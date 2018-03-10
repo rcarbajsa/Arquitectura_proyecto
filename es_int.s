@@ -8,7 +8,7 @@
 * Definicion de equivalencias
 
 MR1A    EQU     $effc01       * de modo A (escritura)
-MR2A    EQU     $effc01       * de modo A (2▒ escritura)
+MR2A    EQU     $effc01       * de modo A (2 escritura)
 SRA     EQU     $effc03       * de estado A (lectura)
 CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
 CRA     EQU     $effc05       * de control A (escritura)
