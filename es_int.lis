@@ -1,30 +1,136 @@
 00000000                                     1  * Inicializa el SP y el PC
 00000000                                     2          ORG     $0
-00000000  00008000                           3          DC.L    $8000           * Pila
-00000004                                     4         
-00000004  00000000                           5          DC.L    INICIO          * PC
-ERROR: Undefined symbol
-00000008                                     6  
-00000400                                     7          ORG     $400
-00000400                                     8  
-00000400                                     9  * Definicion de equivalencias
-00000400                                    10  
-00000400  =00EFFC01                         11  MR1A    EQU     $effc01       * de modo A (escritura)
-00000400  =00EFFC01                         12  MR2A    EQU     $effc01       * de modo A (2 escritura)
-00000400  =00EFFC03                         13  SRA     EQU     $effc03       * de estado A (lectura)
-00000400  =00EFFC03                         14  CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
-00000400  =00EFFC05                         15  CRA     EQU     $effc05       * de control A (escritura)
-00000400  =00EFFC07                         16  TBA     EQU     $effc07       * buffer transmision A (escritura)
-00000400  =00EFFC07                         17  RBA     EQU     $effc07       * buffer recepcion A  (lectura)
-00000400  =00EFFC09                         18  ACR     EQU     $effc09       * de control auxiliar
-00000400  =00EFFC0B                         19  IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
-00000400  =00EFFC0B                         20  ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
-00000400                                    21  
-00000400                                    22  *LEECAR
-00000400                                    23  BTST 
-00000400                                    24  RTS
-00000400                                    25  *INICIO
-00000400                                    26  BREAK
+00000000  00008000                           3          DC.L    $8000           *Pila  
+00000004  00002500                           4          DC.L    INICIO          *PC
+00000400                                     5          ORG     $400
+00000400                                     6  	*Buffers
+00000400                                     7  
+00000400                                     8  BUS_RBA:DS.B 2001
+00000BD1                                     9  BUS_RBB:DS.B 2001
+000013A2                                    10  BUS_TBA:DS.B 2001
+00001B73                                    11  BUS_TBB:DS.B 2001 
+00002344                                    12  	*Punteros
+00002344                                    13  PUNT_IN_RBA: DS.B 4 
+00002348                                    14  PUNT_FIN_RBA:DS.B 4 
+0000234C                                    15  PUNT_EXT_RBA:DS.B 4 
+00002350                                    16  PUNT_INT_RBA:DS.B 4 
+00002354                                    17  P_IN_RBB: DS.B 4
+00002358                                    18  P_FIN_RBB:DS.B 4
+0000235C                                    19  P_EXT_RBB:DS.B 4
+00002360                                    20  P_INT_RBB:DS.B 4
+00002364                                    21  PU_IN_TBA: DS.B 4
+00002368                                    22  PU_FIN_TBB:DS.B 4
+0000236C                                    23  PU_EXT_TBA:DS.B 4
+00002370                                    24  PU_INT_TBA:DS.B 4
+00002374                                    25  PUN_IN_TBB: DS.B 4 
+00002378                                    26  PUN_FIN_TBB:DS.B 4
+0000237C                                    27  PUN_EXT_TBB:DS.B 4
+00002380                                    28  PUN_INT_TBB:DS.B 4
+00002384                                    29  	
+00002384                                    30          
+00002384                                    31  
+00002384                                    32  * Definicion de equivalencias
+00002384                                    33  
+00002384  =00EFFC01                         34  MR1A    EQU     $effc01       * de modo A (escritura)
+00002384  =00EFFC01                         35  MR2A    EQU     $effc01       * de modo A (2 escritura)
+00002384  =00EFFC03                         36  SRA     EQU     $effc03       * de estado A (lectura)
+00002384  =00EFFC03                         37  CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
+00002384  =00EFFC05                         38  CRA     EQU     $effc05       * de control A (escritura)
+00002384  =00EFFC07                         39  TBA     EQU     $effc07       * buffer transmision A (escritura)
+00002384  =00EFFC07                         40  RBA     EQU     $effc07       * buffer recepcion A  (lectura)
+00002384  =00EFFC17                         41  TBB     EQU     $effc17       * buffer trasmisión B
+00002384  =00EFFC17                         42  RBB     EQU     $effc17       * buffer recepción B    
+00002384  =00EFFC09                         43  ACR     EQU     $effc09       * de control auxiliar
+00002384  =00EFFC0B                         44  IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
+00002384  =00EFFC0B                         45  ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
+00002384                                    46  
+00002384                                    47  *INIT
+00002384                                    48  INIT:  
+00002384  21FC 00000400 2344                49  	MOVE.L #BUS_RBA,PUNT_IN_RBA
+0000238C  21FC 00000400 234C                50  	MOVE.L #BUS_RBA,PUNT_EXT_RBA
+00002394  21FC 00000400 2350                51  	MOVE.L #BUS_RBA,PUNT_INT_RBA
+0000239C  21FC 00000400 2348                52  	MOVE.L #BUS_RBA,PUNT_FIN_RBA
+000023A4  06B8 00002000 2348                53  	ADD.L  #$2000,PUNT_FIN_RBA
+000023AC  21FC 00000BD1 2354                54  	MOVE.L #BUS_RBB,P_IN_RBB
+000023B4  21FC 00000BD1 235C                55  	MOVE.L #BUS_RBB,P_EXT_RBB
+000023BC  21FC 00000BD1 2360                56  	MOVE.L #BUS_RBB,P_INT_RBB
+000023C4  21FC 00000BD1 2358                57  	MOVE.L #BUS_RBB,P_FIN_RBB
+000023CC  06B8 00002000 2358                58  	ADD.L  #$2000,P_FIN_RBB
+000023D4  21FC 000013A2 2364                59  	MOVE.L #BUS_TBA,PU_IN_TBA
+000023DC  21FC 000013A2 236C                60  	MOVE.L #BUS_TBA,PU_EXT_TBA
+000023E4  21FC 000013A2 2370                61  	MOVE.L #BUS_TBA,PU_INT_TBA
+000023EC  21FC 000013A2 2368                62  	MOVE.L #BUS_TBA,PU_FIN_TBA
+000023F4  06B8 00002000 2368                63  	ADD.L  #$2000,PU_FIN_TBA
+000023FC  21FC 00001B73 2374                64  	MOVE.L #BUS_TBB,PUN_IN_TBB
+00002404  21FC 00001B73 237C                65  	MOVE.L #BUS_TBB,PUN_EXT_TBB
+0000240C  21FC 00001B73 2380                66  	MOVE.L #BUS_TBB,PUN_INT_TBB
+00002414  21FC 00001B73 2378                67  	MOVE.L #BUS_TBB,PUN_FIN_TBB
+0000241C  06B8 00002000 2378                68  	ADD.L  #$2000,PUN_FIN_TBB
+00002424                                    69  	
+00002424                                    70  *LEECAR
+00002424                                    71  LEECAR:
+00002424  0800 0000                         72  	BTST 	#0,D0
+00002428  6700 003A                         73  	BEQ LINEA_A
+0000242C                                    74  
+0000242C  0800 0001                         75  LINEA_B:BTST    #1,D0
+00002430  6700 001A                         76  	BEQ REC_B
+00002434  2A7C 00002374                     77  TRANS_B:MOVE.L 	#PUN_IN_TBB,A5
+0000243A  528D                              78  	ADD.L   #1,A5
+0000243C  21CD 237C                         79  	MOVE.L  A5,PUN_EXT_TBB
+00002440  203C 0000237C                     80  	MOVE.L  #PUN_EXT_TBB,D0
+00002446  11FC 0000 237C                    81  	MOVE.B  #0,PUN_EXT_TBB
+0000244C  2A7C 00002354                     82  REC_B:  MOVE.L 	#P_IN_RBB,A5
+00002452  528D                              83  	ADD.L   #1,A5
+00002454  21CD 235C                         84  	MOVE.L  A5,P_EXT_RBB
+00002458  203C 0000235C                     85  	MOVE.L  #P_EXT_RBB,D0
+0000245E  11FC 0000 235C                    86  	MOVE.B  #0,P_EXT_RBB
+00002464                                    87  
+00002464  0800 0001                         88  LINEA_A:BTST   #1,D0
+00002468  6700 001A                         89  	BEQ REC_A
+0000246C  2A7C 00002364                     90  TRANS_A:MOVE.L 	#PU_IN_TBA,A5
+00002472  528D                              91  	ADD.L   #1,A5
+00002474  21CD 236C                         92  	MOVE.L  A5,PU_EXT_TBA
+00002478  203C 0000236C                     93  	MOVE.L  #PU_EXT_TBA,D0
+0000247E  11FC 0000 236C                    94  	MOVE.B  #0,PU_EXT_TBA
+00002484  2A7C 00002344                     95  REC_A:  MOVE.L 	#PUNT_IN_RBA,A5
+0000248A  528D                              96  	ADD.L   #1,A5
+0000248C  21CD 234C                         97  	MOVE.L  A5,PUNT_EXT_RBA
+00002490  203C 0000234C                     98  	MOVE.L  #PUNT_EXT_RBA,D0
+00002496  11FC 0000 234C                    99  	MOVE.B  #0,PUNT_EXT_RBA
+0000249C  4E75                             100  	RTS
+0000249E                                   101  *ESCCAR
+0000249E                                   102  ESCCAR:
+0000249E  0800 0000                        103  	BTST 	#0,D0
+000024A2  6700 002E                        104  	BEQ ELINEA_A
+000024A6                                   105  
+000024A6  0800 0001                        106  ELINEA_B:BTST    #1,D0
+000024AA  6700 0014                        107  	BEQ EREC_B
+000024AE  2A7C 00002374                    108  ETRANS_B:MOVE.L	#PUN_IN_TBB,A5
+000024B4  528D                             109  	ADD.L   #1,A5
+000024B6  21CD 237C                        110  	MOVE.L  A5,PUN_EXT_TBB
+000024BA  203C 0000237C                    111  	MOVE.L  #PUN_EXT_TBB,D0
+000024C0  2A7C 00002354                    112  EREC_B: MOVE.L 	#P_IN_RBB,A5
+000024C6  528D                             113  	ADD.L   #1,A5
+000024C8  21CD 235C                        114  	MOVE.L  A5,P_EXT_RBB
+000024CC  203C 0000235C                    115  	MOVE.L  #P_EXT_RBB,D0
+000024D2                                   116  
+000024D2  0800 0001                        117  ELINEA_A:BTST   #1,D0
+000024D6  6700 0014                        118  	BEQ EREC_A
+000024DA  2A7C 00002364                    119  ETRANS_A:MOVE.L	#PU_IN_TBA,A5
+000024E0  528D                             120  	ADD.L   #1,A5
+000024E2  21CD 236C                        121  	MOVE.L  A5,PU_EXT_TBA
+000024E6  203C 0000236C                    122  	MOVE.L  #PU_EXT_TBA,D0
+000024EC  2A7C 00002344                    123  EREC_A: MOVE.L 	#PUNT_IN_RBA,A5
+000024F2  528D                             124  	ADD.L   #1,A5
+000024F4  21CD 234C                        125  	MOVE.L  A5,PUNT_EXT_RBA
+000024F8  203C 0000234C                    126  	MOVE.L  #PUNT_EXT_RBA,D0
+000024FE  4E75                             127  	RTS
+00002500                                   128  	
+00002500                                   129  *Programa Principal
+00002500  6100 FE82                        130  INICIO: BSR INIT
+00002504  7012                             131  	MOVE.L #$12,D0
+00002506  6100 FF1C                        132  	BSR LEECAR
+0000250A  4848                             133  	BREAK
 
-1 error detected
+No errors detected
 No warnings generated
