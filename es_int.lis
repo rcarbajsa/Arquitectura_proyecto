@@ -1,0 +1,30 @@
+00000000                                     1  * Inicializa el SP y el PC
+00000000                                     2          ORG     $0
+00000000  00008000                           3          DC.L    $8000           * Pila
+00000004                                     4         
+00000004  00000000                           5          DC.L    INICIO          * PC
+ERROR: Undefined symbol
+00000008                                     6  
+00000400                                     7          ORG     $400
+00000400                                     8  
+00000400                                     9  * Definicion de equivalencias
+00000400                                    10  
+00000400  =00EFFC01                         11  MR1A    EQU     $effc01       * de modo A (escritura)
+00000400  =00EFFC01                         12  MR2A    EQU     $effc01       * de modo A (2 escritura)
+00000400  =00EFFC03                         13  SRA     EQU     $effc03       * de estado A (lectura)
+00000400  =00EFFC03                         14  CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
+00000400  =00EFFC05                         15  CRA     EQU     $effc05       * de control A (escritura)
+00000400  =00EFFC07                         16  TBA     EQU     $effc07       * buffer transmision A (escritura)
+00000400  =00EFFC07                         17  RBA     EQU     $effc07       * buffer recepcion A  (lectura)
+00000400  =00EFFC09                         18  ACR     EQU     $effc09       * de control auxiliar
+00000400  =00EFFC0B                         19  IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
+00000400  =00EFFC0B                         20  ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
+00000400                                    21  
+00000400                                    22  *LEECAR
+00000400                                    23  BTST 
+00000400                                    24  RTS
+00000400                                    25  *INICIO
+00000400                                    26  BREAK
+
+1 error detected
+No warnings generated

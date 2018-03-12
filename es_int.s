@@ -1,6 +1,7 @@
 * Inicializa el SP y el PC
         ORG     $0
         DC.L    $8000           * Pila
+       
         DC.L    INICIO          * PC
 
         ORG     $400
@@ -19,3 +20,24 @@ IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
 ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
 
 *LEECAR
+LEECAR:
+BTST #0, D0
+BEQ LINEA_A
+
+LINEA_B:BTST #1, D0
+BEQ REC_B
+
+TRANS_B:
+REC_B:
+
+LINEA_A:BTST #1, D0
+BEQ REC_A
+
+TRANS_A:
+REC_A:
+RTS
+*Programa Principal
+INICIO:
+MOVE.L  #$5000, -(A7) *Dirección de buffer
+BSR LEECAR
+BREAK
