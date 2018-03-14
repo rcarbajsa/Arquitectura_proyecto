@@ -98,14 +98,14 @@ REC_B:
   BRA FIN_LEECAR
 LINEA_A:
   BTST   #1,D0
-        BEQ REC_A
+  BEQ REC_A
 TRANS_A:
   MOVE.L TBA_EXT_PUNT,A3
   MOVE.L TBA_INT_PUNT,A4
   CMP  A3,A4
   BEQ VACIO
   MOVE.L        TBA_EXT_PUNT,A5
-        MOVE.L  (A5)+,D0
+  MOVE.L  (A5)+,D0
   MOVE.L  A5,TBA_EXT_PUNT
   BRA FIN_LEECAR
 REC_A:
@@ -114,10 +114,11 @@ REC_A:
   CMP  A3,A4
   BEQ VACIO
   MOVE.L        RBA_EXT_PUNT,A5
-        MOVE.B  (A5)+,D0
+  MOVE.B  (A5)+,D0
   MOVE.L A5,RBA_EXT_PUNT
+  BRA FIN_LEECAR
 VACIO:
-  MOVE.L #%FFFFFFFF,D0
+  MOVE.L #$1,D0
 FIN_LEECAR:     RTS
 
 ********************ESCCAR********************
@@ -133,15 +134,15 @@ ELINEA_B:
 
 ETRANS_B:
 
-  MOVE.L	TBB_IN_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
+  MOVE.L	TBB_INT_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
 	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-  MOVE.L  A5,TBB_IN_PUNT            *Guarda la nueva direcion del puntero
+  MOVE.L  A5,TBB_INT_PUNT            *Guarda la nueva direcion del puntero
 
 EREC_B:
 
-  MOVE.L 	RBB_IN_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
+  MOVE.L 	RBB_INT_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
 	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-	MOVE.L  A5,RBB_IN_PUNT           *Guarda la nueva direcion del puntero
+	MOVE.L  A5,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
   RTS
 
 ELINEA_A:
@@ -151,16 +152,16 @@ ELINEA_A:
 
   ETRANS_A:
 
-  MOVE.L	TBA_IN_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
+  MOVE.L	TBA_INT_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
 	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-	MOVE.L  A5,TBA_IN_PUNT           *Guarda la nueva direcion del puntero
+	MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
   RTS
 
   EREC_A:
 
-  MOVE.L 	RBA_IN_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
+  MOVE.L 	RBA_INT_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
 	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-	MOVE.L  A5,RBA_IN_PUNT           *Guarda la nueva direcion del puntero
+	MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
 	RTS
 
 *PRINT
@@ -174,8 +175,8 @@ SCAN:RTS
 RTI:RTS
 *Programa Principal
 INICIO: BSR INIT
-	MOVE.L #$12,D0
-  MOVE.L #$37,D1
+	MOVE.L #$0,D0
+  MOVE.L #$0,D1
   BSR ESCCAR
 	BSR LEECAR
 
