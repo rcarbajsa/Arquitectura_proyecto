@@ -75,7 +75,7 @@ LEECAR:
 	BTST 	#0,D0
 	BEQ LINEA_A
 
-LINEA_B:BTST#1,D0
+LINEA_B:BTST #1,D0
 	BEQ REC_B
 
 TRANS_B:MOVE.L 	#TBB_EXT_PUNT,A5
@@ -108,31 +108,45 @@ REC_A:  MOVE.L 	#RBA_IN_PUNT,A5
 
 ********************ESCCAR********************
 ESCCAR:
+
 	BTST 	#0,D0
 	BEQ ELINEA_A
 
-ELINEA_B:BTST    #1,D0
+ELINEA_B:
+
+  BTST    #1,D0
 	BEQ EREC_B
-ETRANS_B:MOVE.L	#TBB_IN_PUNT,A5
-	ADD.L   #1,A5
-	MOVE.L  A5,TBB_EXT_PUNT
-	MOVE.L  #TBB_EXT_PUNT,D0
-EREC_B: MOVE.L 	#RBB_IN_PUNT,A5
-	ADD.L   #1,A5
-	MOVE.L  A5,RBB_EXT_PUNT
-	MOVE.L  #RBB_EXT_PUNT,D0
+
+ETRANS_B:
+
+  MOVE.L	TBB_IN_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
+	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+  MOVE.L  A5,TBB_IN_PUNT            *Guarda la nueva direcion del puntero
+
+EREC_B:
+
+  MOVE.L 	RBB_IN_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
+	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+	MOVE.L  A5,RBB_IN_PUNT           *Guarda la nueva direcion del puntero
   RTS
 
-ELINEA_A:BTST   #1,D0
+ELINEA_A:
+
+  BTST   #1,D0
 	BEQ EREC_A
-ETRANS_A:MOVE.L	#TBA_IN_PUNT,A5
-	ADD.L   #1,A5
-	MOVE.L  A5,TBA_EXT_PUNT
-	MOVE.L  #TBA_EXT_PUNT,D0
-EREC_A: MOVE.L 	#RBA_IN_PUNT,A5
-	ADD.L   #1,A5
-	MOVE.L  A5,RBA_EXT_PUNT
-	MOVE.L  #RBA_EXT_PUNT,D0
+
+  ETRANS_A:
+
+  MOVE.L	TBA_IN_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
+	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+	MOVE.L  A5,TBA_IN_PUNT           *Guarda la nueva direcion del puntero
+  RTS
+
+  EREC_A:
+
+  MOVE.L 	RBA_IN_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
+	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+	MOVE.L  A5,RBA_IN_PUNT           *Guarda la nueva direcion del puntero
 	RTS
 
 *PRINT
@@ -147,6 +161,7 @@ RTI:RTS
 *Programa Principal
 INICIO: BSR INIT
 	MOVE.L #$12,D0
+  MOVE.L #$34,D1
   BSR ESCCAR
 	BSR LEECAR
 
