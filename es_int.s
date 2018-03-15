@@ -29,7 +29,6 @@ TBB_EXT_PUNT:DS.B 4
 TBB_INT_PUNT:DS.B 4
 
 
-
 * Definicion de equivalencias
 
 MR1A    EQU     $effc01       * de modo A (escritura)
