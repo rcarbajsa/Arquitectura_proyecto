@@ -88,6 +88,7 @@ TRANS_B:
   CMP  A3,A4
   MOVE.L  TBB_EXT_PUNT,A5
   BEQ  VACIO
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L  (A5)+,D0
   MOVE.L  A5,TBB_EXT_PUNT
   BRA FIN_LEECAR
@@ -97,6 +98,7 @@ REC_B:
   MOVE.L RBB_INT_PUNT,A4
   CMP  A3,A4
   BEQ VACIO
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L  RBB_EXT_PUNT,A5
   MOVE.L  (A5)+,D0
   MOVE.L A5,RBB_EXT_PUNT
@@ -112,6 +114,7 @@ TRANS_A:
   MOVE.L TBA_INT_PUNT,A4
   CMP  A3,A4
   BEQ VACIO
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L  TBA_EXT_PUNT,A5
   MOVE.L  (A5)+,D0
   MOVE.L  A5,TBA_EXT_PUNT
@@ -123,12 +126,13 @@ REC_A:
   MOVE.L RBA_INT_PUNT,A4
   CMP A3,A4
   BEQ VACIO
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L RBA_EXT_PUNT,A5
   MOVE.B (A5)+,D0
   MOVE.L A5,RBA_EXT_PUNT
 
   VACIO:
-  MOVE.L #1,D0
+  MOVE.L #ffffffff,D0
   FIN_LEECAR:     RTS
 
 ********************ESCCAR********************
@@ -143,7 +147,7 @@ ELINEA_B:
 	BEQ EREC_B
 
 ETRANS_B:
-  MOVE.L #0,D0
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L  TBA_FIN_PUNT,A4     **Guarda en el registro A4 el puntero de fin de buffer
   MOVE.L	TBB_INT_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
   CMP A4,A5
@@ -152,7 +156,7 @@ ETRANS_B:
   MOVE.L  A5,TBB_INT_PUNT            *Guarda la nueva direcion del puntero
 
 EREC_B:
-  MOVE.L #0,D0
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L  RBB_FIN_PUNT,A4     **Guarda en el registro A4 el puntero de fin de buffer
   MOVE.L 	RBB_INT_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
   CMP A4,A5
@@ -167,7 +171,7 @@ ELINEA_A:
 	BEQ EREC_A
 
   ETRANS_A:
-  MOVE.L #0,D0
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L  TBA_FIN_PUNT,A4     *Guarda en el registro A4 el puntero de fin de buffer
   MOVE.L	TBA_INT_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
   CMP A4,A5
@@ -177,7 +181,7 @@ ELINEA_A:
   RTS
 
   EREC_A:
-  MOVE.L #0,D0
+  ADD.L #1,D0	* Aumenta en 1 el registro D0
   MOVE.L  RBA_FIN_PUNT,A4      *Guarda en el registro A4 el puntero de fin de buffer
   MOVE.L 	RBA_INT_PUNT,A5      *Guarda en el registro A5 el puntero de introduccion de dato
   CMP A4,A5
@@ -185,6 +189,10 @@ ELINEA_A:
 	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
 	MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
 	RTS
+
+VACIO_E:
+  MOVE.L #ffffffff,D0
+  RTS
 
 *PRINT
 PRINT:RTS
