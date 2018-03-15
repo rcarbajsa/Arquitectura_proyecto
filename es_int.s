@@ -128,7 +128,7 @@ REC_A:
   MOVE.L A5,RBA_EXT_PUNT
 
   VACIO:
-  MOVE.L #1,D0
+  MOVE.L #$ffffffff,D0
   FIN_LEECAR:     RTS
 
 ********************ESCCAR********************
