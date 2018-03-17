@@ -135,57 +135,53 @@ REC_A:
 ********************ESCCAR********************
 ESCCAR:
 
-	BTST 	#0,D0
-	BEQ ELINEA_A
-
-ELINEA_B:
-
-  BTST #1,D0
-	BEQ EREC_B
-
-ETRANS_B:
-  ADD.L #1,D0	* Aumenta en 1 el registro D0
-  MOVE.L  TBA_FIN_PUNT,A4     **Guarda en el registro A4 el puntero de fin de buffer
-  MOVE.L	TBB_INT_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
-  CMP A4,A5
-  BEQ VACIO
-	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-  MOVE.L  A5,TBB_INT_PUNT            *Guarda la nueva direcion del puntero
-
-EREC_B:
-  ADD.L #1,D0	* Aumenta en 1 el registro D0
-  MOVE.L  RBB_FIN_PUNT,A4     **Guarda en el registro A4 el puntero de fin de buffer
-  MOVE.L 	RBB_INT_PUNT,A5            *Guarda en el registro A5 el puntero de introduccion de dato
-  CMP A4,A5
-  BEQ VACIO
-	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-	MOVE.L  A5,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+	         BTST #0,D0
+	         BEQ ELINEA_A
 
 ELINEA_A:
 
-  BTST   #1,D0
-	BEQ EREC_A
+           BTST   #1,D0
+	         BEQ EREC_A
 
-  ETRANS_A:
-  ADD.L #1,D0	* Aumenta en 1 el registro D0
-  MOVE.L  TBA_FIN_PUNT,A4     *Guarda en el registro A4 el puntero de fin de buffer
-  MOVE.L	TBA_INT_PUNT,A5           *Guarda en el registro A5 el puntero de introduccion de dato
-  CMP A4,A5
-  BEQ VACIO
-	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-	MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+ETRANS_A:
+    MOVE.L TBA_INT_PUNT,A5 *Se mete el puntero I en A5
+    MOVE.L TBA_FIN_PUNT,A4 *Se mete el puntero FIn en A4
+    MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
+    CMPA.L  A4,A5
+    BNE    I_FIN
 
-  EREC_A:
-  ADD.L #1,D0	* Aumenta en 1 el registro D0
-  MOVE.L  RBA_FIN_PUNT,A4      *Guarda en el registro A4 el puntero de fin de buffer
-  MOVE.L 	RBA_INT_PUNT,A5      *Guarda en el registro A5 el puntero de introduccion de dato
-  CMP A4,A5
-  BEQ VACIO
-	MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-	MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
-	RTS
+I_NO_FIN:
+    SUB.L A3,#1  *Se le resta a E una unidad
+    CMP.L A5,A3  *Se mira si son iguales I y E-1
+    BNE  LLENO
+    ADD.L A4,#1 *Se le añade 1 al puntero de fin
+    CMP.L A4,A5 *Se comparan los punteros I y F+1
+    SUB.L A4,#1 *Se restablece el valor del puntero FIn
+    BNE  NO_AUX *No esta en la posicion auxiliar
+AUX:
+    CMP A3,A4
+    BNE LLENO
+    CMP.L A3,A4  *Se comprueba si el puntero E y el F estan en el mismo lugar
+    BNE LLENO
+    MOVE.L  D1,(A5)   *Push del registro D1 en el buffer
+    MOVE.L  RBA_IN_PUNT,RBA_INT_PUNT  *Se Inicializa I con el valor de Inicio
+    RTS
+NO_AUX:
+    MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    RTS
+NO_LLENO:
+    MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    RTS
+I_FIN:
+    MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    RTS
+LLENO:
+    MOVE.L #ffffffff,D0
+    RTS
+>>>>>>> feature/leecar
 
 VACIO_E:
   MOVE.L #ffffffff,D0
