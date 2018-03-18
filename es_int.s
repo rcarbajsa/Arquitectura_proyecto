@@ -153,7 +153,13 @@ ETRANS_A:
 I_NO_FIN:
     SUB.L #1,A3  *Se le resta a E una unidad
     CMP.L A5,A3  *Se mira si son iguales I y E-1
-    BNE  LLENO
+    BNE  CONTINUA
+
+LLENO:
+    MOVE.L #$ffffffff,D0
+    RTS
+
+CONTINUA:
     ADD.L #1,A4 *Se le añade 1 al puntero de fin
     CMP.L A4,A5 *Se comparan los punteros I y F+1
     SUB.L #1,A4 *Se restablece el valor del puntero FIn
@@ -163,24 +169,22 @@ AUX:
     BNE LLENO
     CMP.L A3,A4  *Se comprueba si el puntero E y el F estan en el mismo lugar
     BNE LLENO
-    MOVE.L  D1,(A5)   *Push del registro D1 en el buffer
+    MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
     MOVE.L  TBA_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Inicio
     RTS
 NO_AUX:
-    MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
     MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 NO_LLENO:
-    MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
     MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 I_FIN:
-    MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
     MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
-LLENO:
-    MOVE.L #$ffffffff,D0
-    RTS
+
 
 *PRINT
 PRINT:RTS
