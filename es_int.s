@@ -164,19 +164,19 @@ AUX:
     CMP.L A3,A4  *Se comprueba si el puntero E y el F estan en el mismo lugar
     BNE LLENO
     MOVE.L  D1,(A5)   *Push del registro D1 en el buffer
-    MOVE.L  RBA_IN_PUNT,RBA_INT_PUNT  *Se Inicializa I con el valor de Inicio
+    MOVE.L  TBA_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Inicio
     RTS
 NO_AUX:
     MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 NO_LLENO:
     MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 I_FIN:
     MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 LLENO:
     MOVE.L #$ffffffff,D0

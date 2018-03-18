@@ -164,19 +164,19 @@
 000005C0  B9CB                             164      CMP.L A3,A4  *Se comprueba si el puntero E y el F estan en el mismo lugar
 000005C2  6600 0024                        165      BNE LLENO
 000005C6  2A81                             166      MOVE.L  D1,(A5)   *Push del registro D1 en el buffer
-000005C8  21F8 0428 0434                   167      MOVE.L  RBA_IN_PUNT,RBA_INT_PUNT  *Se Inicializa I con el valor de Inicio
+000005C8  21F8 0448 0454                   167      MOVE.L  TBA_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Inicio
 000005CE  4E75                             168      RTS
 000005D0                                   169  NO_AUX:
 000005D0  2AC1                             170      MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-000005D2  21CD 0434                        171      MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+000005D2  21CD 0454                        171      MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
 000005D6  4E75                             172      RTS
 000005D8                                   173  NO_LLENO:
 000005D8  2AC1                             174      MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-000005DA  21CD 0434                        175      MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+000005DA  21CD 0454                        175      MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
 000005DE  4E75                             176      RTS
 000005E0                                   177  I_FIN:
 000005E0  2AC1                             178      MOVE.L  D1,(A5)+           *Push del registro D1 en el buffer
-000005E2  21CD 0434                        179      MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+000005E2  21CD 0454                        179      MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
 000005E6  4E75                             180      RTS
 000005E8                                   181  LLENO:
 000005E8  70FF                             182      MOVE.L #$ffffffff,D0
