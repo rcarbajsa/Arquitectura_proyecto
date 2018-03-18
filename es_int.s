@@ -129,7 +129,7 @@ REC_A:
   MOVE.L A5,RBA_EXT_PUNT
 
   VACIO:
-  MOVE.L #ffffffff,D0
+  MOVE.L #$ffffffff,D0
   FIN_LEECAR:     RTS
 
 ********************ESCCAR********************
@@ -141,7 +141,7 @@ ESCCAR:
 ELINEA_A:
 
            BTST   #1,D0
-	         BEQ EREC_A
+	        * BEQ EREC_A
 
 ETRANS_A:
     MOVE.L TBA_INT_PUNT,A5 *Se mete el puntero I en A5
@@ -151,12 +151,12 @@ ETRANS_A:
     BNE    I_FIN
 
 I_NO_FIN:
-    SUB.L A3,#1  *Se le resta a E una unidad
+    SUB.L #1,A3  *Se le resta a E una unidad
     CMP.L A5,A3  *Se mira si son iguales I y E-1
     BNE  LLENO
-    ADD.L A4,#1 *Se le añade 1 al puntero de fin
+    ADD.L #1,A4 *Se le añade 1 al puntero de fin
     CMP.L A4,A5 *Se comparan los punteros I y F+1
-    SUB.L A4,#1 *Se restablece el valor del puntero FIn
+    SUB.L #1,A4 *Se restablece el valor del puntero FIn
     BNE  NO_AUX *No esta en la posicion auxiliar
 AUX:
     CMP A3,A4
@@ -179,13 +179,8 @@ I_FIN:
     MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 LLENO:
-    MOVE.L #ffffffff,D0
+    MOVE.L #$ffffffff,D0
     RTS
->>>>>>> feature/leecar
-
-VACIO_E:
-  MOVE.L #ffffffff,D0
-  RTS
 
 *PRINT
 PRINT:RTS
