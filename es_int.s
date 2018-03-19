@@ -105,6 +105,7 @@ REC_B:
 LINEA_A:
   CMP #$00000000,D0
   BEQ REC_A
+
 TRANS_A:
 
   MOVE.L TBA_EXT_PUNT,A3
@@ -147,44 +148,47 @@ ETRANS_A:
     MOVE.L TBA_INT_PUNT,A5 *Se mete el puntero I en A5
     MOVE.L TBA_FIN_PUNT,A4 *Se mete el puntero FIn en A4
     MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
+    MOVE.L  TBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
     CMPA.L  A4,A5
-    BNE    I_FIN
+    BEQ    I_FIN  *Si I y Fin son iguales salta a la etiqueta de fin
 
 I_NO_FIN:
     SUB.L #1,A3  *Se le resta a E una unidad
     CMP.L A5,A3  *Se mira si son iguales I y E-1
-    BNE  CONTINUA
-
-LLENO:
-    MOVE.L #$ffffffff,D0
-    RTS
+    ADD.L #1,A3  *Se restablece el valor de E
+    BEQ  LLENO   *Si son iguales esta lleno
 
 CONTINUA:
     ADD.L #1,A4 *Se le añade 1 al puntero de fin
     CMP.L A4,A5 *Se comparan los punteros I y F+1
     SUB.L #1,A4 *Se restablece el valor del puntero FIn
-    BNE  NO_AUX *No esta en la posicion auxiliar
-AUX:
-    CMP A3,A4
-    BNE LLENO
-    CMP.L A3,A4  *Se comprueba si el puntero E y el F estan en el mismo lugar
-    BNE LLENO
-    MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-    MOVE.L  TBA_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Inicio
-    RTS
+    BEQ  AUX    *Está en la posicion auxiliar
+
 NO_AUX:
-    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
+  MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
+  MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
+  RTS
+
+AUX:
+    CMP.L A3,A2  *Se comprueba si E y P estan en la misma posicion
+    BEQ LLENO
+    MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
+    MOVE.L  TBA_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
     RTS
+
 NO_LLENO:
     MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
     MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
+
 I_FIN:
     MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
     MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 
+LLENO:
+    MOVE.L #$ffffffff,D0
+    RTS
 
 *PRINT
 PRINT:RTS
