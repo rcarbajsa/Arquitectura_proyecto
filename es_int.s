@@ -149,7 +149,11 @@ ETRANS_A:
     MOVE.L TBA_FIN_PUNT,A4 *Se mete el puntero FIn en A4
     MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
     MOVE.L  TBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
-    CMPA.L  A4,A5
+    ADD.L #1,A4   *Se le añade 1 al puntero de fin
+    CMP.L A4,A5   *Se comparan los punteros I y F+1
+    SUB.L #1,A4   *Se restablece el valor del puntero FIn
+    BEQ  AUX      *Está en la posicion auxiliar
+    CMPA.L A4,A5  *Se comprueba si F e I estan en la misma posicion
     BEQ    I_FIN  *Si I y Fin son iguales salta a la etiqueta de fin
 
 I_NO_FIN:
