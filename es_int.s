@@ -94,7 +94,7 @@ INIT:
   TBB_RESET:
      MOVE.L  TBB_EXT_PUNT,A5
      MOVE.L  A5,D0
-     MOVE.L  TBA_IN_PUNT,A5
+     MOVE.L  TBB_IN_PUNT,A5
      MOVE.L  A5,TBB_EXT_PUNT
      BRA FIN_LEECAR
 
@@ -144,22 +144,22 @@ INIT:
 
   REC_A:
     MOVE.L RBA_INT_PUNT,A4 *Puntero escritura
-    MOVE.L TBA_EXT_PUNT,A3 *Puntero lectura
+    MOVE.L RBA_EXT_PUNT,A3 *Puntero lectura
     CMP  A3,A4 *Si están en la misma posicion el puntero está vacío
     BEQ VACIO
-    MOVE.L TBA_FIN_PUNT,A5 *Puntero fin
+    MOVE.L RBA_FIN_PUNT,A5 *Puntero fin
     ADD.L #1,A5
     CMP A3,A5
-    BEQ TBA_RESET
-    MOVE.L  TBA_EXT_PUNT,A5
+    BEQ RBA_RESET
+    MOVE.L  RBA_EXT_PUNT,A5
     MOVE.B  (A5)+,D0
-    MOVE.L  A5,TBA_EXT_PUNT
+    MOVE.L  A5,RBA_EXT_PUNT
     BRA FIN_LEECAR
   RBA_RESET:
-    MOVE.L  TBA_EXT_PUNT,A5
+    MOVE.L  RBA_EXT_PUNT,A5
     MOVE.L  (A5)+,D0
-    MOVE.L  TBA_IN_PUNT,A5 *Reseteamos el puntero de lectura
-    MOVE.L  A5,TBA_EXT_PUNT
+    MOVE.L  RBA_IN_PUNT,A5 *Reseteamos el puntero de lectura
+    MOVE.L  A5,RBA_EXT_PUNT
     BRA FIN_LEECAR
 
 
@@ -175,8 +175,8 @@ ESCCAR:
 
 ELINEA_B:
 
-    BTST   #1,D0
-    BEQ EREC_A
+    CMP #$00000001,D0
+    BEQ EREC_B
 
 ETRANS_B:
     MOVE.L TBB_INT_PUNT,A5 *Se mete el puntero I en A5
@@ -276,7 +276,7 @@ RBB_I_FIN:
 
 ELINEA_A:
 
-    BTST   #1,D0
+    CMP #$00000000,D0
 	  BEQ EREC_A
 
 ETRANS_A:
@@ -393,35 +393,22 @@ PRUEBA:
   RTS
 
 *Programa Principal
-INICIO: BSR INIT
-	MOVE.L #$00000000,D0
-  MOVE.L #1,D1
-    BSR ESCCAR
-      MOVE.L #2,D1
-    BSR ESCCAR
-      MOVE.L #3,D1
-    BSR ESCCAR
-      MOVE.L #4,D1
-    BSR ESCCAR
-      MOVE.L #5,D1
-    BSR ESCCAR
-      MOVE.L #6,D1
-    BSR ESCCAR
-      MOVE.L #7,D1
-    BSR ESCCAR
-      MOVE.L #8,D1
+INICIO:
+    BSR INIT
+	  MOVE.L #$00000000,D0
+    MOVE.L #1,D1
     BSR ESCCAR
     BSR LEECAR
+    MOVE.L #$00000001,D0
+    MOVE.L #2,D1
+    BSR ESCCAR
     BSR LEECAR
+    MOVE.L #$00000011,D0
+    MOVE.L #3,D1
+    BSR ESCCAR
     BSR LEECAR
+    MOVE.L #$00000010,D0
+    MOVE.L #4,D1
+    BSR ESCCAR
     BSR LEECAR
-    MOVE.L #9,D1
-    BSR ESCCAR
-    MOVE.L #10,D1
-    BSR ESCCAR
-    MOVE.L #11,D1
-    BSR ESCCAR
-    MOVE.L #12,D1
-    BSR ESCCAR
-
-  BREAK
+    BREAK
