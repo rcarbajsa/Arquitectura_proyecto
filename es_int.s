@@ -73,11 +73,12 @@ INIT:
 
   LEECAR:
     BTST    #0,D0
-    BEQ LINEA_A
+    BEQ LEE_LINEA_A
 
   LEE_LINEA_B:
      CMP #$00000001,D0
-     BEQ REC_B
+     BEQ LEE_REC_B
+     
 LEE_TRANS_B:
      MOVE.L TBB_INT_PUNT,A4
      MOVE.L TBB_EXT_PUNT,A3
@@ -188,7 +189,7 @@ ESC_TRANS_B:
     SUB.L #1,A4   *Se restablece el valor del puntero FIn
     BEQ  TBB_AUX      *Está en la posicion auxiliar
     CMPA.L A4,A5  *Se comprueba si F e I estan en la misma posicion
-    BEQ    TBB_I_FIN  *Si I y Fin son iguales salta a la etiqueta de fin
+    BEQ    TBB_NO_AUX  *Si I y Fin son iguales salta a la etiqueta de fin
 
 TBB_I_NO_FIN:
         SUB.L #1,A3  *Se le resta a E una unidad
@@ -203,27 +204,24 @@ TBB_CONTINUA:
         BEQ  TBB_AUX    *Está en la posicion auxiliar
 
 TBB_NO_AUX:
-      MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-      MOVE.L  A5,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
-      RTS
+        CMP.L A5,A3  *Se comparan I y E
+        BGT MAYOR_TBBA
+        MOVE.B  D1,+(A5)           *Push del registro D1 en el buffer
+        MOVE.L  A5,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
+
+MAYOR_TBB:
+        MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
+        MOVE.L  A5,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
+        RTS
 
 TBB_AUX:
         CMP.L A3,A2  *Se comprueba si E y P estan en la misma posicion
         BEQ   LLENO
+        MOVE.L  TBB_IN_PUNT,A5
         MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-        MOVE.L  TBB_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
+        ADD.L #1,A5 *Se aumenta en 1 el puntero de inicio
+        MOVE.L  A5,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
         RTS
-
-TBB_NO_LLENO:
-        MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-        MOVE.L  A5,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
-        RTS
-
-TBB_I_FIN:
-        MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-        MOVE.L  A5,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
-        RTS
-
 
 
 ESC_REC_B:
@@ -236,7 +234,7 @@ ESC_REC_B:
         SUB.L #1,A4   *Se restablece el valor del puntero FIn
         BEQ  RBB_AUX      *Está en la posicion auxiliar
         CMPA.L A4,A5  *Se comprueba si F e I estan en la misma posicion
-        BEQ    RBB_I_FIN  *Si I y Fin son iguales salta a la etiqueta de fin
+        BEQ    RBB_NO_AUX  *Si I y Fin son iguales salta a la etiqueta de fin
 
 RBB_I_NO_FIN:
         SUB.L #1,A3  *Se le resta a E una unidad
@@ -251,28 +249,24 @@ RBB_CONTINUA:
         BEQ  RBB_AUX    *Está en la posicion auxiliar
 
 RBB_NO_AUX:
-      MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-      MOVE.L  A5,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
-      RTS
+    CMP.L A5,A3  *Se comparan I y E
+    BGT MAYOR_RBB
+    MOVE.B  D1,+(A5)           *Push del registro D1 en el buffer
+    MOVE.L  A5,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
+
+MAYOR_RBB:
+    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.L  A5,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
+    RTS
 
 RBB_AUX:
-        CMP.L A3,A2  *Se comprueba si E y P estan en la misma posicion
-        BEQ   LLENO
-        MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-        MOVE.L  RBB_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-        RTS
-
-RBB_NO_LLENO:
-        MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-        MOVE.L  A5,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
-        RTS
-
-RBB_I_FIN:
-        MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-        MOVE.L  A5,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
-        RTS
-
-
+      CMP.L A3,A2  *Se comprueba si E y P estan en la misma posicion
+      BEQ   LLENO
+      MOVE.L  RBB_IN_PUNT,A5
+      MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
+      ADD.L #1,A5 *Se aumenta en 1 el puntero de inicio
+      MOVE.L  A5,RBB_INT_PUNT  *Se Inicializa I con el valor de Principio
+      RTS
 
 ESC_LINEA_A:
 
@@ -289,7 +283,7 @@ ESC_TRANS_A:
     SUB.L #1,A4   *Se restablece el valor del puntero FIn
     BEQ  TBA_AUX      *Está en la posicion auxiliar
     CMPA.L A4,A5  *Se comprueba si F e I estan en la misma posicion
-    BEQ    TBA_I_FIN  *Si I y Fin son iguales salta a la etiqueta de fin
+    BEQ    TBA_NO_AUX  *Si I y Fin son iguales salta a la etiqueta de fin
 
 TBA_I_NO_FIN:
     SUB.L #1,A3  *Se le resta a E una unidad
@@ -304,25 +298,23 @@ TBA_CONTINUA:
     BEQ  TBA_AUX    *Está en la posicion auxiliar
 
 TBA_NO_AUX:
-  MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-  MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+    CMP.L A5,A3  *Se comparan I y E
+    BGT MAYOR_TBA
+    MOVE.B  D1,+(A5)           *Push del registro D1 en el buffer
+    MOVE.L  A5,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
+
+MAYOR_TBA:
+    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
+    MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    RTS
 
 TBA_AUX:
     CMP.L A3,A2  *Se comprueba si E y P estan en la misma posicion
     BEQ   LLENO
+    MOVE.L  TBA_IN_PUNT,A5
     MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-    MOVE.L  TBA_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-    RTS
-
-TBA_NO_LLENO:
-    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
-    RTS
-
-TBA_I_FIN:
-    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    ADD.L #1,A5 *Se aumenta en 1 el puntero de inicio
+    MOVE.L  A5,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
     RTS
 
 
@@ -336,7 +328,7 @@ ESC_REC_A:
     SUB.L #1,A4   *Se restablece el valor del puntero FIn
     BEQ  RBA_AUX      *Está en la posicion auxiliar
     CMPA.L A4,A5  *Se comprueba si F e I estan en la misma posicion
-    BEQ    RBA_I_FIN  *Si I y Fin son iguales salta a la etiqueta de fin
+    BEQ  RBA_NO_AUX  *Si I y Fin son iguales salta a la etiqueta de fin
 
 RBA_I_NO_FIN:
     SUB.L #1,A3  *Se le resta a E una unidad
@@ -351,25 +343,22 @@ RBA_CONTINUA:
     BEQ  RBA_AUX    *Está en la posicion auxiliar
 
 RBA_NO_AUX:
+  CMP.L A5,A3  *Se comparan I y E
+  BGT MAYOR_RBA
+  MOVE.B  D1,+(A5)           *Push del registro D1 en el buffer
+  MOVE.L  A5,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
+
+MAYOR_RBA:
   MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
   MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
   RTS
 
 RBA_AUX:
     CMP.L A3,A2  *Se comprueba si E y P estan en la misma posicion
-    BEQ LLENO
+    BEQ   LLENO
+    MOVE.L  RBA_IN_PUNT,A5
     MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-    MOVE.L  RBA_IN_PUNT,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-    RTS
-
-RBA_NO_LLENO:
-    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
-    RTS
-
-RBA_I_FIN:
-    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+    MOVE.L  A5,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
     RTS
 
 LLENO:
