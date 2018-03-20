@@ -386,17 +386,16 @@ LINEA:
     CMP #$00000013,D0 *Se comprueba si el caracter es ASCII 13
     BEQ FIN_LINEA
     ADD.L #1,D1 *Se toma D1 como contador y se le suma 1
-    RTS
-
+    BSR LINEA
+    
 FIN_LINEA:
-    ADD.L #1,D0 *Se añade el caracter 13
+    ADD.L #1,D1 *Se añade el caracter 13
     MOVE.L D1,D0 *Se guarda la info del contador en D0
     RTS
+
 VACIO_LINEA:
     MOVE.L #$00000000,D0 *Se guarda un 0 en D0
     RTS
-
-
 
 *PRINT
 PRINT:RTS

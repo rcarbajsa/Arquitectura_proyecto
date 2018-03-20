@@ -1,7 +1,7 @@
 00000000                                     1  * Inicializa el SP y el PC
 00000000                                     2          ORG     $0
 00000000  00008000                           3          DC.L    $8000           *Pila
-00000004  000026E6                           4          DC.L    INICIO          *PC
+00000004  000026E8                           4          DC.L    INICIO          *PC
 00000400                                     5          ORG     $400
 00000400                                     6  
 00000400                                     7  	*Buffers
@@ -382,56 +382,56 @@
 000026BA                                   382  
 000026BA  6100 FD6E                        383      BSR LEECAR *Llamada a leecar para leer el caracter
 000026BE  B07C FFFF                        384      CMP #$ffffffff,D0 *Se comprueba si el buffer esta vacio
-000026C2  6700 0012                        385      BEQ VACIO_LINEA
+000026C2  6700 0014                        385      BEQ VACIO_LINEA
 000026C6  B07C 0013                        386      CMP #$00000013,D0 *Se comprueba si el caracter es ASCII 13
 000026CA  6700 0006                        387      BEQ FIN_LINEA
 000026CE  5281                             388      ADD.L #1,D1 *Se toma D1 como contador y se le suma 1
-000026D0  4E75                             389      RTS
-000026D2                                   390  
+000026D0  61E8                             389      BSR LINEA
+000026D2                                   390      
 000026D2                                   391  FIN_LINEA:
-000026D2  2001                             392      MOVE.L D1,D0 *Se guarda la info del contador en D0
-000026D4  4E75                             393      RTS
-000026D6                                   394  VACIO_LINEA:
-000026D6  7000                             395      MOVE.L #$00000000,D0 *Se guarda un 0 en D0
-000026D8  4E75                             396      RTS
-000026DA                                   397  
-000026DA                                   398  
-000026DA                                   399  
-000026DA                                   400  *PRINT
-000026DA  4E75                             401  PRINT:RTS
-000026DC                                   402  
-000026DC                                   403  *SCAN
-000026DC  4E75                             404  SCAN:RTS
-000026DE                                   405  *RTI
-000026DE  4E75                             406  RTI:RTS
-000026E0                                   407  
-000026E0                                   408  
-000026E0                                   409  *Pruebas
-000026E0                                   410  PRUEBA:
-000026E0  2878 234C                        411    MOVE.L RBA_FIN_PUNT,A4
-000026E4                                   412    *MOVE.L RBB_IN_PUNT,A4
-000026E4  4E75                             413    RTS
-000026E6                                   414  
-000026E6                                   415  *Programa Principal
-000026E6                                   416  INICIO:
-000026E6  6100 FCA0                        417      BSR INIT
-000026EA  7000                             418  	  MOVE.L #$00000000,D0
-000026EC  7201                             419      MOVE.L #1,D1
-000026EE  6100 FE3E                        420      BSR ESCCAR
-000026F2  6100 FD36                        421      BSR LEECAR
-000026F6  7001                             422      MOVE.L #$00000001,D0
-000026F8  7202                             423      MOVE.L #2,D1
-000026FA  6100 FE32                        424      BSR ESCCAR
-000026FE  6100 FD2A                        425      BSR LEECAR
-00002702  7011                             426      MOVE.L #$00000011,D0
-00002704  7203                             427      MOVE.L #3,D1
-00002706  6100 FE26                        428      BSR ESCCAR
-0000270A  6100 FD1E                        429      BSR LEECAR
-0000270E  7010                             430      MOVE.L #$00000010,D0
-00002710  7204                             431      MOVE.L #4,D1
-00002712  6100 FE1A                        432      BSR ESCCAR
-00002716  6100 FD12                        433      BSR LEECAR
-0000271A  4848                             434      BREAK
+000026D2  5281                             392      ADD.L #1,D1 *Se añade el caracter 13
+000026D4  2001                             393      MOVE.L D1,D0 *Se guarda la info del contador en D0
+000026D6  4E75                             394      RTS
+000026D8                                   395  
+000026D8                                   396  VACIO_LINEA:
+000026D8  7000                             397      MOVE.L #$00000000,D0 *Se guarda un 0 en D0
+000026DA  4E75                             398      RTS
+000026DC                                   399  
+000026DC                                   400  *PRINT
+000026DC  4E75                             401  PRINT:RTS
+000026DE                                   402  
+000026DE                                   403  *SCAN
+000026DE  4E75                             404  SCAN:RTS
+000026E0                                   405  *RTI
+000026E0  4E75                             406  RTI:RTS
+000026E2                                   407  
+000026E2                                   408  
+000026E2                                   409  *Pruebas
+000026E2                                   410  PRUEBA:
+000026E2  2878 234C                        411    MOVE.L RBA_FIN_PUNT,A4
+000026E6                                   412    *MOVE.L RBB_IN_PUNT,A4
+000026E6  4E75                             413    RTS
+000026E8                                   414  
+000026E8                                   415  *Programa Principal
+000026E8                                   416  INICIO:
+000026E8  6100 FC9E                        417      BSR INIT
+000026EC  7000                             418  	  MOVE.L #$00000000,D0
+000026EE  7201                             419      MOVE.L #1,D1
+000026F0  6100 FE3C                        420      BSR ESCCAR
+000026F4  6100 FD34                        421      BSR LEECAR
+000026F8  7001                             422      MOVE.L #$00000001,D0
+000026FA  7202                             423      MOVE.L #2,D1
+000026FC  6100 FE30                        424      BSR ESCCAR
+00002700  6100 FD28                        425      BSR LEECAR
+00002704  7011                             426      MOVE.L #$00000011,D0
+00002706  7203                             427      MOVE.L #3,D1
+00002708  6100 FE24                        428      BSR ESCCAR
+0000270C  6100 FD1C                        429      BSR LEECAR
+00002710  7010                             430      MOVE.L #$00000010,D0
+00002712  7204                             431      MOVE.L #4,D1
+00002714  6100 FE18                        432      BSR ESCCAR
+00002718  6100 FD10                        433      BSR LEECAR
+0000271C  4848                             434      BREAK
 
 No errors detected
 No warnings generated
