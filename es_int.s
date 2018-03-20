@@ -75,10 +75,10 @@ INIT:
     BTST    #0,D0
     BEQ LINEA_A
 
-  LINEA_B:
+  LEE_LINEA_B:
      CMP #$00000001,D0
      BEQ REC_B
-TRANS_B:
+LEE_TRANS_B:
      MOVE.L TBB_INT_PUNT,A4
      MOVE.L TBB_EXT_PUNT,A3
      CMP  A3,A4
@@ -98,7 +98,7 @@ TRANS_B:
      MOVE.L  A5,TBB_EXT_PUNT
      BRA FIN_LEECAR
 
-   REC_B:
+  LEE_REC_B:
      MOVE.L RBB_INT_PUNT,A4
      MOVE.L RBB_EXT_PUNT,A3
      CMP  A3,A4
@@ -118,11 +118,11 @@ TRANS_B:
      MOVE.L  A5,RBB_EXT_PUNT
      BRA FIN_LEECAR
 
-  LINEA_A:
+  LEE_LINEA_A:
     CMP #$00000000,D0
     BEQ REC_A
 
-  TRANS_A:
+  LEE_TRANS_A:
     MOVE.L TBA_INT_PUNT,A4
     MOVE.L TBA_EXT_PUNT,A3
     CMP  A3,A4
@@ -142,7 +142,7 @@ TRANS_B:
     MOVE.L  A5,TBA_EXT_PUNT
     BRA FIN_LEECAR
 
-  REC_A:
+  LEE_REC_A:
     MOVE.L RBA_INT_PUNT,A4 *Puntero escritura
     MOVE.L RBA_EXT_PUNT,A3 *Puntero lectura
     CMP  A3,A4 *Si están en la misma posicion el puntero está vacío
@@ -171,14 +171,14 @@ TRANS_B:
 ESCCAR:
 
     BTST #0,D0
-    BEQ ELINEA_A
+    BEQ ESC_LINEA_A
 
-ELINEA_B:
+ESC_LINEA_B:
 
     CMP #$00000001,D0
-    BEQ EREC_B
+    BEQ ESC_REC_B
 
-ETRANS_B:
+ESC_TRANS_B:
     MOVE.L TBB_INT_PUNT,A5 *Se mete el puntero I en A5
     MOVE.L TBB_FIN_PUNT,A4 *Se mete el puntero FIn en A4
     MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
@@ -226,7 +226,7 @@ TBB_I_FIN:
 
 
 
-EREC_B:
+ESC_REC_B:
         MOVE.L RBB_INT_PUNT,A5 *Se mete el puntero I en A5
         MOVE.L RBB_FIN_PUNT,A4 *Se mete el puntero FIn en A4
         MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
@@ -274,12 +274,12 @@ RBB_I_FIN:
 
 
 
-ELINEA_A:
+ESC_LINEA_A:
 
     CMP #$00000000,D0
-	  BEQ EREC_A
+	  BEQ ESC_REC_A
 
-ETRANS_A:
+ESC_TRANS_A:
     MOVE.L TBA_INT_PUNT,A5 *Se mete el puntero I en A5
     MOVE.L TBA_FIN_PUNT,A4 *Se mete el puntero FIn en A4
     MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
@@ -326,7 +326,7 @@ TBA_I_FIN:
     RTS
 
 
-EREC_A:
+ESC_REC_A:
     MOVE.L RBA_INT_PUNT,A5 *Se mete el puntero I en A5
     MOVE.L RBA_FIN_PUNT,A4 *Se mete el puntero FIn en A4
     MOVE.L RBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
@@ -387,7 +387,7 @@ LINEA:
     BEQ FIN_LINEA
     ADD.L #1,D1 *Se toma D1 como contador y se le suma 1
     BSR LINEA
-    
+
 FIN_LINEA:
     ADD.L #1,D1 *Se añade el caracter 13
     MOVE.L D1,D0 *Se guarda la info del contador en D0
@@ -402,6 +402,8 @@ PRINT:RTS
 
 *SCAN
 SCAN:RTS
+*PRINT
+PRINT:RTS
 *RTI
 RTI:RTS
 
