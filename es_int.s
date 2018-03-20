@@ -389,6 +389,7 @@ LINEA:
     RTS
 
 FIN_LINEA:
+    ADD.L #1,D0 *Se añade el caracter 13
     MOVE.L D1,D0 *Se guarda la info del contador en D0
     RTS
 VACIO_LINEA:
