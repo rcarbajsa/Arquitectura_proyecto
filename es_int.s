@@ -80,98 +80,103 @@ INIT:
 
 LB_TRANS:
      MOVE.L TBB_IN_PUNT,A2
-     MOVE.L TBB_INT_PUNT,A4
      MOVE.L TBB_EXT_PUNT,A3
-     CMP  A3,A4
-     BEQ VACIO
+     MOVE.L TBB_INT_PUNT,A4
      MOVE.L TBB_FIN_PUNT,A5
+     CMP  A3,A4    * E=I?
+     BEQ VACIO     * E= I, entonces buffer vacio
      ADD.L #1,A5
-     CMP A3,A5
+     CMP A3,A5     * E = F+1?
      BEQ TBB_RESET
-     MOVE.L  TBB_EXT_PUNT,A5
-     MOVE.B  (A5)+,D0
-     MOVE.L  A5,TBB_EXT_PUNT
+     MOVE.B  (A3)+,D0
+     MOVE.L  A3,TBB_EXT_PUNT
      BRA FIN_LEECAR
   TBB_RESET:
-     CMP A2,A4
+     CMP A2,A4  *I=F?
      BNE TBB_I_NO_P
-     MOVE.L  TBB_IN_PUNT,A5
-     MOVE.B   (A5),D0
-     MOVE.L  A5,TBB_EXT_PUNT
+     MOVE.B   (A2),D0
+     MOVE.L  A2,TBB_EXT_PUNT
      BRA FIN_LEECAR
-TBB_I_NO_P:MOVE.L  TBB_IN_PUNT,A5
-     MOVE.B   (A5)+,D0
-     MOVE.L  A5,TBB_EXT_PUNT
+TBB_I_NO_P:
+     MOVE.B  (A2)+,D0
+     MOVE.L  A2,TBB_EXT_PUNT
      BRA FIN_LEECAR
 
-  LB_REC:
-     MOVE.L RBB_IN_PUNT,A2
-     MOVE.L RBB_INT_PUNT,A4
-     MOVE.L RBB_EXT_PUNT,A3
-     CMP  A3,A4
-     BEQ VACIO
-     MOVE.L RBB_FIN_PUNT,A5
-     ADD.L #1,A5
-     CMP A3,A5
-     BEQ RBB_RESET
-     MOVE.L  RBB_EXT_PUNT,A5
-     MOVE.B  (A5)+,D0
-     MOVE.L  A5,RBB_EXT_PUNT
-     BRA FIN_LEECAR
-  RBB_RESET:
-     CMP  A2,A3
-     BNE RBB_I_NO_P
-     MOVE.L  RBB_IN_PUNT,A5
-     MOVE.B (A5),D0
-     MOVE.L  A5,RBB_EXT_PUNT
-     BRA FIN_LEECAR
-RBB_I_NO_P:MOVE.L  RBB_IN_PUNT,A5
-     MOVE.B (A5)+,D0
-     MOVE.L  A5,RBB_EXT_PUNT
-     BRA FIN_LEECAR
+LB_REC:
+    MOVE.L RBB_IN_PUNT,A2
+    MOVE.L RBB_EXT_PUNT,A3
+    MOVE.L RBB_INT_PUNT,A4
+    MOVE.L RBB_FIN_PUNT,A5
+    CMP  A3,A4    * E=I?
+    BEQ VACIO     * E= I, entonces buffer vacio
+    ADD.L #1,A5
+    CMP A3,A5     * E = F+1?
+    BEQ RBB_RESET
+    MOVE.B  (A3)+,D0
+    MOVE.L  A3,RBB_EXT_PUNT
+    BRA FIN_LEECAR
+RBB_RESET:
+    CMP A2,A4  *I=F?
+    BNE RBB_I_NO_P
+    MOVE.B   (A2),D0
+    MOVE.L  A2,RBB_EXT_PUNT
+    BRA FIN_LEECAR
+RBB_I_NO_P:
+    MOVE.B  (A2)+,D0
+    MOVE.L  A2,RBB_EXT_PUNT
+    BRA FIN_LEECAR
 
   LA_LINEA:
     CMP #$00000000,D0
     BEQ LA_REC
 
-  LA_TRANS:
-    MOVE.L TBA_INT_PUNT,A4
-    MOVE.L TBA_EXT_PUNT,A3
-    CMP  A3,A4
-    BEQ VACIO
-    MOVE.L TBA_FIN_PUNT,A5
-    ADD.L #1,A5
-    CMP A3,A5
-    BEQ TBA_RESET
-    MOVE.L  TBA_EXT_PUNT,A5
-    MOVE.B  (A5)+,D0
-    MOVE.L  A5,TBA_EXT_PUNT
-    BRA FIN_LEECAR
-  TBA_RESET:
-    MOVE.L  TBA_IN_PUNT,A5
-    MOVE.B  (A5),D0
-    MOVE.L  A5,TBA_EXT_PUNT
-    BRA FIN_LEECAR
+    LA_TRANS:
+         MOVE.L TBA_IN_PUNT,A2
+         MOVE.L TBA_EXT_PUNT,A3
+         MOVE.L TBA_INT_PUNT,A4
+         MOVE.L TBA_FIN_PUNT,A5
+         CMP  A3,A4    * E=I?
+         BEQ VACIO     * E= I, entonces buffer vacio
+         ADD.L #1,A5
+         CMP A3,A5     * E = F+1?
+         BEQ TBA_RESET
+         MOVE.B  (A3)+,D0
+         MOVE.L  A3,TBB_EXT_PUNT
+         BRA FIN_LEECAR
+      TBA_RESET:
+         CMP A2,A4  *I=F?
+         BNE TBA_I_NO_P
+         MOVE.B   (A2),D0
+         MOVE.L  A2,TBA_EXT_PUNT
+         BRA FIN_LEECAR
+    TBA_I_NO_P:
+         MOVE.B  (A2)+,D0
+         MOVE.L  A2,TBA_EXT_PUNT
+         BRA FIN_LEECAR
 
-  LA_REC:
-    MOVE.L RBA_INT_PUNT,A4 *Puntero escritura
-    MOVE.L RBA_EXT_PUNT,A3 *Puntero lectura
-    CMP  A3,A4 *Si están en la misma posicion el puntero está vacío
-    BEQ VACIO
-    MOVE.L RBA_FIN_PUNT,A5 *Puntero fin
-    ADD.L #1,A5
-    CMP A3,A5
-    BEQ RBA_RESET
-    MOVE.L  RBA_EXT_PUNT,A5
-    MOVE.B  (A5)+,D0
-    MOVE.L  A5,RBA_EXT_PUNT
-    BRA FIN_LEECAR
-RBA_RESET:
-    MOVE.L  RBA_IN_PUNT,A5
-    MOVE.B  (A5),D0
-     *Reseteamos el puntero de lectura
-    MOVE.L  A5,RBA_EXT_PUNT
-    BRA FIN_LEECAR
+         LB_REC:
+              MOVE.L RBA_IN_PUNT,A2
+              MOVE.L RBA_EXT_PUNT,A3
+              MOVE.L RBA_INT_PUNT,A4
+              MOVE.L RBA_FIN_PUNT,A5
+              CMP  A3,A4    * E=I?
+              BEQ VACIO     * E= I, entonces buffer vacio
+              ADD.L #1,A5
+              CMP A3,A5     * E = F+1?
+              BEQ RBA_RESET
+              MOVE.B  (A3)+,D0
+              MOVE.L  A3,RBA_EXT_PUNT
+              BRA FIN_LEECAR
+           RBA_RESET:
+              CMP A2,A4  *I=F?
+              BNE RBA_I_NO_P
+              MOVE.B  (A2),D0
+              MOVE.L  A2,RBA_EXT_PUNT
+              BRA FIN_LEECAR
+         RBA_I_NO_P:
+              MOVE.B  (A2)+,D0
+              MOVE.L  A2,RBA_EXT_PUNT
+              BRA FIN_LEECAR
 
 
   VACIO:
@@ -369,10 +374,11 @@ INICIO:
   MOVE.L #4,D1
   BSR ESCCAR
   BSR LEECAR
-  BSR LEECAR
-  BSR LEECAR
-  BSR LEECAR
   MOVE.L #5,D1
   BSR ESCCAR
+  BSR LEECAR
+  BSR LEECAR
+  BSR LEECAR
+  BSR LEECAR
   BSR LEECAR
   BREAK
