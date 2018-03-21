@@ -154,7 +154,7 @@ RBB_I_NO_P:
          MOVE.L  A2,TBA_EXT_PUNT
          BRA FIN_LEECAR
 
-         LB_REC:
+         LA_REC:
               MOVE.L RBA_IN_PUNT,A2
               MOVE.L RBA_EXT_PUNT,A3
               MOVE.L RBA_INT_PUNT,A4
@@ -195,145 +195,145 @@ EB_LINEA:
     *BEQ ESC_REC_B
 
 ESC_TRANS_B:
-    MOVE.L TBB_INT_PUNT,A5 *Se mete el puntero I en A5
-    MOVE.L TBB_FIN_PUNT,A4 *Se mete el puntero FIn en A4
-    MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
     MOVE.L  TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+    MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
+    MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
+    MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
     SUB.L #1,A3  *Se le resta 1 a E
-    CMP.L A3,A5 * I=E-1?
+    CMP.L A3,A4 * I=E-1?
     ADD.L #1,A3  *Se restablece el valor de E
     BEQ LLENO
-    ADD.L #1,A4   *Se le añade 1 al puntero de fin
+    ADD.L #1,A5   *Se le añade 1 al puntero de fin
     CMP.L A4,A5   *Se comparan los punteros I y F+1
-    SUB.L #1,A4   *Se restablece el valor del puntero FIn
+    SUB.L #1,A5   *Se restablece el valor del puntero FIn
     BEQ  TBB_AUX      *Está en la posicion auxiliar
 
 TBB_NO_AUX:
-    CMP.L A3,A5  *Se comparan I y E
+    CMP.L A3,A4  *Se comparan I y E
     BGE TBB_MAYOR
-    ADD.L #1,A5
-    MOVE.B  D1,(A5)            *Push del registro D1 en el buffer
-    MOVE.L  A5,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
+    ADD.L #1,A4
+    MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+    MOVE.L  A4,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
     RTS
 TBB_MAYOR:
-    MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-    MOVE.L  A5,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
+    MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+    MOVE.L  A4,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
     RTS
 
 TBB_AUX:
     CMP.L A3,A2  * E=P?
     BEQ   LLENO
-    MOVE.L  TBB_IN_PUNT,A5
-    MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-    MOVE.L  A5,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
+    MOVE.L  TBB_IN_PUNT,A4
+    MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+    MOVE.L  A4,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
     RTS
 
 
 
 ESC_REC_B:
-  MOVE.L RBB_INT_PUNT,A5 *Se mete el puntero I en A5
-  MOVE.L RBB_FIN_PUNT,A4 *Se mete el puntero FIn en A4
+  MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
+  MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
   MOVE.L  RBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
   SUB.L #1,A3  *Se le resta 1 a E
-  CMP.L A3,A5 * I=E-1?
+  CMP.L A3,A4 * I=E-1?
   ADD.L #1,A3  *Se restablece el valor de E
   BEQ LLENO
-  ADD.L #1,A4   *Se le añade 1 al puntero de fin
+  ADD.L #1,A5   *Se le añade 1 al puntero de fin
   CMP.L A4,A5   *Se comparan los punteros I y F+1
-  SUB.L #1,A4   *Se restablece el valor del puntero FIn
+  SUB.L #1,A5   *Se restablece el valor del puntero FIn
   BEQ  RBB_AUX      *Está en la posicion auxiliar
 
 RBB_NO_AUX:
-  CMP.L A3,A5  *Se comparan I y E
+  CMP.L A3,A4  *Se comparan I y E
   BGE RBB_MAYOR
-  ADD.L #1,A5
-  MOVE.B  D1,(A5)            *Push del registro D1 en el buffer
-  MOVE.L  A5,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
+  ADD.L #1,A4
+  MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+  MOVE.L  A4,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
   RTS
 RBB_MAYOR:
-  MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-  MOVE.L  A5,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
+  MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+  MOVE.L  A4,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
   RTS
 
 RBB_AUX:
   CMP.L A3,A2  * E=P?
   BEQ   LLENO
-  MOVE.L  RBB_IN_PUNT,A5
-  MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-  MOVE.L  A5,RBB_INT_PUNT  *Se Inicializa I con el valor de Principio
+  MOVE.L  RBB_IN_PUNT,A4
+  MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+  MOVE.L  A4,RBB_INT_PUNT  *Se Inicializa I con el valor de Principio
   RTS
 
 EA_LINEA:
   CMP #$00000000,D0
   BEQ EA_REC
 
-EA_TRANS:  MOVE.L TBA_INT_PUNT,A5 *Se mete el puntero I en A5
-  MOVE.L TBA_FIN_PUNT,A4 *Se mete el puntero FIn en A4
+EA_TRANS:  MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
+  MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
   MOVE.L  TBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
   SUB.L #1,A3  *Se le resta 1 a E
-  CMP.L A3,A5 * I=E-1?
+  CMP.L A3,A4 * I=E-1?
   ADD.L #1,A3  *Se restablece el valor de E
   BEQ LLENO
-  ADD.L #1,A4   *Se le añade 1 al puntero de fin
+  ADD.L #1,A5   *Se le añade 1 al puntero de fin
   CMP.L A4,A5   *Se comparan los punteros I y F+1
-  SUB.L #1,A4   *Se restablece el valor del puntero FIn
+  SUB.L #1,A5   *Se restablece el valor del puntero FIn
   BEQ  TBA_AUX      *Está en la posicion auxiliar
 
 TBA_NO_AUX:
-  CMP.L A3,A5  *Se comparan I y E
+  CMP.L A3,A4  *Se comparan I y E
   BGE TBA_MAYOR
-  ADD.L #1,A5
-  MOVE.B  D1,(A5)            *Push del registro D1 en el buffer
-  MOVE.L  A5,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
+  ADD.L #1,A4
+  MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+  MOVE.L  A4,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
   RTS
 TBA_MAYOR:
-  MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-  MOVE.L  A5,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
+  MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+  MOVE.L  A4,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
   RTS
 
 TBA_AUX:
   CMP.L A3,A2  * E=P?
   BEQ   LLENO
-  MOVE.L  TBA_IN_PUNT,A5
-  MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-  MOVE.L  A5,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
+  MOVE.L  TBA_IN_PUNT,A4
+  MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+  MOVE.L  A4,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
   RTS
 
 
 EA_REC:
-  MOVE.L RBA_INT_PUNT,A5 *Se mete el puntero I en A5
-  MOVE.L RBA_FIN_PUNT,A4 *Se mete el puntero FIn en A4
+  MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
+  MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   MOVE.L RBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
   MOVE.L RBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
   SUB.L #1,A3  *Se le resta 1 a E
-  CMP.L A3,A5 * I=E-1?
+  CMP.L A3,A4 * I=E-1?
   ADD.L #1,A3  *Se restablece el valor de E
   BEQ LLENO
-  ADD.L #1,A4   *Se le añade 1 al puntero de fin
+  ADD.L #1,A5   *Se le añade 1 al puntero de fin
   CMP.L A4,A5   *Se comparan los punteros I y F+1
-  SUB.L #1,A4   *Se restablece el valor del puntero FIn
+  SUB.L #1,A5   *Se restablece el valor del puntero FIn
   BEQ  RBA_AUX      *Está en la posicion auxiliar
 
 RBA_NO_AUX:
-  CMP.L A3,A5  *Se comparan I y E
+  CMP.L A3,A4  *Se comparan I y E
   BGE RBA_MAYOR
-  ADD.L #1,A5
-  MOVE.B  D1,(A5)            *Push del registro D1 en el buffer
-  MOVE.L  A5,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
+  ADD.L #1,A4
+  MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+  MOVE.L  A4,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
   RTS
 RBA_MAYOR:
-  MOVE.B  D1,(A5)+           *Push del registro D1 en el buffer
-  MOVE.L  A5,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+  MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+  MOVE.L  A4,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
   RTS
 
 RBA_AUX:
   CMP.L A3,A2  * E=P?
   BEQ   LLENO
-  MOVE.L  RBA_IN_PUNT,A5
-  MOVE.B  D1,(A5)   *Push del registro D1 en el buffer
-  MOVE.L  A5,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
+  MOVE.L  RBA_IN_PUNT,A4
+  MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+  MOVE.L  A4,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
   RTS
 LLENO:
     MOVE.L #$ffffffff,D0
@@ -357,10 +357,6 @@ RTI:RTS
 
 
 *Pruebas
-PRUEBA:
-  MOVE.L RBA_FIN_PUNT,A4
-  *MOVE.L RBB_IN_PUNT,A4
-  RTS
 
 *Programa Principal
 INICIO:
