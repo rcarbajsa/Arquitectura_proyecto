@@ -132,7 +132,6 @@ LA_LINEA:
     CMP #$00000000,D0
     BEQ LA_REC
 
-<<<<<<< HEAD
 LA_TRANS:
     MOVE.L TBA_IN_PUNT,A2
     MOVE.L TBA_EXT_PUNT,A3
@@ -182,58 +181,6 @@ RBA_I_NO_P:
     MOVE.B  (A2)+,D0
     MOVE.L  A2,RBA_EXT_PUNT
     BRA FIN_LEECAR
-=======
-    LA_TRANS:
-         MOVE.L TBA_IN_PUNT,A2
-         MOVE.L TBA_EXT_PUNT,A3
-         MOVE.L TBA_INT_PUNT,A4
-         MOVE.L TBA_FIN_PUNT,A5
-         CMP  A3,A4    * E=I?
-         BEQ VACIO     * E= I, entonces buffer vacio
-         ADD.L #1,A5
-         CMP A3,A5     * E = F+1?
-         SUB.L #1,A5  *Se restablece F a sus posicion original
-         BEQ TBA_RESET
-         MOVE.B  (A3)+,D0
-         MOVE.L  A3,TBB_EXT_PUNT
-         BRA FIN_LEECAR
-      TBA_RESET:
-         CMP A2,A4  *I=P?
-         BNE TBA_I_NO_P
-         MOVE.B  (A2),D0
-         MOVE.L  A2,TBA_EXT_PUNT
-         BRA FIN_LEECAR
-    TBA_I_NO_P:
-         MOVE.B  (A2)+,D0
-         MOVE.L  A2,TBA_EXT_PUNT
-         BRA FIN_LEECAR
-
-         LA_REC:
-              MOVE.L RBA_IN_PUNT,A2
-              MOVE.L RBA_EXT_PUNT,A3
-              MOVE.L RBA_INT_PUNT,A4
-              MOVE.L RBA_FIN_PUNT,A5
-              CMP  A3,A4    * E=I?
-              BEQ VACIO     * E= I, entonces buffer vacio
-              ADD.L #1,A5
-              CMP A3,A5     * E = F+1?
-              SUB.L #1,A5  *Se restablece F a sus posicion original
-              BEQ RBA_RESET
-              MOVE.B  (A3)+,D0
-              MOVE.L  A3,RBA_EXT_PUNT
-              BRA FIN_LEECAR
-           RBA_RESET:
-              CMP A2,A4  *I=P?
-              BNE RBA_I_NO_P
-              MOVE.B  (A2),D0
-              MOVE.L  A2,RBA_EXT_PUNT
-              BRA FIN_LEECAR
-         RBA_I_NO_P:
-              MOVE.B  (A2)+,D0
-              MOVE.L  A2,RBA_EXT_PUNT
-              BRA FIN_LEECAR
->>>>>>> d79a0be50e7c0e0680847bc97e19bdd6c0483b26
-
 
   VACIO:
     MOVE.L #$ffffffff,D0
@@ -399,7 +346,6 @@ LLENO:
 
 LINEA:
   BTST #0,D0
-<<<<<<< HEAD
   BEQ LINEA_A
 
 LINEA_B:
@@ -408,17 +354,7 @@ LINEA_B:
 
 LINEAB_TRANS:
   MOVE.L  TBB_IN_PUNT,A3 *Se mete el puntero de Principio al A2
-=======
-  *BEQ LINEA_A
 
-LINEA_B:
-  BTST #$00000001,D0
-  *BEQ LINEAB_REC
-
-LINEAB_TRANS:
-  MOVE.L  TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
-  MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
->>>>>>> d79a0be50e7c0e0680847bc97e19bdd6c0483b26
   MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
@@ -428,7 +364,7 @@ TBB_BUCLE_LINEA:
   CMP A4,A3
   BEQ L_VACIO
   CLR.L D1
-<<<<<<< HEAD
+
   ADD.B #1,D0
   MOVE.B (A3)+,D1
   CMP #13,D1
@@ -500,36 +436,7 @@ FIN_LINEA:
   BEQ F_LINEA
   CLR.L D0
 F_LINEA: RTS
-=======
-  ADD.L #1,D0
-  MOVE.B (A3)+,D1
-  MOVE.L A3,TBB_EXT_PUNT
-  CMP #13,D1
-  BEQ F_LINEA
-  BRA TBB_BUCLE_LINEA
-L_VACIO:
-  CLR.L D0
-  RTS
-FIN_LINEA:
-  ADD.L #1,D0
-  MOVE.B (A3)+,D1
-  CMP #13,D1
-  BEQ F_LINEA
-  MOVE.L #0,D0
-  RTS
-  F_LINEA:RTS
-LINEAB_REC:
 
-LINEA_A:
-  BTST #$00000000,D0
-  BEQ LINEAA_REC
-
-LINEAA_TRANS:
-LINEAA_REC:
-RTS
-
-
->>>>>>> d79a0be50e7c0e0680847bc97e19bdd6c0483b26
 *PRINT
 PRINT:RTS
 *SCAN
@@ -543,7 +450,6 @@ RTI:RTS
 
 *Programa Principal
 INICIO:
-<<<<<<< HEAD
    BSR INIT
    MOVE.L #$00000000,D0
    MOVE.L #1,D1
@@ -570,11 +476,3 @@ INICIO:
    MOVE.L #$00000010,D0
    BSR LINEA
    BREAK
-=======
-  BSR INIT
-  CLR.L D1
-  CLR.L D0
-  MOVE.L #1,D0
-  BSR LINEA
-  BREAK
->>>>>>> d79a0be50e7c0e0680847bc97e19bdd6c0483b26
