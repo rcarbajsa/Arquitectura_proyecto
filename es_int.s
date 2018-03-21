@@ -87,12 +87,13 @@ LB_TRANS:
      BEQ VACIO     * E= I, entonces buffer vacio
      ADD.L #1,A5
      CMP A3,A5     * E = F+1?
+     SUB.L #1,A5  *Se restablece F a sus posicion original
      BEQ TBB_RESET
      MOVE.B  (A3)+,D0
      MOVE.L  A3,TBB_EXT_PUNT
      BRA FIN_LEECAR
   TBB_RESET:
-     CMP A2,A4  *I=F?
+     CMP A2,A4  *I=P?
      BNE TBB_I_NO_P
      MOVE.B   (A2),D0
      MOVE.L  A2,TBB_EXT_PUNT
@@ -111,12 +112,13 @@ LB_REC:
     BEQ VACIO     * E= I, entonces buffer vacio
     ADD.L #1,A5
     CMP A3,A5     * E = F+1?
+    SUB.L #1,A5  *Se restablece F a sus posicion original
     BEQ RBB_RESET
     MOVE.B  (A3)+,D0
     MOVE.L  A3,RBB_EXT_PUNT
     BRA FIN_LEECAR
 RBB_RESET:
-    CMP A2,A4  *I=F?
+    CMP A2,A4  *I=P?
     BNE RBB_I_NO_P
     MOVE.B   (A2),D0
     MOVE.L  A2,RBB_EXT_PUNT
@@ -139,14 +141,15 @@ RBB_I_NO_P:
          BEQ VACIO     * E= I, entonces buffer vacio
          ADD.L #1,A5
          CMP A3,A5     * E = F+1?
+         SUB.L #1,A5  *Se restablece F a sus posicion original
          BEQ TBA_RESET
          MOVE.B  (A3)+,D0
          MOVE.L  A3,TBB_EXT_PUNT
          BRA FIN_LEECAR
       TBA_RESET:
-         CMP A2,A4  *I=F?
+         CMP A2,A4  *I=P?
          BNE TBA_I_NO_P
-         MOVE.B   (A2),D0
+         MOVE.B  (A2),D0
          MOVE.L  A2,TBA_EXT_PUNT
          BRA FIN_LEECAR
     TBA_I_NO_P:
@@ -163,12 +166,13 @@ RBB_I_NO_P:
               BEQ VACIO     * E= I, entonces buffer vacio
               ADD.L #1,A5
               CMP A3,A5     * E = F+1?
+              SUB.L #1,A5  *Se restablece F a sus posicion original
               BEQ RBA_RESET
               MOVE.B  (A3)+,D0
               MOVE.L  A3,RBA_EXT_PUNT
               BRA FIN_LEECAR
            RBA_RESET:
-              CMP A2,A4  *I=F?
+              CMP A2,A4  *I=P?
               BNE RBA_I_NO_P
               MOVE.B  (A2),D0
               MOVE.L  A2,RBA_EXT_PUNT
