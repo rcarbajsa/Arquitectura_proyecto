@@ -384,7 +384,7 @@ LINEAA_REC:
   BRA L_BUCLE
 L_BUCLE:
    CLR.L D1
-   ADD.B #1,D0 *Aumenta el contador
+   ADD.L #1,D0 *Aumenta el contador
    MOVE.B (A3),D1 *POP de E
    CMP #13,D1 *D1=13?
    BEQ F_LINEA  *Si D1=13, SE acaba la linea
@@ -461,5 +461,5 @@ CON_3:
 
   MOVE.L #13,D1
   BSR ESCCAR
-
+  BSR LINEA
    BREAK

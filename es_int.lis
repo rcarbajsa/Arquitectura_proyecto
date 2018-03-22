@@ -384,7 +384,7 @@
 000026FE  6000 0002                        384    BRA L_BUCLE
 00002702                                   385  L_BUCLE:
 00002702  4281                             386     CLR.L D1
-00002704  5200                             387     ADD.B #1,D0 *Aumenta el contador
+00002704  5280                             387     ADD.L #1,D0 *Aumenta el contador
 00002706  1213                             388     MOVE.B (A3),D1 *POP de E
 00002708  B27C 000D                        389     CMP #13,D1 *D1=13?
 0000270C  6700 0034                        390     BEQ F_LINEA  *Si D1=13, SE acaba la linea
@@ -461,8 +461,8 @@
 00002792                                   461  
 00002792  720D                             462    MOVE.L #13,D1
 00002794  6100 FDB8                        463    BSR ESCCAR
-00002798                                   464  
-00002798  4848                             465     BREAK
+00002798  6100 FF00                        464    BSR LINEA
+0000279C  4848                             465     BREAK
 
 No errors detected
 No warnings generated
