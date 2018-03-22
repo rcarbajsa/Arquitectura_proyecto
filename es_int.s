@@ -144,7 +144,7 @@ LA_TRANS:
     SUB.L #1,A5  *Se restablece F a sus posicion original
     BEQ TBA_RESET
     MOVE.B  (A3)+,D0
-    MOVE.L  A3,TBB_EXT_PUNT
+    MOVE.L  A3,TBA_EXT_PUNT
     BRA FIN_LEECAR
 TBA_RESET:
     CMP A2,A4  *I=P?
@@ -198,7 +198,7 @@ EB_LINEA:
     BEQ ESC_REC_B
 
 ESC_TRANS_B:
-    MOVE.L  TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+    MOVE.L TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
     MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
     MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
     MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
@@ -231,13 +231,11 @@ TBB_AUX:
     MOVE.L  A4,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
     RTS
 
-
-
 ESC_REC_B:
   MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
-  MOVE.L  RBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+  MOVE.L RBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
   SUB.L #1,A3  *Se le resta 1 a E
   CMP.L A3,A4 * I=E-1?
   ADD.L #1,A3  *Se restablece el valor de E
@@ -271,10 +269,11 @@ EA_LINEA:
   CMP #$00000000,D0
   BEQ EA_REC
 
-EA_TRANS:  MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
+EA_TRANS:
+  MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
-  MOVE.L  TBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+  MOVE.L TBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
   SUB.L #1,A3  *Se le resta 1 a E
   CMP.L A3,A4 * I=E-1?
   ADD.L #1,A3  *Se restablece el valor de E
@@ -303,7 +302,6 @@ TBA_AUX:
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
   RTS
-
 
 EA_REC:
   MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
@@ -353,22 +351,20 @@ LINEA_B:
   BEQ LINEAB_REC
 
 LINEAB_TRANS:
-  MOVE.L  TBB_IN_PUNT,A3 *Se mete el puntero de Principio al A2
-
+  MOVE.L TBB_IN_PUNT,A3 *Se mete el puntero de Principio al A2
   MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
 TBB_BUCLE_LINEA:
-  CMP A3,A5
-  BEQ FIN_LINEA
-  CMP A4,A3
-  BEQ L_VACIO
+  CMP A3,A5 *E=F?
+  BEQ FIN_LINEA *Si E=F, esta al final de la linea
+  CMP A4,A3 *I=E?
+  BEQ L_VACIO *Si I=E, vacio
   CLR.L D1
-
-  ADD.B #1,D0
-  MOVE.B (A3)+,D1
-  CMP #13,D1
-  BEQ F_LINEA
+  ADD.B #1,D0 *Aumenta el contador
+  MOVE.B (A3)+,D1 *POP de E
+  CMP #13,D1 *D1=13?
+  BEQ F_LINEA  *Si D1=13, SE acaba la linea
   BRA TBB_BUCLE_LINEA
 
 LINEAB_REC:
@@ -377,15 +373,15 @@ LINEAB_REC:
   MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
 RBB_BUCLE_LINEA:
-  CMP A3,A5
-  BEQ FIN_LINEA
-  CMP A4,A3
-  BEQ L_VACIO
+  CMP A3,A5 *E=F?
+  BEQ FIN_LINEA *Si E=F, esta al final de la linea
+  CMP A4,A3 *I=E?
+  BEQ L_VACIO *Si I=E, vacio
   CLR.L D1
-  ADD.B #1,D0
-  MOVE.B (A3)+,D1
-  CMP #13,D1
-  BEQ F_LINEA
+  ADD.B #1,D0 *Aumenta el contador
+  MOVE.B (A3)+,D1 *POP de E
+  CMP #13,D1 *D1=13?
+  BEQ F_LINEA  *Si D1=13, SE acaba la linea
   BRA RBB_BUCLE_LINEA
 
 LINEA_A:
@@ -398,15 +394,15 @@ LINEAA_TRANS:
   MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
 TBA_BUCLE_LINEA:
-  CMP A3,A5
-  BEQ FIN_LINEA
-  CMP A4,A3
-  BEQ L_VACIO
+  CMP A3,A5 *E=F?
+  BEQ FIN_LINEA *Si E=F, esta al final de la linea
+  CMP A4,A3 *I=E?
+  BEQ L_VACIO *Si I=E, vacio
   CLR.L D1
-  ADD.B #1,D0
-  MOVE.B (A3)+,D1
-  CMP #13,D1
-  BEQ F_LINEA
+  ADD.B #1,D0 *Aumenta el contador
+  MOVE.B (A3)+,D1 *POP de E
+  CMP #13,D1 *D1=13?
+  BEQ F_LINEA  *Si D1=13, SE acaba la linea
   BRA TBA_BUCLE_LINEA
 
 LINEAA_REC:
@@ -415,26 +411,26 @@ LINEAA_REC:
   MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
 RBA_BUCLE_LINEA:
-  CMP A3,A5
-  BEQ FIN_LINEA
-  CMP A4,A3
-  BEQ L_VACIO
+  CMP A3,A5 *E=F?
+  BEQ FIN_LINEA *Si E=F, esta al final de la linea
+  CMP A4,A3 *I=E?
+  BEQ L_VACIO *Si I=E, vacio
   CLR.L D1
-  ADD.B #1,D0
-  MOVE.B (A3)+,D1
-  CMP #13,D1
-  BEQ F_LINEA
+  ADD.B #1,D0 *Aumenta el contador
+  MOVE.B (A3)+,D1 *POP de E
+  CMP #13,D1 *D1=13?
+  BEQ F_LINEA  *Si D1=13, SE acaba la linea
   BRA RBA_BUCLE_LINEA
 
 L_VACIO:
-  CLR.L D0
+  CLR.L D0 *Se pone el contador a 0
   RTS
 FIN_LINEA:
-  ADD.L #1,D0
-  MOVE.B (A3)+,D1
-  CMP #13,D1
-  BEQ F_LINEA
-  CLR.L D0
+  ADD.L #1,D0 *Se le suma 1 al contador (ultimo carcter)
+  MOVE.B (A3)+,D1 *POP del buffer
+  CMP #13,D1 *D1=13?
+  BEQ F_LINEA *Fin de la linea
+  CLR.L D0 *D1!=13, no es una linea, por tanto contador=0
 F_LINEA: RTS
 
 *PRINT
@@ -444,7 +440,6 @@ SCAN:RTS
 
 *RTI
 RTI:RTS
-
 
 *Pruebas
 
