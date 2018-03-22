@@ -72,11 +72,11 @@ INIT:
 
   LEECAR:
     BTST    #0,D0
-    BEQ LA_LINEA
+    *BEQ LA_LINEA
 
 LB_LINEA:
      CMP #$00000001,D0
-     BEQ LB_REC
+    * BEQ LB_REC
 
 LB_TRANS:
      MOVE.L TBB_IN_PUNT,A2
@@ -190,12 +190,12 @@ RBA_I_NO_P:
 ESCCAR:
 
     BTST #0,D0
-    BEQ EA_LINEA
+    *BEQ EA_LINEA
 
 EB_LINEA:
 
     CMP #$00000001,D0
-    BEQ ESC_REC_B
+    *BEQ ESC_REC_B
 
 ESC_TRANS_B:
     MOVE.L TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
@@ -344,11 +344,11 @@ LLENO:
 
 LINEA:
   BTST #0,D0
-  BEQ LINEA_A
+  *BEQ LINEA_A
 
 LINEA_B:
   CMP #$00000001,D0
-  BEQ LINEAB_REC
+  *BEQ LINEAB_REC
 
 LINEAB_TRANS:
   MOVE.L TBB_IN_PUNT,A2
@@ -382,7 +382,7 @@ LINEAA_REC:
   MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
   BRA L_BUCLE
-  L_BUCLE:
+L_BUCLE:
    CMP A3,A5 *E=F?
    BEQ FIN_LINEA *Si E=F, esta al final de la linea
    CMP A4,A3 *I=E?
@@ -402,7 +402,8 @@ FIN_LINEA:
   CMP #13,D1 *D1=13?
   BEQ F_LINEA *Fin de la linea
   ADD.L #1,A2
-  CMP A2,A5
+  CMP A4,A5
+  SUB.L #1,A5
   BNE L_RESET
   CLR.L D0 *D1!=13, no es una linea, por tanto contador=0
   BRA F_LINEA
@@ -424,28 +425,24 @@ RTI:RTS
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.L #$00000000,D0
-   MOVE.L #1,D1
+   CLR.L D3
+BUCLE:
+   ADD.L #1,D3
+   CMP #1500,D3
+   BEQ LEE
    BSR ESCCAR
+   BRA BUCLE
+LEE:
+   ADD.L #1,D4
+   CMP #1500,D4
+   BEQ ESC
    BSR LEECAR
-   MOVE.L #$00000000,D0
-   BSR LINEA
-   MOVE.L #$00000001,D0
-   MOVE.L #13,D1
+   BRA LEE
+ESC:
+   ADD.L #1,D5
+   CMP #1000,D5
+   BEQ FIN
    BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000001,D0
-   BSR LINEA
-   MOVE.L #$00000011,D0
-   MOVE.L #2,D1
-   BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000011,D0
-   BSR LINEA
-   MOVE.L #$00000010,D0
-   MOVE.L #13,D1
-   BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000010,D0
-   BSR LINEA
+   BRA ESC
+FIN:BSR LINEA
    BREAK
