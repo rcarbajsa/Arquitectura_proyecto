@@ -416,7 +416,10 @@ RTI:RTS
 
 *Programa Principal
 INICIO:
+*Programa Principal
+INICIO:
    BSR INIT
+   CLR.L D0
    CLR.L D1
    CLR.L D3
 B1:
