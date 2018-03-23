@@ -123,6 +123,7 @@ RBB_RESET:
     MOVE.B   (A2),D0
     MOVE.L  A2,RBB_EXT_PUNT
     BRA FIN_LEECAR
+
 RBB_I_NO_P:
     MOVE.B  (A2)+,D0
     MOVE.L  A2,RBB_EXT_PUNT
@@ -171,12 +172,14 @@ LA_REC:
     MOVE.B  (A3)+,D0
     MOVE.L  A3,RBA_EXT_PUNT
     BRA FIN_LEECAR
+
 RBA_RESET:
     CMP A2,A4  *I=P?
     BNE RBA_I_NO_P
     MOVE.B  (A2),D0
     MOVE.L  A2,RBA_EXT_PUNT
     BRA FIN_LEECAR
+
 RBA_I_NO_P:
     MOVE.B  (A2)+,D0
     MOVE.L  A2,RBA_EXT_PUNT
@@ -218,6 +221,7 @@ TBB_NO_AUX:
     MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
     RTS
+
 TBB_MAYOR:
     MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
@@ -252,6 +256,7 @@ RBB_NO_AUX:
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
   RTS
+
 RBB_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
@@ -290,6 +295,7 @@ TBA_NO_AUX:
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
   RTS
+
 TBA_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
@@ -324,6 +330,7 @@ RBA_NO_AUX:
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
   RTS
+
 RBA_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
@@ -336,6 +343,7 @@ RBA_AUX:
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
   RTS
+
 LLENO:
     MOVE.L #$ffffffff,D0
     RTS
@@ -351,86 +359,69 @@ LINEA_B:
   BEQ LINEAB_REC
 
 LINEAB_TRANS:
-  MOVE.L TBB_IN_PUNT,A3 *Se mete el puntero de Principio al A2
+  MOVE.L TBB_IN_PUNT,A2
+  MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
   MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
-TBB_BUCLE_LINEA:
-  CMP A3,A5 *E=F?
-  BEQ FIN_LINEA *Si E=F, esta al final de la linea
-  CMP A4,A3 *I=E?
-  BEQ L_VACIO *Si I=E, vacio
-  CLR.L D1
-  ADD.B #1,D0 *Aumenta el contador
-  MOVE.B (A3)+,D1 *POP de E
-  CMP #13,D1 *D1=13?
-  BEQ F_LINEA  *Si D1=13, SE acaba la linea
-  BRA TBB_BUCLE_LINEA
+  BRA L_BUCLE
 
 LINEAB_REC:
-  MOVE.L RBB_IN_PUNT,A3 *Se mete el puntero de Principio al A2
+  MOVE.L RBB_IN_PUNT,A2
+  MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
   MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
-RBB_BUCLE_LINEA:
-  CMP A3,A5 *E=F?
-  BEQ FIN_LINEA *Si E=F, esta al final de la linea
-  CMP A4,A3 *I=E?
-  BEQ L_VACIO *Si I=E, vacio
-  CLR.L D1
-  ADD.B #1,D0 *Aumenta el contador
-  MOVE.B (A3)+,D1 *POP de E
-  CMP #13,D1 *D1=13?
-  BEQ F_LINEA  *Si D1=13, SE acaba la linea
-  BRA RBB_BUCLE_LINEA
+  BRA L_BUCLE
 
 LINEA_A:
   CMP #$00000000,D0
   BEQ LINEAA_REC
 
 LINEAA_TRANS:
-  MOVE.L TBA_IN_PUNT,A3 *Se mete el puntero de Principio al A2
+  MOVE.L TBA_IN_PUNT,A2
+  MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
   MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
-TBA_BUCLE_LINEA:
-  CMP A3,A5 *E=F?
-  BEQ FIN_LINEA *Si E=F, esta al final de la linea
-  CMP A4,A3 *I=E?
-  BEQ L_VACIO *Si I=E, vacio
-  CLR.L D1
-  ADD.B #1,D0 *Aumenta el contador
-  MOVE.B (A3)+,D1 *POP de E
-  CMP #13,D1 *D1=13?
-  BEQ F_LINEA  *Si D1=13, SE acaba la linea
-  BRA TBA_BUCLE_LINEA
+  BRA L_BUCLE
 
 LINEAA_REC:
-  MOVE.L RBA_IN_PUNT,A3 *Se mete el puntero de Principio al A2
+  MOVE.L RBA_IN_PUNT,A2
+  MOVE.L RBA_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
   MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
   MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
   CLR.L D0 *Contador
-RBA_BUCLE_LINEA:
-  CMP A3,A5 *E=F?
-  BEQ FIN_LINEA *Si E=F, esta al final de la linea
-  CMP A4,A3 *I=E?
-  BEQ L_VACIO *Si I=E, vacio
-  CLR.L D1
-  ADD.B #1,D0 *Aumenta el contador
-  MOVE.B (A3)+,D1 *POP de E
-  CMP #13,D1 *D1=13?
-  BEQ F_LINEA  *Si D1=13, SE acaba la linea
-  BRA RBA_BUCLE_LINEA
-
+  BRA L_BUCLE
+  
+L_BUCLE:
+   CLR.L D1
+   ADD.L #1,D0 *Aumenta el contador
+   MOVE.B (A3),D1 *POP de E
+   CMP #13,D1 *D1=13?
+   BEQ F_LINEA  *Si D1=13, SE acaba la linea
+   CMP A3,A5 *E=F?
+   BEQ FIN_LINEA *Si E=F, esta al final de la linea
+   CMP A4,A3 *I=E?
+   BEQ L_VACIO *Si I=E, vacio
+   ADD.L #1,A3
+   BRA L_BUCLE
 L_VACIO:
   CLR.L D0 *Se pone el contador a 0
   RTS
 FIN_LINEA:
-  ADD.L #1,D0 *Se le suma 1 al contador (ultimo carcter)
   MOVE.B (A3)+,D1 *POP del buffer
   CMP #13,D1 *D1=13?
   BEQ F_LINEA *Fin de la linea
+  ADD.L #1,A5
+  CMP A4,A5
+  SUB.L #1,A5
+  BNE L_RESET
   CLR.L D0 *D1!=13, no es una linea, por tanto contador=0
+  BRA F_LINEA
+L_RESET:
+  MOVE.L A2,A3
+  BRA L_BUCLE
 F_LINEA: RTS
 
 *PRINT
@@ -446,28 +437,41 @@ RTI:RTS
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.L #$00000000,D0
-   MOVE.L #1,D1
+   CLR.L D1
+   CLR.L D3
+B1:
+   ADD.L #1,D1
+   ADD.L #1,D3
+   CMP  #10,D1
+   BNE CON_1
+   CLR.L D1
+CON_1:
    BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000000,D0
-   BSR LINEA
-   MOVE.L #$00000001,D0
-   MOVE.L #13,D1
-   BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000001,D0
-   BSR LINEA
-   MOVE.L #$00000011,D0
-   MOVE.L #2,D1
-   BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000011,D0
-   BSR LINEA
-   MOVE.L #$00000010,D0
-   MOVE.L #13,D1
-   BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000010,D0
-   BSR LINEA
+   CMP #1500,D3
+   BNE B1
+
+   CLR.L D3
+
+B2:
+  ADD.L #1,D3
+  BSR LEECAR
+  CMP #1500,D3
+  BNE B2
+
+  CLR.L D3
+
+B3:
+  ADD.L #1,D1
+  ADD.L #1,D3
+  CMP  #10,D1
+  BNE CON_3
+  CLR.L D1
+CON_3:
+  BSR ESCCAR
+  CMP #999,D3
+  BNE B3
+
+  MOVE.L #13,D1
+  BSR ESCCAR
+  BSR LINEA
    BREAK
