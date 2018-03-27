@@ -71,6 +71,7 @@ INIT:
   *********************LEECAR**********************
 
   LEECAR:
+    LINK A6,#-8 *Creación del marco de pila
     BTST    #0,D0
     BEQ LA_LINEA
 
@@ -167,11 +168,13 @@ RBA_RESET:
 
   VACIO:
     MOVE.L #$ffffffff,D0
-  FIN_LEECAR:RTS
+  FIN_LEECAR:
+    UNLK A6 *Destrucción del marco de pila
+    RTS
 
 ********************ESCCAR********************
 ESCCAR:
-
+    LINK A6,#-8 *Creación del marco de pila
     BTST #0,D0
     BEQ EA_LINEA
 
@@ -200,12 +203,12 @@ TBB_NO_AUX:
     ADD.L #1,A4
     MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
-    RTS
+    BRA FIN_ESCCAR
 
 TBB_MAYOR:
     MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
-    RTS
+    BRA FIN_ESCCAR
 
 TBB_AUX:
     CMP.L A3,A2  * E=P?
@@ -213,7 +216,7 @@ TBB_AUX:
     MOVE.L  TBB_IN_PUNT,A4
     MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
-    RTS
+    BRA FIN_ESCCAR
 
 ESC_REC_B:
   MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
@@ -235,12 +238,12 @@ RBB_NO_AUX:
   ADD.L #1,A4
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBB_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBB_AUX:
   CMP.L A3,A2  * E=P?
@@ -248,7 +251,7 @@ RBB_AUX:
   MOVE.L  RBB_IN_PUNT,A4
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT  *Se Inicializa I con el valor de Principio
-  RTS
+  BRA FIN_ESCCAR
 
 EA_LINEA:
   CMP #$00000000,D0
@@ -274,12 +277,12 @@ TBA_NO_AUX:
   ADD.L #1,A4
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 TBA_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 TBA_AUX:
   CMP.L A3,A2  * E=P?
@@ -287,7 +290,7 @@ TBA_AUX:
   MOVE.L  TBA_IN_PUNT,A4
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-  RTS
+  BRA FIN_ESCCAR
 
 EA_REC:
   MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
@@ -309,12 +312,12 @@ RBA_NO_AUX:
   ADD.L #1,A4
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBA_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBA_AUX:
   CMP.L A3,A2  * E=P?
@@ -322,15 +325,19 @@ RBA_AUX:
   MOVE.L  RBA_IN_PUNT,A4
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-  RTS
+  BRA FIN_ESCCAR
 
 LLENO:
     MOVE.L #$ffffffff,D0
-    RTS
+    BRA FIN_ESCCAR
+FIN_ESCCAR:
+  UNLK A6
+  RTS
 
 ********************LINEA********************
 
 LINEA:
+  LINK A6
   BTST #0,D0
   BEQ LINEA_A
 
@@ -388,7 +395,7 @@ L_BUCLE:
    BRA L_BUCLE
 L_VACIO:
   CLR.L D0 *Se pone el contador a 0
-  RTS
+  BRA F_LINEA
 FIN_LINEA:
   MOVE.B (A3)+,D1 *POP del buffer
   CMP #13,D1 *D1=13?
@@ -402,7 +409,9 @@ FIN_LINEA:
 L_RESET:
   MOVE.L A2,A3
   BRA L_BUCLE
-F_LINEA: RTS
+F_LINEA:
+  UNLK A6
+  RTS
 
 *PRINT
 PRINT:RTS
