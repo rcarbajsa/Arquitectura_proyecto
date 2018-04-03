@@ -429,7 +429,7 @@ SCAN:
   CLR.L D2
 SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
   CMP D2,D3
-  BEQ SCAN_FIN
+  BEQ SC_FIN
   ADD.B #1,D2
   BSR LEECAR
   MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
@@ -440,7 +440,10 @@ SCAN_ERROR:
   BRA SCAN_FIN
 SCAN_TAMANO:
   MOVE.L #0,D0
-SCAN_FIN:UNLK A6
+SC_FIN:
+  MOVE.L D3,D0*Devolvemos el resultado en D0
+SCAN_FIN:
+  UNLK A6
   RTS
 *PRINT
 **transmision
@@ -488,6 +491,10 @@ INICIO:
    MOVE.L #$73,D1
    BSR ESCCAR
    MOVE.L #13,D1
+   BSR ESCCAR
+   MOVE.L #$65,D1
+   BSR ESCCAR
+   MOVE.L #$73,D1
    BSR ESCCAR
    BSR SCAN
    BREAK
