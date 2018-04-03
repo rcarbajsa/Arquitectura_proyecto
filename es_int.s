@@ -422,6 +422,10 @@ SCAN:
   MOVE.L -8(A6),A1 *DIR Buffer
   MOVE.W -4(A6),D0 *Descriptor
   MOVE.W -2(A6),D2 *Tamaño
+  CMP #$0001,D0
+  BGT SCAN_ERROR
+  CMP #0000,D0
+  BLT SCAN_ERROR
   BSR LINEA
   MOVE.L D0,D3 *Número de caracteres que hay en la línea
   CMP D2,D3 *Si el número de caracteres que hay en la línea es mayor que el tamaño tiene que devolver un error
