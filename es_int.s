@@ -425,18 +425,22 @@ SCAN:
   BSR LINEA
   MOVE.L D0,D3 *Número de caracteres que hay en la línea
   CMP D2,D3 *Si el número de caracteres que hay en la línea es mayor que el tamaño tiene que devolver un error
-  BGT SCAN_ERROR
+  BGT SCAN_TAMANO
   CLR.L D2
+  CLR.L D0
 SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
   CMP D2,D3
   BEQ SCAN_FIN
   ADD.B #1,D2
   BSR LEECAR
-  MOVE.L D0,(A1)+ *Metemos el caracter en el buffer
+  MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
   BRA SCAN_BUCLE
 
 SCAN_ERROR:
   MOVE.L #$ffffffff,D0
+  BRA SCAN_FIN
+SCAN_TAMANO:
+  MOVE.L #0,D0
 SCAN_FIN:UNLK A6
   RTS
 *PRINT
@@ -454,5 +458,7 @@ RTI:RTS
 INICIO:
    BSR INIT
    MOVE.L #3216,A7
+   MOVE.L #13,D1
+   BSR ESCCAR
    BSR SCAN
    BREAK
