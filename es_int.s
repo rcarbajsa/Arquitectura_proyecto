@@ -73,12 +73,11 @@ INIT:
   LEECAR:
     LINK A6,#0 *Creación del marco de pila
     BTST    #0,D0
-    BEQ LA_LINEA
+    *BEQ LA_LINEA
 
 LB_LINEA:
      CMP #$00000001,D0
-     BEQ LB_REC
-
+     *BEQ LB_REC
 LB_TRANS:
      MOVE.L TBB_IN_PUNT,A2
      MOVE.L TBB_EXT_PUNT,A3
@@ -176,13 +175,11 @@ RBA_RESET:
 ESCCAR:
     LINK A6,#0 *Creación del marco de pila
     BTST #0,D0
-    BEQ EA_LINEA
-
+    *BEQ EA_LINEA
 EB_LINEA:
 
     CMP #$00000001,D0
-    BEQ ESC_REC_B
-
+    *BEQ ESC_REC_B
 ESC_TRANS_B:
     MOVE.L TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
     MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
@@ -339,12 +336,11 @@ FIN_ESCCAR:
 LINEA:
   LINK A6,#0
   BTST #0,D0
-  BEQ LINEA_A
+  *BEQ LINEA_A
 
 LINEA_B:
   CMP #$00000001,D0
-  BEQ LINEAB_REC
-
+  *BEQ LINEAB_REC
 LINEAB_TRANS:
   MOVE.L TBB_IN_PUNT,A2
   MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
@@ -431,7 +427,6 @@ SCAN:
   CMP D2,D3 *Si el número de caracteres que hay en la línea es mayor que el tamaño tiene que devolver un error
   BGT SCAN_TAMANO
   CLR.L D2
-  CLR.L D0
 SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
   CMP D2,D3
   BEQ SCAN_FIN
@@ -462,6 +457,36 @@ RTI:RTS
 INICIO:
    BSR INIT
    MOVE.L #3216,A7
+   MOVE.L #$64,D1
+   BSR ESCCAR
+   MOVE.L #$65,D1
+   BSR ESCCAR
+   MOVE.L #$20,D1
+   BSR ESCCAR
+   MOVE.L #$63,D1
+   BSR ESCCAR
+   MOVE.L #$6f,D1
+   BSR ESCCAR
+   MOVE.L #$6d,D1
+   BSR ESCCAR
+   MOVE.L #$70,D1
+   BSR ESCCAR
+   MOVE.L #$75,D1
+   BSR ESCCAR
+   MOVE.L #$74,D1
+   BSR ESCCAR
+   MOVE.L #$61,D1
+   BSR ESCCAR
+   MOVE.L #$64,D1
+   BSR ESCCAR
+   MOVE.L #$6f,D1
+   BSR ESCCAR
+   MOVE.L #$72,D1
+   BSR ESCCAR
+   MOVE.L #$65,D1
+   BSR ESCCAR
+   MOVE.L #$73,D1
+   BSR ESCCAR
    MOVE.L #13,D1
    BSR ESCCAR
    BSR SCAN
