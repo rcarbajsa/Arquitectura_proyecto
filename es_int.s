@@ -73,11 +73,11 @@ INIT:
   LEECAR:
     LINK A6,#0 *Creación del marco de pila
     BTST    #0,D0
-    *BEQ LA_LINEA
+    BEQ LA_LINEA
 
 LB_LINEA:
      CMP #$00000001,D0
-     *BEQ LB_REC
+     BEQ LB_REC
 LB_TRANS:
      MOVE.L TBB_IN_PUNT,A2
      MOVE.L TBB_EXT_PUNT,A3
@@ -175,11 +175,11 @@ RBA_RESET:
 ESCCAR:
     LINK A6,#0 *Creación del marco de pila
     BTST #0,D0
-    *BEQ EA_LINEA
+    BEQ EA_LINEA
 EB_LINEA:
 
     CMP #$00000001,D0
-    *BEQ ESC_REC_B
+    BEQ ESC_REC_B
 ESC_TRANS_B:
     MOVE.L TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
     MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
@@ -336,11 +336,11 @@ FIN_ESCCAR:
 LINEA:
   LINK A6,#0
   BTST #0,D0
-  *BEQ LINEA_A
+  BEQ LINEA_A
 
 LINEA_B:
   CMP #$00000001,D0
-  *BEQ LINEAB_REC
+  BEQ LINEAB_REC
 LINEAB_TRANS:
   MOVE.L TBB_IN_PUNT,A2
   MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
@@ -414,10 +414,11 @@ F_LINEA:
   *SCAN
   **recepcion
 SCAN:
-  LINK A6,#-8 *Creación marco de pila
-  MOVE.L -8(A6),A1 *DIR Buffer
-  MOVE.W -4(A6),D0 *Descriptor
-  MOVE.W -2(A6),D2 *Tamaño
+  LINK A6,#0  *Creación marco de pila
+  MOVE.L   8(A6),A1 *DIR Buffer
+  MOVE.W   12(A6),D0 *Descriptor
+  MOVE.W   14(A6),D2 *Tamaño
+  MOVE.W   D0,D4 *Guardamos el Descriptor
   CMP #$0001,D0
   BGT SCAN_ERROR
   CMP #0000,D0
@@ -431,23 +432,37 @@ SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
   CMP D2,D3
   BEQ SC_FIN
   ADD.B #1,D2
+  MOVE.W D4,D0
   BSR LEECAR
   MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
   BRA SCAN_BUCLE
-
 SCAN_ERROR:
   MOVE.L #$ffffffff,D0
   BRA SCAN_FIN
 SCAN_TAMANO:
   MOVE.L #0,D0
+  BRA SCAN_FIN
 SC_FIN:
-  MOVE.L D3,D0*Devolvemos el resultado en D0
+  MOVE.L D3,D0 *Devolvemos el resultado en D0
 SCAN_FIN:
   UNLK A6
   RTS
+
+
 *PRINT
 **transmision
-PRINT:RTS
+PRINT:
+  LINK A6,#0  *Creación marco de pila
+  MOVE.L   8(A6),A1 *DIR Buffer
+  MOVE.W   12(A6),D0 *Descriptor
+  MOVE.W   14(A6),D2 *Tamaño
+  MOVE.W   D0,D4 *Guardamos el Descriptor
+
+
+
+
+
+  RTS
 
 
 
@@ -459,42 +474,17 @@ RTI:RTS
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.L #3216,A7
-   MOVE.L #$64,D1
-   BSR ESCCAR
-   MOVE.L #$65,D1
-   BSR ESCCAR
-   MOVE.L #$20,D1
-   BSR ESCCAR
-   MOVE.L #$63,D1
-   BSR ESCCAR
-   MOVE.L #$6f,D1
-   BSR ESCCAR
-   MOVE.L #$6d,D1
-   BSR ESCCAR
-   MOVE.L #$70,D1
-   BSR ESCCAR
-   MOVE.L #$75,D1
-   BSR ESCCAR
-   MOVE.L #$74,D1
-   BSR ESCCAR
+   MOVE.L #$0001,D0
    MOVE.L #$61,D1
    BSR ESCCAR
-   MOVE.L #$64,D1
-   BSR ESCCAR
-   MOVE.L #$6f,D1
-   BSR ESCCAR
-   MOVE.L #$72,D1
-   BSR ESCCAR
-   MOVE.L #$65,D1
-   BSR ESCCAR
-   MOVE.L #$73,D1
+   MOVE.L #$62,D1
    BSR ESCCAR
    MOVE.L #13,D1
    BSR ESCCAR
-   MOVE.L #$65,D1
-   BSR ESCCAR
-   MOVE.L #$73,D1
-   BSR ESCCAR
+   MOVE.W #$0022,-(A7)
+   MOVE.W #$0001,-(A7)
+   MOVE.L #$00001388,-(A7)
    BSR SCAN
+   BSR LEECAR
+   BSR LEECAR
    BREAK
