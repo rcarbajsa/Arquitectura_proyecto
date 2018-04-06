@@ -456,12 +456,35 @@ PRINT:
   MOVE.L   8(A6),A1 *DIR Buffer
   MOVE.W   12(A6),D0 *Descriptor
   MOVE.W   14(A6),D2 *Tamaño
-  MOVE.W   D0,D4 *Guardamos el Descriptor
+  CLR.L D4 *Contador
+  CMP #$0001,D0
+  BGT PRINT_ERROR
+  BEQ PRINT_B
+  CMP #0000,D0
+  BEQ PRINT_A
+  BLT PRINT_ERROR
+PRINT_A:
+  MOVE.W #$0011,D0
+  BRA PRINT_BUCLE
+PRINT_B:
+  MOVE.W #$0010,D0
 
-
-
-
-
+PRINT_BUCLE:
+  CMP D4,D2
+  BEQ PR_FIN
+  ADD.B #1,D4 *Aumentamos Contador
+  MOVE.B (A1)+,D1
+  BSR ESCCAR
+  CMP #$ffffffff,D0
+  BEQ PR_FIN
+  BRA PRINT_BUCLE
+PRINT_ERROR:
+  MOVE.L #$ffffffff,D0
+  BRA PRINT_FIN
+PR_FIN:
+  MOVE.L D4,D0 *Devolvemos el resultado en D0
+PRINT_FIN:
+  UNLK A6
   RTS
 
 
