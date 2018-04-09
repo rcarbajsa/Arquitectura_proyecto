@@ -36,15 +36,23 @@ MR2A    EQU     $effc01       * de modo A (2 escritura)
 SRA     EQU     $effc03       * de estado A (lectura)
 CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
 CRA     EQU     $effc05       * de control A (escritura)
-TBA     EQU     $effc07       * buffer transmision A (escritura)
 RBA     EQU     $effc07       * buffer recepcion A  (lectura)
-TBB     EQU     $effc17       * buffer trasmisión B
-RBB     EQU     $effc17       * buffer recepción B
+TBA     EQU     $effc07       * buffer transmision A (escritura)
 ACR     EQU     $effc09       * de control auxiliar
 IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
 ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
 
-*INIT
+MR1B    EQU     $effc11       * de modo B (escritura)
+MR2B    EQU     $effc11       * de modo B (2 escritura)
+SRB     EQU     $effc13       * de estado B (lectura)
+CSRB    EQU     $effc13       * de seleccion de reloj B (escritura)
+CRB     EQU     $effc15       * de control B (escritura)
+RBB     EQU     $effc17       * buffer recepcion B  (lectura)
+TBB     EQU     $effc17       * buffer transmision B (escritura)
+IVR     EQU     $effc09       * de vector de interrupcion
+
+  *********************INIT**********************
+
 INIT:
 	MOVE.L #BUS_RBA,RBA_IN_PUNT
 	MOVE.L #BUS_RBA,RBA_EXT_PUNT
@@ -66,7 +74,17 @@ INIT:
 	MOVE.L #BUS_TBB,TBB_INT_PUNT
 	MOVE.L #BUS_TBB,TBB_FIN_PUNT
 	ADD.L  #1999,TBB_FIN_PUNT
-	RTS
+
+  MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
+  MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
+  MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
+  MOVE.B #%00000000,MR2A     * Eco desactivado de modo A.
+  MOVE.B #%00000000,MR2B     * Eco desactivado de modo B.
+  MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
+  MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
+  MOVE.B #%00000000,ACR     
+  MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
+  MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
 
   *********************LEECAR**********************
 
@@ -411,7 +429,7 @@ F_LINEA:
 
 
 
-  *SCAN
+********************SCAN********************
   **recepcion
 SCAN:
   LINK A6,#0  *Creación marco de pila
@@ -427,7 +445,7 @@ SCAN:
   MOVE.L D0,D3 *Número de caracteres que hay en la línea
   CMP D2,D3 *Si el número de caracteres que hay en la línea es mayor que el tamaño tiene que devolver un error
   BGT SCAN_TAMANO
-  CLR.L D2
+  CLR.L D2  *Se libera el 2 registro de Direccion
 SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
   CMP D2,D3
   BEQ SC_FIN
@@ -449,7 +467,8 @@ SCAN_FIN:
   RTS
 
 
-*PRINT
+********************PRINT********************
+
 **transmision
 PRINT:
   LINK A6,#0  *Creación marco de pila
@@ -462,7 +481,7 @@ PRINT:
   CMP #0000,D0
   BEQ PRINT_A
 PRINT_ERROR:
-  MOVE.L #$ffffffff,D0
+  MOVE.L #$ffffffff,D0 *Se retorna -1 en el registro D0
   BRA PRINT_FIN
 PRINT_A:
   MOVE.W #$0010,D0
@@ -482,12 +501,10 @@ PRINT_BUCLE:
 PR_FIN:
   MOVE.L D4,D0 *Devolvemos el resultado en D0
 PRINT_FIN:
-  UNLK A6
+  UNLK A6 *Se elimina el marco de pila
   RTS
 *RTI
 RTI:RTS
-
-*Pruebas
 
 *Programa Principal
 INICIO:
