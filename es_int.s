@@ -54,6 +54,7 @@ IVR     EQU     $effc09       * de vector de interrupcion
   *********************INIT**********************
 
 INIT:
+  LINK A6,#0
 	MOVE.L #BUS_RBA,RBA_IN_PUNT
 	MOVE.L #BUS_RBA,RBA_EXT_PUNT
 	MOVE.L #BUS_RBA,RBA_INT_PUNT
@@ -76,16 +77,22 @@ INIT:
 	ADD.L  #1999,TBB_FIN_PUNT
 
   MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
+  MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
   MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
   MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
   MOVE.B #%00000000,MR2A     * Eco desactivado de modo A.
   MOVE.B #%00000000,MR2B     * Eco desactivado de modo B.
   MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
   MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
-  MOVE.B #%00000000,ACR     
+  MOVE.B #%00000000,ACR
   MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
   MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
-
+  MOVE.L #$040,IVR           * Vector de Interrrupcion nº 40
+*  MOVE.L #100,               * Actualiza la tabla de vectores
+  MOVE.B #%00000000,ISR      *
+  MOVE.B #%00000000,IMR      *
+  UNLK A6
+  RTS
   *********************LEECAR**********************
 
   LEECAR:
