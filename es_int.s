@@ -88,9 +88,9 @@ INIT:
   MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
   MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
   MOVE.L #$040,IVR           * Vector de Interrrupcion nº 40
-*  MOVE.L #100,               * Actualiza la tabla de vectores
-  MOVE.B #%00000000,ISR      *
-  MOVE.B #%00000000,IMR      *
+  MOVE.L #256,VBR            * Actualiza la tabla de vectores
+  MOVE.B #%00000000,ISR      * Inicializado el Vector de peticon de interrupcion ISR
+  MOVE.B #%00000000,IMR      * Inicializada la mascara del vector de Interrupcion IMRs
   UNLK A6
   RTS
   *********************LEECAR**********************
