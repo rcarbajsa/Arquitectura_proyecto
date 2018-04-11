@@ -28,6 +28,8 @@ TBB_FIN_PUNT:DC.L 0
 TBB_EXT_PUNT:DC.L 0
 TBB_INT_PUNT:DC.L 0
 
+*Flag
+FLAG_PRINT: DC.L 0
 
 * Definicion de equivalencias
 
@@ -54,7 +56,9 @@ IVR     EQU     $effc09       * de vector de interrupcion
   *********************INIT**********************
 
 INIT:
-  LINK A6,#0
+
+*********************BUFFERS**********************
+
 	MOVE.L #BUS_RBA,RBA_IN_PUNT
 	MOVE.L #BUS_RBA,RBA_EXT_PUNT
 	MOVE.L #BUS_RBA,RBA_INT_PUNT
@@ -76,6 +80,8 @@ INIT:
 	MOVE.L #BUS_TBB,TBB_FIN_PUNT
 	ADD.L  #1999,TBB_FIN_PUNT
 
+  *********************DECLARACIONES INIT**********************
+
   MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
   MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
   MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
@@ -88,11 +94,9 @@ INIT:
   MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
   MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
   MOVE.L #$040,IVR           * Vector de Interrrupcion nº 40
-  MOVE.L #256,VBR            * Actualiza la tabla de vectores
-  MOVE.B #%00000000,ISR      * Inicializado el Vector de peticon de interrupcion ISR
-  MOVE.B #%00000000,IMR      * Inicializada la mascara del vector de Interrupcion IMRs
-  UNLK A6
-  RTS
+  MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
+  MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
+  RTS *Retorno
   *********************LEECAR**********************
 
   LEECAR:
@@ -500,9 +504,17 @@ PRINT_BUCLE:
   BEQ PR_FIN
   ADD.B #1,D4 *Aumentamos Contador
   MOVE.B (A1)+,D1
-  BSR ESCCAR
+  BSR ESCCAR	git push --set-upstream origin feature/print
+
+  CMP #13,D1
+  BEQ PRINT_FLAG
   CMP #$ffffffff,D0
   BEQ PR_FIN
+  BRA PRINT_BUCLE
+PRINT_FLAG:
+  CLR.L D5
+  MOVE.B #1,D5
+  MOVE.B D5,FLAG_PRINT
   BRA PRINT_BUCLE
 
 PR_FIN:
@@ -511,22 +523,26 @@ PRINT_FIN:
   UNLK A6 *Se elimina el marco de pila
   RTS
 *RTI
-RTI:RTS
+RTI:
+  MOVE.B FLAG_PRINT,D2 *Comprobamos si print ha activado las interrupciones
+  RTS
 
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.L #$0011,D0
-   MOVE.L #$70,D1
-   BSR ESCCAR
-   MOVE.L #$65,D1
-   BSR ESCCAR
-   MOVE.L #$0001,D0
-   MOVE.W #$0000,-(A7)
+   MOVE.W #$0022,-(A7)
    MOVE.W #$0000,-(A7)
    MOVE.L #$00001388,-(A7)
    MOVE.L #$00001388,A4
    MOVE.B #$69,(A4)+
-   MOVE.B #$6E,(A4)+
+   MOVE.B #13,(A4)+
+   MOVE.B #$69,(A4)+
+   MOVE.B #$69,(A4)+
+   MOVE.B #$69,(A4)+
+   MOVE.B #$69,(A4)+
+   MOVE.B #$69,(A4)+
+   MOVE.B #$69,(A4)+
+   MOVE.B #$69,(A4)+
    BSR PRINT
+   BSR RTI
    BREAK
