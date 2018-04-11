@@ -51,7 +51,7 @@ TBB     EQU     $effc17       * buffer transmision B (escritura)
 IVR     EQU     $effc09       * de vector de interrupcion
 
 *********************INIT**********************
-+
+
 INIT:
 
 *********************BUFFERS**********************
@@ -531,19 +531,17 @@ RTI:
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.W #$0009,-(A7)
-   MOVE.W #$0001,-(A7)
+   MOVE.W #$0000,-(A7)
+   MOVE.W #$0000,-(A7)
    MOVE.L #$00001388,-(A7)
    MOVE.L #$00001388,A4
    MOVE.B #$69,(A4)+
+   MOVE.B #$6e,(A4)+
+   MOVE.L #$00000011,D0
+   MOVE.B #$70,D1
+   BSR ESCCAR
+   MOVE.B #$65,D1
+   BSR ESCCAR
    MOVE.B #13,(A4)+
-   MOVE.B #$69,(A4)+
-   MOVE.B #$69,(A4)+
-   MOVE.B #$69,(A4)+
-   MOVE.B #$69,(A4)+
-   MOVE.B #$69,(A4)+
-   MOVE.B #$69,(A4)+
-   MOVE.B #$69,(A4)+
    BSR PRINT
-   BSR RTI
    BREAK
