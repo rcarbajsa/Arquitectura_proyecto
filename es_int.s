@@ -28,9 +28,6 @@ TBB_FIN_PUNT:DC.L 0
 TBB_EXT_PUNT:DC.L 0
 TBB_INT_PUNT:DC.L 0
 
-*Flag
-FLAG_PRINT: DC.L 0
-
 * Definicion de equivalencias
 
 MR1A    EQU     $effc01       * de modo A (escritura)
@@ -53,7 +50,7 @@ RBB     EQU     $effc17       * buffer recepcion B  (lectura)
 TBB     EQU     $effc17       * buffer transmision B (escritura)
 IVR     EQU     $effc09       * de vector de interrupcion
 
-  *********************INIT**********************
+*********************INIT**********************
 
 INIT:
 
@@ -97,6 +94,7 @@ INIT:
   MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
   MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
   RTS *Retorno
+
   *********************LEECAR**********************
 
   LEECAR:
@@ -429,7 +427,7 @@ FIN_LINEA:
   CMP A4,A5
   SUB.L #1,A5
   BNE L_RESET
-  CLR.L D0 *D1!=13, no es una linea, por tanto contador=0
+  CLR.L D0 *D1!=13, no es una linea, por tanto contador = 0
   BRA F_LINEA
 L_RESET:
   MOVE.L A2,A3
@@ -504,7 +502,7 @@ PRINT_BUCLE:
   BEQ PR_FIN
   ADD.B #1,D4 *Aumentamos Contador
   MOVE.B (A1)+,D1
-  BSR ESCCAR	git push --set-upstream origin feature/print
+  BSR ESCCAR
 
   CMP #13,D1
   BEQ PRINT_FLAG
@@ -513,9 +511,12 @@ PRINT_BUCLE:
   BRA PRINT_BUCLE
 
 PRINT_FLAG:
-  CLR.L D5
-  MOVE.B #1,D5
-  MOVE.B D5,FLAG_PRINT
+  CMP #$0010,D0
+  BEQ FLAGA
+  MOVE.B #4,IMR * Pone el bit 4 de IMR a 1
+  BRA PRINT_BUCLE
+FLAGA:
+  MOVE.B #1,IMR * Pone el bit 0 de IMR a 1
   BRA PRINT_BUCLE
 
 PR_FIN:
@@ -525,8 +526,7 @@ PRINT_FIN:
   RTS
 *RTI
 RTI:
-  MOVE.B FLAG_PRINT,D2 *Comprobamos si print ha activado las interrupciones
-  RTS
+    RTS
 
 *Programa Principal
 INICIO:
