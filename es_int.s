@@ -93,7 +93,7 @@ INIT:
   MOVE.B #%00000000,ACR
   MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
   MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
-  MOVE.L #$040,IVR           * Vector de Interrrupcion nº 40
+  MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
   MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
   MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
   RTS *Retorno
@@ -511,6 +511,7 @@ PRINT_BUCLE:
   CMP #$ffffffff,D0
   BEQ PR_FIN
   BRA PRINT_BUCLE
+
 PRINT_FLAG:
   CLR.L D5
   MOVE.B #1,D5
