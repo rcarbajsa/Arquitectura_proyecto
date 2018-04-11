@@ -51,7 +51,7 @@ TBB     EQU     $effc17       * buffer transmision B (escritura)
 IVR     EQU     $effc09       * de vector de interrupcion
 
 *********************INIT**********************
-
++
 INIT:
 
 *********************BUFFERS**********************
@@ -513,10 +513,10 @@ PRINT_BUCLE:
 PRINT_FLAG:
   CMP #$0010,D0
   BEQ FLAGA
-  MOVE.B #4,IMR * Pone el bit 4 de IMR a 1
+  MOVE.B #%00110000,IMR * Pone el bit 4 de IMR a 1
   BRA PRINT_BUCLE
 FLAGA:
-  MOVE.B #1,IMR * Pone el bit 0 de IMR a 1
+  MOVE.B #%00000011,IMR * Pone el bit 0 de IMR a 1
   BRA PRINT_BUCLE
 
 PR_FIN:
@@ -526,13 +526,13 @@ PRINT_FIN:
   RTS
 *RTI
 RTI:
-    RTS
+  RTS
 
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.W #$0022,-(A7)
-   MOVE.W #$0000,-(A7)
+   MOVE.W #$0009,-(A7)
+   MOVE.W #$0001,-(A7)
    MOVE.L #$00001388,-(A7)
    MOVE.L #$00001388,A4
    MOVE.B #$69,(A4)+
