@@ -1,552 +1,632 @@
 00000000                                     1  * Inicializa el SP y el PC
 00000000                                     2          ORG     $0
 00000000  00008000                           3          DC.L    $8000           *Pila
-00000004  000028A0                           4          DC.L    INICIO          *PC
+00000004  00003106                           4          DC.L    INICIO          *PC
 00000400                                     5          ORG     $400
 00000400                                     6  
-00000400                                     7  	*Buffers
-00000400                                     8  BUS_RBA:DS.B 2002
-00000BD2                                     9  BUS_RBB:DS.B 2002
-000013A4                                    10  BUS_TBA:DS.B 2002
-00001B76                                    11  BUS_TBB:DS.B 2002
-00002348                                    12  
-00002348                                    13  	*Punteros
-00002348  00000000                          14  RBA_IN_PUNT: DC.L 0
-0000234C  00000000                          15  RBA_FIN_PUNT:DC.L 0
-00002350  00000000                          16  RBA_EXT_PUNT:DC.L 0
-00002354  00000000                          17  RBA_INT_PUNT:DC.L 0
-00002358  00000000                          18  RBB_IN_PUNT: DC.L 0
-0000235C  00000000                          19  RBB_FIN_PUNT:DC.L 0
-00002360  00000000                          20  RBB_EXT_PUNT:DC.L 0
-00002364  00000000                          21  RBB_INT_PUNT:DC.L 0
-00002368  00000000                          22  TBA_IN_PUNT: DC.L 0
-0000236C  00000000                          23  TBA_FIN_PUNT:DC.L 0
-00002370  00000000                          24  TBA_EXT_PUNT:DC.L 0
-00002374  00000000                          25  TBA_INT_PUNT:DC.L 0
-00002378  00000000                          26  TBB_IN_PUNT: DC.L 0
-0000237C  00000000                          27  TBB_FIN_PUNT:DC.L 0
-00002380  00000000                          28  TBB_EXT_PUNT:DC.L 0
-00002384  00000000                          29  TBB_INT_PUNT:DC.L 0
-00002388                                    30  
-00002388                                    31  * Definicion de equivalencias
+00000400                                     7  *************** Buffers  ****************
+00000400                                     8  
+00000400                                     9  BUS_RBA:DS.B 2002
+00000BD2                                    10  BUS_RBB:DS.B 2002
+000013A4                                    11  BUS_TBA:DS.B 2002
+00001B76                                    12  BUS_TBB:DS.B 2002
+00002348                                    13  
+00002348                                    14  *************** Punteros ****************
+00002348                                    15  
+00002348  00000000                          16  RBA_IN_PUNT: DC.L 0
+0000234C  00000000                          17  RBA_FIN_PUNT:DC.L 0
+00002350  00000000                          18  RBA_EXT_PUNT:DC.L 0
+00002354  00000000                          19  RBA_INT_PUNT:DC.L 0
+00002358  00000000                          20  RBB_IN_PUNT: DC.L 0
+0000235C  00000000                          21  RBB_FIN_PUNT:DC.L 0
+00002360  00000000                          22  RBB_EXT_PUNT:DC.L 0
+00002364  00000000                          23  RBB_INT_PUNT:DC.L 0
+00002368  00000000                          24  TBA_IN_PUNT: DC.L 0
+0000236C  00000000                          25  TBA_FIN_PUNT:DC.L 0
+00002370  00000000                          26  TBA_EXT_PUNT:DC.L 0
+00002374  00000000                          27  TBA_INT_PUNT:DC.L 0
+00002378  00000000                          28  TBB_IN_PUNT: DC.L 0
+0000237C  00000000                          29  TBB_FIN_PUNT:DC.L 0
+00002380  00000000                          30  TBB_EXT_PUNT:DC.L 0
+00002384  00000000                          31  TBB_INT_PUNT:DC.L 0
 00002388                                    32  
-00002388  =00EFFC01                         33  MR1A    EQU     $effc01       * de modo A (escritura)
-00002388  =00EFFC01                         34  MR2A    EQU     $effc01       * de modo A (2 escritura)
-00002388  =00EFFC03                         35  SRA     EQU     $effc03       * de estado A (lectura)
-00002388  =00EFFC03                         36  CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
-00002388  =00EFFC05                         37  CRA     EQU     $effc05       * de control A (escritura)
-00002388  =00EFFC07                         38  RBA     EQU     $effc07       * buffer recepcion A  (lectura)
-00002388  =00EFFC07                         39  TBA     EQU     $effc07       * buffer transmision A (escritura)
-00002388  =00EFFC09                         40  ACR     EQU     $effc09       * de control auxiliar
-00002388  =00EFFC0B                         41  IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
-00002388  =00EFFC0B                         42  ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
-00002388                                    43  
-00002388  =00EFFC11                         44  MR1B    EQU     $effc11       * de modo B (escritura)
-00002388  =00EFFC11                         45  MR2B    EQU     $effc11       * de modo B (2 escritura)
-00002388  =00EFFC13                         46  SRB     EQU     $effc13       * de estado B (lectura)
-00002388  =00EFFC13                         47  CSRB    EQU     $effc13       * de seleccion de reloj B (escritura)
-00002388  =00EFFC15                         48  CRB     EQU     $effc15       * de control B (escritura)
-00002388  =00EFFC17                         49  RBB     EQU     $effc17       * buffer recepcion B  (lectura)
-00002388  =00EFFC17                         50  TBB     EQU     $effc17       * buffer transmision B (escritura)
-00002388  =00EFFC09                         51  IVR     EQU     $effc09       * de vector de interrupcion
-00002388                                    52  
-00002388                                    53  *********************INIT**********************
-00002388                                    54  
-00002388                                    55  INIT:
-00002388                                    56  
-00002388                                    57  *********************BUFFERS**********************
-00002388                                    58  
-00002388  21FC 00000400 2348                59  	MOVE.L #BUS_RBA,RBA_IN_PUNT
-00002390  21FC 00000400 2350                60  	MOVE.L #BUS_RBA,RBA_EXT_PUNT
-00002398  21FC 00000400 2354                61  	MOVE.L #BUS_RBA,RBA_INT_PUNT
-000023A0  21FC 00000400 234C                62  	MOVE.L #BUS_RBA,RBA_FIN_PUNT
-000023A8  06B8 000007CF 234C                63  	ADD.L  #1999,RBA_FIN_PUNT
-000023B0  21FC 00000BD2 2358                64  	MOVE.L #BUS_RBB,RBB_IN_PUNT
-000023B8  21FC 00000BD2 2360                65  	MOVE.L #BUS_RBB,RBB_EXT_PUNT
-000023C0  21FC 00000BD2 2364                66  	MOVE.L #BUS_RBB,RBB_INT_PUNT
-000023C8  21FC 00000BD2 235C                67  	MOVE.L #BUS_RBB,RBB_FIN_PUNT
-000023D0  06B8 000007CF 235C                68  	ADD.L  #1999,RBB_FIN_PUNT
-000023D8  21FC 000013A4 2368                69  	MOVE.L #BUS_TBA,TBA_IN_PUNT
-000023E0  21FC 000013A4 2370                70  	MOVE.L #BUS_TBA,TBA_EXT_PUNT
-000023E8  21FC 000013A4 2374                71  	MOVE.L #BUS_TBA,TBA_INT_PUNT
-000023F0  21FC 000013A4 236C                72  	MOVE.L #BUS_TBA,TBA_FIN_PUNT
-000023F8  06B8 000007CF 236C                73  	ADD.L  #1999,TBA_FIN_PUNT
-00002400  21FC 00001B76 2378                74  	MOVE.L #BUS_TBB,TBB_IN_PUNT
-00002408  21FC 00001B76 2380                75  	MOVE.L #BUS_TBB,TBB_EXT_PUNT
-00002410  21FC 00001B76 2384                76  	MOVE.L #BUS_TBB,TBB_INT_PUNT
-00002418  21FC 00001B76 237C                77  	MOVE.L #BUS_TBB,TBB_FIN_PUNT
-00002420  06B8 000007CF 237C                78  	ADD.L  #1999,TBB_FIN_PUNT
-00002428                                    79  
-00002428                                    80    *********************DECLARACIONES INIT**********************
-00002428                                    81  
-00002428  13FC 0010 00EFFC05                82    MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
-00002430  13FC 0010 00EFFC15                83    MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
-00002438  13FC 0003 00EFFC11                84    MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
-00002440  13FC 0003 00EFFC01                85    MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
-00002448  13FC 0000 00EFFC01                86    MOVE.B #%00000000,MR2A     * Eco desactivado de modo A.
-00002450  13FC 0000 00EFFC11                87    MOVE.B #%00000000,MR2B     * Eco desactivado de modo B.
-00002458  13FC 00CC 00EFFC03                88    MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
-00002460  13FC 00CC 00EFFC13                89    MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
-00002468  13FC 0000 00EFFC09                90    MOVE.B #%00000000,ACR
-00002470  13FC 0005 00EFFC05                91    MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
-00002478  13FC 0005 00EFFC15                92    MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
-00002480  13FC 0040 00EFFC09                93    MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
-00002488  13FC 0022 00EFFC0B                94    MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
-00002490  21FC 0000289E 0100                95    MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
-00002498  4E75                              96    RTS *Retorno
-0000249A                                    97  
-0000249A                                    98    *********************LEECAR**********************
-0000249A                                    99  
-0000249A                                   100    LEECAR:
-0000249A  4E56 0000                        101      LINK A6,#0 *Creación del marco de pila
-0000249E  0800 0000                        102      BTST    #0,D0
-000024A2  6700 007E                        103      BEQ LA_LINEA
-000024A6                                   104  
-000024A6                                   105  LB_LINEA:
-000024A6  B07C 0001                        106       CMP #$00000001,D0
-000024AA  6700 003C                        107       BEQ LB_REC
-000024AE                                   108  LB_TRANS:
-000024AE  2478 2378                        109       MOVE.L TBB_IN_PUNT,A2
-000024B2  2678 2380                        110       MOVE.L TBB_EXT_PUNT,A3
-000024B6  2878 2384                        111       MOVE.L TBB_INT_PUNT,A4
-000024BA  2A78 237C                        112       MOVE.L TBB_FIN_PUNT,A5
-000024BE  B8CB                             113       CMP  A3,A4    * E=I?
-000024C0  6700 00DC                        114       BEQ VACIO     * E= I, entonces buffer vacio
-000024C4  528D                             115       ADD.L #1,A5
-000024C6  BACB                             116       CMP A3,A5     * E = F+1?
-000024C8  538D                             117       SUB.L #1,A5  *Se restablece F a sus posicion original
-000024CA  6700 000C                        118       BEQ TBB_RESET
-000024CE  101B                             119       MOVE.B  (A3)+,D0
-000024D0  21CB 2380                        120       MOVE.L  A3,TBB_EXT_PUNT
-000024D4  6000 00CA                        121       BRA FIN_LEECAR
-000024D8                                   122    TBB_RESET:
-000024D8  528C                             123       ADD.L #1,A4
-000024DA  101A                             124       MOVE.B (A2)+,D0
-000024DC  21CC 2384                        125       MOVE.L A4,TBB_INT_PUNT
-000024E0  21CA 2380                        126       MOVE.L A2,TBB_EXT_PUNT
-000024E4  6000 00BA                        127       BRA FIN_LEECAR
-000024E8                                   128  
-000024E8                                   129  LB_REC:
-000024E8  2478 2358                        130      MOVE.L RBB_IN_PUNT,A2
-000024EC  2678 2360                        131      MOVE.L RBB_EXT_PUNT,A3
-000024F0  2878 2364                        132      MOVE.L RBB_INT_PUNT,A4
-000024F4  2A78 235C                        133      MOVE.L RBB_FIN_PUNT,A5
-000024F8  B8CB                             134      CMP  A3,A4    * E=I?
-000024FA  6700 00A2                        135      BEQ VACIO     * E= I, entonces buffer vacio
-000024FE  528D                             136      ADD.L #1,A5
-00002500  BACB                             137      CMP A3,A5     * E = F+1?
-00002502  538D                             138      SUB.L #1,A5  *Se restablece F a sus posicion original
-00002504  6700 000C                        139      BEQ RBB_RESET
-00002508  101B                             140      MOVE.B  (A3)+,D0
-0000250A  21CB 2360                        141      MOVE.L  A3,RBB_EXT_PUNT
-0000250E  6000 0090                        142      BRA FIN_LEECAR
-00002512                                   143  RBB_RESET:
-00002512  528C                             144      ADD.L #1,A4
-00002514  101A                             145      MOVE.B (A2)+,D0
-00002516  21CC 2364                        146      MOVE.L A4,RBB_INT_PUNT
-0000251A  21CA 2360                        147      MOVE.L A2,RBB_EXT_PUNT
-0000251E  6000 0080                        148      BRA FIN_LEECAR
-00002522                                   149  LA_LINEA:
-00002522  B07C 0000                        150      CMP #$00000000,D0
-00002526  6700 003C                        151      BEQ LA_REC
-0000252A                                   152  
-0000252A                                   153  LA_TRANS:
-0000252A  2478 2368                        154      MOVE.L TBA_IN_PUNT,A2
-0000252E  2678 2370                        155      MOVE.L TBA_EXT_PUNT,A3
-00002532  2878 2374                        156      MOVE.L TBA_INT_PUNT,A4
-00002536  2A78 236C                        157      MOVE.L TBA_FIN_PUNT,A5
-0000253A  B8CB                             158      CMP  A3,A4    * E=I?
-0000253C  6700 0060                        159      BEQ VACIO     * E= I, entonces buffer vacio
-00002540  528D                             160      ADD.L #1,A5
-00002542  BACB                             161      CMP A3,A5     * E = F+1?
-00002544  538D                             162      SUB.L #1,A5  *Se restablece F a sus posicion original
-00002546  6700 000C                        163      BEQ TBA_RESET
-0000254A  101B                             164      MOVE.B  (A3)+,D0
-0000254C  21CB 2370                        165      MOVE.L  A3,TBA_EXT_PUNT
-00002550  6000 004E                        166      BRA FIN_LEECAR
-00002554                                   167  TBA_RESET:
-00002554  528C                             168      ADD.L #1,A4
-00002556  101A                             169      MOVE.B (A2)+,D0
-00002558  21CC 2374                        170      MOVE.L A4,TBA_INT_PUNT
-0000255C  21CA 2370                        171      MOVE.L A2,TBA_EXT_PUNT
-00002560  6000 003E                        172      BRA FIN_LEECAR
-00002564                                   173  LA_REC:
-00002564  2478 2348                        174      MOVE.L RBA_IN_PUNT,A2
-00002568  2678 2350                        175      MOVE.L RBA_EXT_PUNT,A3
-0000256C  2878 2354                        176      MOVE.L RBA_INT_PUNT,A4
-00002570  2A78 234C                        177      MOVE.L RBA_FIN_PUNT,A5
-00002574  B8CB                             178      CMP  A3,A4    * E=I?
-00002576  6700 0026                        179      BEQ VACIO     * E= I, entonces buffer vacio
-0000257A  528D                             180      ADD.L #1,A5
-0000257C  BACB                             181      CMP A3,A5     * E = F+1?
-0000257E  538D                             182      SUB.L #1,A5  *Se restablece F a sus posicion original
-00002580  6700 000C                        183      BEQ RBA_RESET
-00002584  101B                             184      MOVE.B  (A3)+,D0
-00002586  21CB 2350                        185      MOVE.L  A3,RBA_EXT_PUNT
-0000258A  6000 0014                        186      BRA FIN_LEECAR
-0000258E                                   187  
-0000258E                                   188  RBA_RESET:
-0000258E  528C                             189      ADD.L #1,A4
-00002590  101A                             190      MOVE.B (A2)+,D0
-00002592  21CC 2354                        191      MOVE.L A4,RBA_INT_PUNT
-00002596  21CA 2350                        192      MOVE.L A2,RBA_EXT_PUNT
-0000259A  6000 0004                        193      BRA FIN_LEECAR
-0000259E                                   194  
-0000259E                                   195    VACIO:
-0000259E  70FF                             196      MOVE.L #$ffffffff,D0
-000025A0                                   197    FIN_LEECAR:
-000025A0  4E5E                             198      UNLK A6 *Destrucción del marco de pila
-000025A2  4E75                             199      RTS
-000025A4                                   200  
-000025A4                                   201  ********************ESCCAR********************
-000025A4                                   202  ESCCAR:
-000025A4  4E56 0000                        203      LINK A6,#0 *Creación del marco de pila
-000025A8  0800 0000                        204      BTST #0,D0
-000025AC  6700 00B2                        205      BEQ EA_LINEA
-000025B0                                   206  EB_LINEA:
-000025B0                                   207  
-000025B0  B07C 0001                        208      CMP #$00000001,D0
-000025B4  6700 0056                        209      BEQ ESC_REC_B
-000025B8                                   210  ESC_TRANS_B:
-000025B8  2478 2378                        211      MOVE.L TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
-000025BC  2678 2380                        212      MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
-000025C0  2878 2384                        213      MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
-000025C4  2A78 237C                        214      MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-000025C8  538B                             215      SUB.L #1,A3  *Se le resta 1 a E
-000025CA  B9CB                             216      CMP.L A3,A4 * I=E-1?
-000025CC  528B                             217      ADD.L #1,A3  *Se restablece el valor de E
-000025CE  6700 0140                        218      BEQ LLENO
-000025D2  528D                             219      ADD.L #1,A5   *Se le añade 1 al puntero de fin
-000025D4  BBCC                             220      CMP.L A4,A5   *Se comparan los punteros I y F+1
-000025D6  538D                             221      SUB.L #1,A5   *Se restablece el valor del puntero FIn
-000025D8  6700 001E                        222      BEQ  TBB_AUX      *Está en la posicion auxiliar
-000025DC                                   223  
-000025DC                                   224  TBB_NO_AUX:
-000025DC  B9CB                             225      CMP.L A3,A4  *Se comparan I y E
-000025DE  6C00 000E                        226      BGE TBB_MAYOR
-000025E2  528C                             227      ADD.L #1,A4
-000025E4  1881                             228      MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
-000025E6  21CC 2384                        229      MOVE.L  A4,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
-000025EA  6000 012A                        230      BRA FIN_ESCCAR
-000025EE                                   231  
-000025EE                                   232  TBB_MAYOR:
-000025EE  18C1                             233      MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
-000025F0  21CC 2384                        234      MOVE.L  A4,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
-000025F4  6000 0120                        235      BRA FIN_ESCCAR
-000025F8                                   236  
-000025F8                                   237  TBB_AUX:
-000025F8  B5CB                             238      CMP.L A3,A2  * E=P?
-000025FA  6700 0114                        239      BEQ   LLENO
-000025FE  2878 2378                        240      MOVE.L  TBB_IN_PUNT,A4
-00002602  1881                             241      MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
-00002604  21CC 2384                        242      MOVE.L  A4,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
-00002608  6000 010C                        243      BRA FIN_ESCCAR
-0000260C                                   244  
-0000260C                                   245  ESC_REC_B:
-0000260C  2878 2364                        246    MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
-00002610  2A78 235C                        247    MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-00002614  2678 2360                        248    MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
-00002618  2478 2358                        249    MOVE.L RBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
-0000261C  538B                             250    SUB.L #1,A3  *Se le resta 1 a E
-0000261E  B9CB                             251    CMP.L A3,A4 * I=E-1?
-00002620  528B                             252    ADD.L #1,A3  *Se restablece el valor de E
-00002622  6700 00EC                        253    BEQ LLENO
-00002626  528D                             254    ADD.L #1,A5   *Se le añade 1 al puntero de fin
-00002628  BBCC                             255    CMP.L A4,A5   *Se comparan los punteros I y F+1
-0000262A  538D                             256    SUB.L #1,A5   *Se restablece el valor del puntero FIn
-0000262C  6700 001E                        257    BEQ  RBB_AUX      *Está en la posicion auxiliar
-00002630                                   258  
-00002630                                   259  RBB_NO_AUX:
-00002630  B9CB                             260    CMP.L A3,A4  *Se comparan I y E
-00002632  6C00 000E                        261    BGE RBB_MAYOR
-00002636  528C                             262    ADD.L #1,A4
-00002638  1881                             263    MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
-0000263A  21CC 2364                        264    MOVE.L  A4,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
-0000263E  6000 00D6                        265    BRA FIN_ESCCAR
-00002642                                   266  
-00002642                                   267  RBB_MAYOR:
-00002642  18C1                             268    MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
-00002644  21CC 2364                        269    MOVE.L  A4,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
-00002648  6000 00CC                        270    BRA FIN_ESCCAR
-0000264C                                   271  
-0000264C                                   272  RBB_AUX:
-0000264C  B5CB                             273    CMP.L A3,A2  * E=P?
-0000264E  6700 00C0                        274    BEQ   LLENO
-00002652  2878 2358                        275    MOVE.L  RBB_IN_PUNT,A4
-00002656  1881                             276    MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
-00002658  21CC 2364                        277    MOVE.L  A4,RBB_INT_PUNT  *Se Inicializa I con el valor de Principio
-0000265C  6000 00B8                        278    BRA FIN_ESCCAR
-00002660                                   279  
-00002660                                   280  EA_LINEA:
-00002660  B07C 0000                        281    CMP #$00000000,D0
-00002664  6700 0056                        282    BEQ EA_REC
-00002668                                   283  
-00002668                                   284  EA_TRANS:
-00002668  2878 2374                        285    MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
-0000266C  2A78 236C                        286    MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-00002670  2678 2370                        287    MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
-00002674  2478 2368                        288    MOVE.L TBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
-00002678  538B                             289    SUB.L #1,A3  *Se le resta 1 a E
-0000267A  B9CB                             290    CMP.L A3,A4 * I=E-1?
-0000267C  528B                             291    ADD.L #1,A3  *Se restablece el valor de E
-0000267E  6700 0090                        292    BEQ LLENO
-00002682  528D                             293    ADD.L #1,A5   *Se le añade 1 al puntero de fin
-00002684  BBCC                             294    CMP.L A4,A5   *Se comparan los punteros I y F+1
-00002686  538D                             295    SUB.L #1,A5   *Se restablece el valor del puntero FIn
-00002688  6700 001E                        296    BEQ  TBA_AUX      *Está en la posicion auxiliar
-0000268C                                   297  
-0000268C                                   298  TBA_NO_AUX:
-0000268C  B9CB                             299    CMP.L A3,A4  *Se comparan I y E
-0000268E  6C00 000E                        300    BGE TBA_MAYOR
-00002692  528C                             301    ADD.L #1,A4
-00002694  1881                             302    MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
-00002696  21CC 2374                        303    MOVE.L  A4,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
-0000269A  6000 007A                        304    BRA FIN_ESCCAR
-0000269E                                   305  
-0000269E                                   306  TBA_MAYOR:
-0000269E  18C1                             307    MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
-000026A0  21CC 2374                        308    MOVE.L  A4,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
-000026A4  6000 0070                        309    BRA FIN_ESCCAR
-000026A8                                   310  
-000026A8                                   311  TBA_AUX:
-000026A8  B5CB                             312    CMP.L A3,A2  * E=P?
-000026AA  6700 0064                        313    BEQ   LLENO
-000026AE  2878 2368                        314    MOVE.L  TBA_IN_PUNT,A4
-000026B2  1881                             315    MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
-000026B4  21CC 2374                        316    MOVE.L  A4,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-000026B8  6000 005C                        317    BRA FIN_ESCCAR
-000026BC                                   318  
-000026BC                                   319  EA_REC:
-000026BC  2878 2354                        320    MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
-000026C0  2A78 234C                        321    MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-000026C4  2678 2350                        322    MOVE.L RBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
-000026C8  2478 2348                        323    MOVE.L RBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
-000026CC  538B                             324    SUB.L #1,A3  *Se le resta 1 a E
-000026CE  B9CB                             325    CMP.L A3,A4 * I=E-1?
-000026D0  528B                             326    ADD.L #1,A3  *Se restablece el valor de E
-000026D2  6700 003C                        327    BEQ LLENO
-000026D6  528D                             328    ADD.L #1,A5   *Se le añade 1 al puntero de fin
-000026D8  BBCC                             329    CMP.L A4,A5   *Se comparan los punteros I y F+1
-000026DA  538D                             330    SUB.L #1,A5   *Se restablece el valor del puntero FIn
-000026DC  6700 001E                        331    BEQ  RBA_AUX      *Está en la posicion auxiliar
-000026E0                                   332  
-000026E0                                   333  RBA_NO_AUX:
-000026E0  B9CB                             334    CMP.L A3,A4  *Se comparan I y E
-000026E2  6C00 000E                        335    BGE RBA_MAYOR
-000026E6  528C                             336    ADD.L #1,A4
-000026E8  1881                             337    MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
-000026EA  21CC 2354                        338    MOVE.L  A4,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
-000026EE  6000 0026                        339    BRA FIN_ESCCAR
-000026F2                                   340  
-000026F2                                   341  RBA_MAYOR:
-000026F2  18C1                             342    MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
-000026F4  21CC 2354                        343    MOVE.L  A4,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
-000026F8  6000 001C                        344    BRA FIN_ESCCAR
-000026FC                                   345  
-000026FC                                   346  RBA_AUX:
-000026FC  B5CB                             347    CMP.L A3,A2  * E=P?
-000026FE  6700 0010                        348    BEQ   LLENO
-00002702  2878 2348                        349    MOVE.L  RBA_IN_PUNT,A4
-00002706  1881                             350    MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
-00002708  21CC 2354                        351    MOVE.L  A4,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-0000270C  6000 0008                        352    BRA FIN_ESCCAR
-00002710                                   353  
-00002710                                   354  LLENO:
-00002710  70FF                             355      MOVE.L #$ffffffff,D0
-00002712  6000 0002                        356      BRA FIN_ESCCAR
-00002716                                   357  FIN_ESCCAR:
-00002716  4E5E                             358    UNLK A6
-00002718  4E75                             359    RTS
-0000271A                                   360  
-0000271A                                   361  ********************LINEA********************
-0000271A                                   362  
-0000271A                                   363  LINEA:
-0000271A  4E56 0000                        364    LINK A6,#0
-0000271E  0800 0000                        365    BTST #0,D0
-00002722  6700 0036                        366    BEQ LINEA_A
-00002726                                   367  
-00002726                                   368  LINEA_B:
-00002726  B07C 0001                        369    CMP #$00000001,D0
-0000272A  6700 0018                        370    BEQ LINEAB_REC
-0000272E                                   371  LINEAB_TRANS:
-0000272E  2478 2378                        372    MOVE.L TBB_IN_PUNT,A2
-00002732  2678 2380                        373    MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
-00002736  2878 2384                        374    MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
-0000273A  2A78 237C                        375    MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-0000273E  4280                             376    CLR.L D0 *Contador
-00002740  6000 004C                        377    BRA L_BUCLE
-00002744                                   378  
-00002744                                   379  LINEAB_REC:
-00002744  2478 2358                        380    MOVE.L RBB_IN_PUNT,A2
-00002748  2678 2360                        381    MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
-0000274C  2878 2364                        382    MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
-00002750  2A78 235C                        383    MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-00002754  4280                             384    CLR.L D0 *Contador
-00002756  6000 0036                        385    BRA L_BUCLE
-0000275A                                   386  
-0000275A                                   387  LINEA_A:
-0000275A  B07C 0000                        388    CMP #$00000000,D0
-0000275E  6700 0018                        389    BEQ LINEAA_REC
-00002762                                   390  
-00002762                                   391  LINEAA_TRANS:
-00002762  2478 2368                        392    MOVE.L TBA_IN_PUNT,A2
-00002766  2678 2370                        393    MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
-0000276A  2878 2374                        394    MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
-0000276E  2A78 236C                        395    MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-00002772  4280                             396    CLR.L D0 *Contador
-00002774  6000 0018                        397    BRA L_BUCLE
-00002778                                   398  
-00002778                                   399  LINEAA_REC:
-00002778  2478 2348                        400    MOVE.L RBA_IN_PUNT,A2
-0000277C  2678 2350                        401    MOVE.L RBA_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
-00002780  2878 2354                        402    MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
-00002784  2A78 234C                        403    MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
-00002788  4280                             404    CLR.L D0 *Contador
-0000278A  6000 0002                        405    BRA L_BUCLE
-0000278E                                   406  
-0000278E                                   407  L_BUCLE:
-0000278E  4281                             408     CLR.L D1
-00002790  5280                             409     ADD.L #1,D0 *Aumenta el contador
-00002792  1213                             410     MOVE.B (A3),D1 *POP de E
-00002794  B27C 000D                        411     CMP #13,D1 *D1=13?
-00002798  6700 0036                        412     BEQ F_LINEA  *Si D1=13, SE acaba la linea
-0000279C  BACB                             413     CMP A3,A5 *E=F?
-0000279E  6700 0012                        414     BEQ FIN_LINEA *Si E=F, esta al final de la linea
-000027A2  B6CC                             415     CMP A4,A3 *I=E?
-000027A4  6700 0006                        416     BEQ L_VACIO *Si I=E, vacio
-000027A8  528B                             417     ADD.L #1,A3
-000027AA  60E2                             418     BRA L_BUCLE
-000027AC                                   419  L_VACIO:
-000027AC  4280                             420    CLR.L D0 *Se pone el contador a 0
-000027AE  6000 0020                        421    BRA F_LINEA
-000027B2                                   422  FIN_LINEA:
-000027B2  121B                             423    MOVE.B (A3)+,D1 *POP del buffer
-000027B4  B27C 000D                        424    CMP #13,D1 *D1=13?
-000027B8  6700 0016                        425    BEQ F_LINEA *Fin de la linea
-000027BC  528D                             426    ADD.L #1,A5
-000027BE  BACC                             427    CMP A4,A5
-000027C0  538D                             428    SUB.L #1,A5
-000027C2  6600 0008                        429    BNE L_RESET
-000027C6  4280                             430    CLR.L D0 *D1!=13, no es una linea, por tanto contador = 0
-000027C8  6000 0006                        431    BRA F_LINEA
-000027CC                                   432  L_RESET:
-000027CC  264A                             433    MOVE.L A2,A3
-000027CE  60BE                             434    BRA L_BUCLE
-000027D0                                   435  F_LINEA:
-000027D0  4E5E                             436    UNLK A6
-000027D2  4E75                             437    RTS
-000027D4                                   438  
-000027D4                                   439  
-000027D4                                   440  
-000027D4                                   441  ********************SCAN********************
-000027D4                                   442    **recepcion
-000027D4                                   443  SCAN:
-000027D4  4E56 0000                        444    LINK A6,#0  *Creación marco de pila
-000027D8  226E 0008                        445    MOVE.L   8(A6),A1 *DIR Buffer
-000027DC  302E 000C                        446    MOVE.W   12(A6),D0 *Descriptor
-000027E0  342E 000E                        447    MOVE.W   14(A6),D2 *Tamaño
-000027E4  3800                             448    MOVE.W   D0,D4 *Guardamos el Descriptor
-000027E6  B07C 0001                        449    CMP #$0001,D0
-000027EA  6E00 002A                        450    BGT SCAN_ERROR
-000027EE  B07C 0000                        451    CMP #0000,D0
-000027F2  6D00 0022                        452    BLT SCAN_ERROR
-000027F6  6100 FF22                        453    BSR LINEA
-000027FA  2600                             454    MOVE.L D0,D3 *Número de caracteres que hay en la línea
-000027FC  B642                             455    CMP D2,D3 *Si el número de caracteres que hay en la línea es mayor que el tamaño tiene que devolver un error
-000027FE  6E00 001C                        456    BGT SCAN_TAMANO
-00002802  4282                             457    CLR.L D2  *Se libera el 2 registro de Direccion
-00002804                                   458  SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
-00002804  B642                             459    CMP D2,D3
-00002806  6700 001A                        460    BEQ SC_FIN
-0000280A  5202                             461    ADD.B #1,D2
-0000280C  3004                             462    MOVE.W D4,D0
-0000280E  6100 FC8A                        463    BSR LEECAR
-00002812  12C0                             464    MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
-00002814  60EE                             465    BRA SCAN_BUCLE
-00002816                                   466  SCAN_ERROR:
-00002816  70FF                             467    MOVE.L #$ffffffff,D0
-00002818  6000 000A                        468    BRA SCAN_FIN
-0000281C                                   469  SCAN_TAMANO:
-0000281C  7000                             470    MOVE.L #0,D0
-0000281E  6000 0004                        471    BRA SCAN_FIN
-00002822                                   472  SC_FIN:
-00002822  2003                             473    MOVE.L D3,D0 *Devolvemos el resultado en D0
-00002824                                   474  SCAN_FIN:
-00002824  4E5E                             475    UNLK A6
-00002826  4E75                             476    RTS
-00002828                                   477  
-00002828                                   478  
-00002828                                   479  ********************PRINT********************
-00002828                                   480  
-00002828                                   481  **transmision
-00002828                                   482  PRINT:
-00002828  4E56 0000                        483    LINK A6,#0  *Creación marco de pila
-0000282C  226E 0008                        484    MOVE.L   8(A6),A1 *DIR Buffer
-00002830  302E 000C                        485    MOVE.W   12(A6),D0 *Descriptor
-00002834  342E 000E                        486    MOVE.W   14(A6),D2 *Tamaño
-00002838  4284                             487    CLR.L D4 *Contador
-0000283A  B07C 0001                        488    CMP #$0001,D0
-0000283E  6700 0018                        489    BEQ PRINT_B
-00002842  B07C 0000                        490    CMP #0000,D0
-00002846  6700 0008                        491    BEQ PRINT_A
-0000284A                                   492  PRINT_ERROR:
-0000284A  70FF                             493    MOVE.L #$ffffffff,D0 *Se retorna -1 en el registro D0
-0000284C  6000 004C                        494    BRA PRINT_FIN
-00002850                                   495  PRINT_A:
-00002850  303C 0010                        496    MOVE.W #$0010,D0
-00002854  6000 0006                        497    BRA PRINT_BUCLE
-00002858                                   498  PRINT_B:
-00002858  303C 0011                        499    MOVE.W #$0011,D0
-0000285C                                   500  PRINT_BUCLE:
-0000285C  B444                             501    CMP D4,D2
-0000285E  6700 0038                        502    BEQ PR_FIN
-00002862  5204                             503    ADD.B #1,D4 *Aumentamos Contador
-00002864  1219                             504    MOVE.B (A1)+,D1
-00002866  6100 FD3C                        505    BSR ESCCAR
-0000286A                                   506  
-0000286A  B27C 000D                        507    CMP #13,D1
-0000286E  6700 000C                        508    BEQ PRINT_FLAG
-00002872  B07C FFFF                        509    CMP #$ffffffff,D0
-00002876  6700 0020                        510    BEQ PR_FIN
-0000287A  60E0                             511    BRA PRINT_BUCLE
-0000287C                                   512  
-0000287C                                   513  PRINT_FLAG:
-0000287C  B07C 0010                        514    CMP #$0010,D0
-00002880  6700 000C                        515    BEQ FLAGA
-00002884  13FC 0004 00EFFC0B               516    MOVE.B #4,IMR * Pone el bit 4 de IMR a 1
-0000288C  60CE                             517    BRA PRINT_BUCLE
-0000288E                                   518  FLAGA:
-0000288E  13FC 0001 00EFFC0B               519    MOVE.B #1,IMR * Pone el bit 0 de IMR a 1
-00002896  60C4                             520    BRA PRINT_BUCLE
-00002898                                   521  
-00002898                                   522  PR_FIN:
-00002898  2004                             523    MOVE.L D4,D0 *Devolvemos el resultado en D0
-0000289A                                   524  PRINT_FIN:
-0000289A  4E5E                             525    UNLK A6 *Se elimina el marco de pila
-0000289C  4E75                             526    RTS
-0000289E                                   527  *RTI
-0000289E                                   528  RTI:
-0000289E  4E75                             529      RTS
-000028A0                                   530  
-000028A0                                   531  *Programa Principal
-000028A0                                   532  INICIO:
-000028A0  6100 FAE6                        533     BSR INIT
-000028A4  3F3C 0022                        534     MOVE.W #$0022,-(A7)
-000028A8  3F3C 0000                        535     MOVE.W #$0000,-(A7)
-000028AC  2F3C 00001388                    536     MOVE.L #$00001388,-(A7)
-000028B2  287C 00001388                    537     MOVE.L #$00001388,A4
-000028B8  18FC 0069                        538     MOVE.B #$69,(A4)+
-000028BC  18FC 000D                        539     MOVE.B #13,(A4)+
-000028C0  18FC 0069                        540     MOVE.B #$69,(A4)+
-000028C4  18FC 0069                        541     MOVE.B #$69,(A4)+
-000028C8  18FC 0069                        542     MOVE.B #$69,(A4)+
-000028CC  18FC 0069                        543     MOVE.B #$69,(A4)+
-000028D0  18FC 0069                        544     MOVE.B #$69,(A4)+
-000028D4  18FC 0069                        545     MOVE.B #$69,(A4)+
-000028D8  18FC 0069                        546     MOVE.B #$69,(A4)+
-000028DC  6100 FF4A                        547     BSR PRINT
-000028E0  61BC                             548     BSR RTI
-000028E2  4848                             549     BREAK
+00002388                                    33  *************** Copia del IMR ****************
+00002388                                    34  
+00002388  00000000                          35  IMR_COPIA:DC.L 0
+0000238C                                    36  
+0000238C                                    37  *************** Definicion de equivalencias para INICIO ****************
+0000238C                                    38  
+0000238C                                    39  BUFFER: DS.B 2100 * Buffer para lectura y escritura de caracteres
+00002BC0  0000                              40  CONTL: DC.W 0 * Contador de lineas
+00002BC2  0000                              41  CONTC: DC.W 0 * Contador de caracteres
+00002BC4  00000000                          42  DIRLEC: DC.L 0 * Direccion de lectura para SCAN
+00002BC8  00000000                          43  DIRESC: DC.L 0 * Direccion de escritura para PRINT
+00002BCC  0000                              44  TAME: DC.W 0 * Tamaño de escritura para print
+00002BCE  =00000000                         45  DESA: EQU 0 * Descriptor linea A
+00002BCE  =00000001                         46  DESB: EQU 1 * Descriptor linea B
+00002BCE  =0000000A                         47  NLIN: EQU 10 * Numero de lineas a leer
+00002BCE  =0000001E                         48  TAML: EQU 30 * Tamaño de linea para SCAN
+00002BCE  =00000005                         49  TAMB: EQU 5 * Tamaño de bloque para PRINT
+00002BCE                                    50  
+00002BCE                                    51  
+00002BCE                                    52  *************** Definicion de equivalencias ****************
+00002BCE                                    53  
+00002BCE  =00EFFC01                         54  MR1A    EQU     $effc01       * de modo A (escritura)
+00002BCE  =00EFFC01                         55  MR2A    EQU     $effc01       * de modo A (2 escritura)
+00002BCE  =00EFFC03                         56  SRA     EQU     $effc03       * de estado A (lectura)
+00002BCE  =00EFFC03                         57  CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
+00002BCE  =00EFFC05                         58  CRA     EQU     $effc05       * de control A (escritura)
+00002BCE  =00EFFC07                         59  RBA     EQU     $effc07       * buffer recepcion A  (lectura)
+00002BCE  =00EFFC07                         60  TBA     EQU     $effc07       * buffer transmision A (escritura)
+00002BCE  =00EFFC09                         61  ACR     EQU     $effc09       * de control auxiliar
+00002BCE  =00EFFC0B                         62  IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
+00002BCE  =00EFFC0B                         63  ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
+00002BCE                                    64  
+00002BCE  =00EFFC11                         65  MR1B    EQU     $effc11       * de modo B (escritura)
+00002BCE  =00EFFC11                         66  MR2B    EQU     $effc11       * de modo B (2 escritura)
+00002BCE  =00EFFC13                         67  SRB     EQU     $effc13       * de estado B (lectura)
+00002BCE  =00EFFC13                         68  CSRB    EQU     $effc13       * de seleccion de reloj B (escritura)
+00002BCE  =00EFFC15                         69  CRB     EQU     $effc15       * de control B (escritura)
+00002BCE  =00EFFC17                         70  RBB     EQU     $effc17       * buffer recepcion B  (lectura)
+00002BCE  =00EFFC17                         71  TBB     EQU     $effc17       * buffer transmision B (escritura)
+00002BCE  =00EFFC09                         72  IVR     EQU     $effc09       * de vector de interrupcion
+00002BCE                                    73  
+00002BCE                                    74  *********************INIT**********************
+00002BCE                                    75  
+00002BCE                                    76  INIT:
+00002BCE                                    77  
+00002BCE                                    78  *********************BUFFERS**********************
+00002BCE                                    79  
+00002BCE  21FC 00000400 2348                80  	MOVE.L #BUS_RBA,RBA_IN_PUNT
+00002BD6  21FC 00000400 2350                81  	MOVE.L #BUS_RBA,RBA_EXT_PUNT
+00002BDE  21FC 00000400 2354                82  	MOVE.L #BUS_RBA,RBA_INT_PUNT
+00002BE6  21FC 00000400 234C                83  	MOVE.L #BUS_RBA,RBA_FIN_PUNT
+00002BEE  06B8 000007CF 234C                84  	ADD.L  #1999,RBA_FIN_PUNT
+00002BF6  21FC 00000BD2 2358                85  	MOVE.L #BUS_RBB,RBB_IN_PUNT
+00002BFE  21FC 00000BD2 2360                86  	MOVE.L #BUS_RBB,RBB_EXT_PUNT
+00002C06  21FC 00000BD2 2364                87  	MOVE.L #BUS_RBB,RBB_INT_PUNT
+00002C0E  21FC 00000BD2 235C                88  	MOVE.L #BUS_RBB,RBB_FIN_PUNT
+00002C16  06B8 000007CF 235C                89  	ADD.L  #1999,RBB_FIN_PUNT
+00002C1E  21FC 000013A4 2368                90  	MOVE.L #BUS_TBA,TBA_IN_PUNT
+00002C26  21FC 000013A4 2370                91  	MOVE.L #BUS_TBA,TBA_EXT_PUNT
+00002C2E  21FC 000013A4 2374                92  	MOVE.L #BUS_TBA,TBA_INT_PUNT
+00002C36  21FC 000013A4 236C                93  	MOVE.L #BUS_TBA,TBA_FIN_PUNT
+00002C3E  06B8 000007CF 236C                94  	ADD.L  #1999,TBA_FIN_PUNT
+00002C46  21FC 00001B76 2378                95  	MOVE.L #BUS_TBB,TBB_IN_PUNT
+00002C4E  21FC 00001B76 2380                96  	MOVE.L #BUS_TBB,TBB_EXT_PUNT
+00002C56  21FC 00001B76 2384                97  	MOVE.L #BUS_TBB,TBB_INT_PUNT
+00002C5E  21FC 00001B76 237C                98  	MOVE.L #BUS_TBB,TBB_FIN_PUNT
+00002C66  06B8 000007CF 237C                99  	ADD.L  #1999,TBB_FIN_PUNT
+00002C6E                                   100  
+00002C6E                                   101    *********************DECLARACIONES INIT**********************
+00002C6E                                   102  
+00002C6E  13FC 0010 00EFFC05               103    MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
+00002C76  13FC 0010 00EFFC15               104    MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
+00002C7E  13FC 0003 00EFFC11               105    MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
+00002C86  13FC 0003 00EFFC01               106    MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
+00002C8E  13FC 0000 00EFFC01               107    MOVE.B #%00000000,MR2A     * Eco desactivado de modo A.
+00002C96  13FC 0000 00EFFC11               108    MOVE.B #%00000000,MR2B     * Eco desactivado de modo B.
+00002C9E  13FC 00CC 00EFFC03               109    MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
+00002CA6  13FC 00CC 00EFFC13               110    MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
+00002CAE  13FC 0000 00EFFC09               111    MOVE.B #%00000000,ACR
+00002CB6  13FC 0005 00EFFC05               112    MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
+00002CBE  13FC 0005 00EFFC15               113    MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
+00002CC6  13FC 0040 00EFFC09               114    MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
+00002CCE  13FC 0022 00EFFC0B               115    MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
+00002CD6  21FC 00003104 0100               116    MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
+00002CDE  4E75                             117    RTS *Retorno
+00002CE0                                   118  
+00002CE0                                   119    *********************LEECAR**********************
+00002CE0                                   120  
+00002CE0                                   121    LEECAR:
+00002CE0  4E56 0000                        122      LINK A6,#0 *Creación del marco de pila
+00002CE4  0800 0000                        123      BTST    #0,D0
+00002CE8  6700 007E                        124      BEQ LA_LINEA
+00002CEC                                   125  
+00002CEC                                   126  LB_LINEA:
+00002CEC  B07C 0001                        127       CMP #$00000001,D0
+00002CF0  6700 003C                        128       BEQ LB_REC
+00002CF4                                   129  LB_TRANS:
+00002CF4  2478 2378                        130       MOVE.L TBB_IN_PUNT,A2
+00002CF8  2678 2380                        131       MOVE.L TBB_EXT_PUNT,A3
+00002CFC  2878 2384                        132       MOVE.L TBB_INT_PUNT,A4
+00002D00  2A78 237C                        133       MOVE.L TBB_FIN_PUNT,A5
+00002D04  B8CB                             134       CMP  A3,A4    * E=I?
+00002D06  6700 00DC                        135       BEQ VACIO     * E= I, entonces buffer vacio
+00002D0A  528D                             136       ADD.L #1,A5
+00002D0C  BACB                             137       CMP A3,A5     * E = F+1?
+00002D0E  538D                             138       SUB.L #1,A5  *Se restablece F a sus posicion original
+00002D10  6700 000C                        139       BEQ TBB_RESET
+00002D14  101B                             140       MOVE.B  (A3)+,D0
+00002D16  21CB 2380                        141       MOVE.L  A3,TBB_EXT_PUNT
+00002D1A  6000 00CA                        142       BRA FIN_LEECAR
+00002D1E                                   143    TBB_RESET:
+00002D1E  528C                             144       ADD.L #1,A4
+00002D20  101A                             145       MOVE.B (A2)+,D0
+00002D22  21CC 2384                        146       MOVE.L A4,TBB_INT_PUNT
+00002D26  21CA 2380                        147       MOVE.L A2,TBB_EXT_PUNT
+00002D2A  6000 00BA                        148       BRA FIN_LEECAR
+00002D2E                                   149  
+00002D2E                                   150  LB_REC:
+00002D2E  2478 2358                        151      MOVE.L RBB_IN_PUNT,A2
+00002D32  2678 2360                        152      MOVE.L RBB_EXT_PUNT,A3
+00002D36  2878 2364                        153      MOVE.L RBB_INT_PUNT,A4
+00002D3A  2A78 235C                        154      MOVE.L RBB_FIN_PUNT,A5
+00002D3E  B8CB                             155      CMP  A3,A4    * E=I?
+00002D40  6700 00A2                        156      BEQ VACIO     * E= I, entonces buffer vacio
+00002D44  528D                             157      ADD.L #1,A5
+00002D46  BACB                             158      CMP A3,A5     * E = F+1?
+00002D48  538D                             159      SUB.L #1,A5  *Se restablece F a sus posicion original
+00002D4A  6700 000C                        160      BEQ RBB_RESET
+00002D4E  101B                             161      MOVE.B  (A3)+,D0
+00002D50  21CB 2360                        162      MOVE.L  A3,RBB_EXT_PUNT
+00002D54  6000 0090                        163      BRA FIN_LEECAR
+00002D58                                   164  RBB_RESET:
+00002D58  528C                             165      ADD.L #1,A4
+00002D5A  101A                             166      MOVE.B (A2)+,D0
+00002D5C  21CC 2364                        167      MOVE.L A4,RBB_INT_PUNT
+00002D60  21CA 2360                        168      MOVE.L A2,RBB_EXT_PUNT
+00002D64  6000 0080                        169      BRA FIN_LEECAR
+00002D68                                   170  LA_LINEA:
+00002D68  B07C 0000                        171      CMP #$00000000,D0
+00002D6C  6700 003C                        172      BEQ LA_REC
+00002D70                                   173  
+00002D70                                   174  LA_TRANS:
+00002D70  2478 2368                        175      MOVE.L TBA_IN_PUNT,A2
+00002D74  2678 2370                        176      MOVE.L TBA_EXT_PUNT,A3
+00002D78  2878 2374                        177      MOVE.L TBA_INT_PUNT,A4
+00002D7C  2A78 236C                        178      MOVE.L TBA_FIN_PUNT,A5
+00002D80  B8CB                             179      CMP  A3,A4    * E=I?
+00002D82  6700 0060                        180      BEQ VACIO     * E= I, entonces buffer vacio
+00002D86  528D                             181      ADD.L #1,A5
+00002D88  BACB                             182      CMP A3,A5     * E = F+1?
+00002D8A  538D                             183      SUB.L #1,A5  *Se restablece F a sus posicion original
+00002D8C  6700 000C                        184      BEQ TBA_RESET
+00002D90  101B                             185      MOVE.B  (A3)+,D0
+00002D92  21CB 2370                        186      MOVE.L  A3,TBA_EXT_PUNT
+00002D96  6000 004E                        187      BRA FIN_LEECAR
+00002D9A                                   188  TBA_RESET:
+00002D9A  528C                             189      ADD.L #1,A4
+00002D9C  101A                             190      MOVE.B (A2)+,D0
+00002D9E  21CC 2374                        191      MOVE.L A4,TBA_INT_PUNT
+00002DA2  21CA 2370                        192      MOVE.L A2,TBA_EXT_PUNT
+00002DA6  6000 003E                        193      BRA FIN_LEECAR
+00002DAA                                   194  LA_REC:
+00002DAA  2478 2348                        195      MOVE.L RBA_IN_PUNT,A2
+00002DAE  2678 2350                        196      MOVE.L RBA_EXT_PUNT,A3
+00002DB2  2878 2354                        197      MOVE.L RBA_INT_PUNT,A4
+00002DB6  2A78 234C                        198      MOVE.L RBA_FIN_PUNT,A5
+00002DBA  B8CB                             199      CMP  A3,A4    * E=I?
+00002DBC  6700 0026                        200      BEQ VACIO     * E= I, entonces buffer vacio
+00002DC0  528D                             201      ADD.L #1,A5
+00002DC2  BACB                             202      CMP A3,A5     * E = F+1?
+00002DC4  538D                             203      SUB.L #1,A5  *Se restablece F a sus posicion original
+00002DC6  6700 000C                        204      BEQ RBA_RESET
+00002DCA  101B                             205      MOVE.B  (A3)+,D0
+00002DCC  21CB 2350                        206      MOVE.L  A3,RBA_EXT_PUNT
+00002DD0  6000 0014                        207      BRA FIN_LEECAR
+00002DD4                                   208  
+00002DD4                                   209  RBA_RESET:
+00002DD4  528C                             210      ADD.L #1,A4
+00002DD6  101A                             211      MOVE.B (A2)+,D0
+00002DD8  21CC 2354                        212      MOVE.L A4,RBA_INT_PUNT
+00002DDC  21CA 2350                        213      MOVE.L A2,RBA_EXT_PUNT
+00002DE0  6000 0004                        214      BRA FIN_LEECAR
+00002DE4                                   215  
+00002DE4                                   216    VACIO:
+00002DE4  70FF                             217      MOVE.L #$ffffffff,D0
+00002DE6                                   218    FIN_LEECAR:
+00002DE6  4E5E                             219      UNLK A6 *Destrucción del marco de pila
+00002DE8  4E75                             220      RTS
+00002DEA                                   221  
+00002DEA                                   222  ********************ESCCAR********************
+00002DEA                                   223  ESCCAR:
+00002DEA  4E56 0000                        224      LINK A6,#0 *Creación del marco de pila
+00002DEE  0800 0000                        225      BTST #0,D0
+00002DF2  6700 00B2                        226      BEQ EA_LINEA
+00002DF6                                   227  EB_LINEA:
+00002DF6                                   228  
+00002DF6  B07C 0001                        229      CMP #$00000001,D0
+00002DFA  6700 0056                        230      BEQ ESC_REC_B
+00002DFE                                   231  ESC_TRANS_B:
+00002DFE  2478 2378                        232      MOVE.L TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+00002E02  2678 2380                        233      MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
+00002E06  2878 2384                        234      MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
+00002E0A  2A78 237C                        235      MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002E0E  538B                             236      SUB.L #1,A3  *Se le resta 1 a E
+00002E10  B9CB                             237      CMP.L A3,A4 * I=E-1?
+00002E12  528B                             238      ADD.L #1,A3  *Se restablece el valor de E
+00002E14  6700 0140                        239      BEQ LLENO
+00002E18  528D                             240      ADD.L #1,A5   *Se le añade 1 al puntero de fin
+00002E1A  BBCC                             241      CMP.L A4,A5   *Se comparan los punteros I y F+1
+00002E1C  538D                             242      SUB.L #1,A5   *Se restablece el valor del puntero FIn
+00002E1E  6700 001E                        243      BEQ  TBB_AUX      *Está en la posicion auxiliar
+00002E22                                   244  
+00002E22                                   245  TBB_NO_AUX:
+00002E22  B9CB                             246      CMP.L A3,A4  *Se comparan I y E
+00002E24  6C00 000E                        247      BGE TBB_MAYOR
+00002E28  528C                             248      ADD.L #1,A4
+00002E2A  1881                             249      MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+00002E2C  21CC 2384                        250      MOVE.L  A4,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
+00002E30  6000 012A                        251      BRA FIN_ESCCAR
+00002E34                                   252  
+00002E34                                   253  TBB_MAYOR:
+00002E34  18C1                             254      MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+00002E36  21CC 2384                        255      MOVE.L  A4,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
+00002E3A  6000 0120                        256      BRA FIN_ESCCAR
+00002E3E                                   257  
+00002E3E                                   258  TBB_AUX:
+00002E3E  B5CB                             259      CMP.L A3,A2  * E=P?
+00002E40  6700 0114                        260      BEQ   LLENO
+00002E44  2878 2378                        261      MOVE.L  TBB_IN_PUNT,A4
+00002E48  1881                             262      MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+00002E4A  21CC 2384                        263      MOVE.L  A4,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
+00002E4E  6000 010C                        264      BRA FIN_ESCCAR
+00002E52                                   265  
+00002E52                                   266  ESC_REC_B:
+00002E52  2878 2364                        267    MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
+00002E56  2A78 235C                        268    MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002E5A  2678 2360                        269    MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
+00002E5E  2478 2358                        270    MOVE.L RBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+00002E62  538B                             271    SUB.L #1,A3  *Se le resta 1 a E
+00002E64  B9CB                             272    CMP.L A3,A4 * I=E-1?
+00002E66  528B                             273    ADD.L #1,A3  *Se restablece el valor de E
+00002E68  6700 00EC                        274    BEQ LLENO
+00002E6C  528D                             275    ADD.L #1,A5   *Se le añade 1 al puntero de fin
+00002E6E  BBCC                             276    CMP.L A4,A5   *Se comparan los punteros I y F+1
+00002E70  538D                             277    SUB.L #1,A5   *Se restablece el valor del puntero FIn
+00002E72  6700 001E                        278    BEQ  RBB_AUX      *Está en la posicion auxiliar
+00002E76                                   279  
+00002E76                                   280  RBB_NO_AUX:
+00002E76  B9CB                             281    CMP.L A3,A4  *Se comparan I y E
+00002E78  6C00 000E                        282    BGE RBB_MAYOR
+00002E7C  528C                             283    ADD.L #1,A4
+00002E7E  1881                             284    MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+00002E80  21CC 2364                        285    MOVE.L  A4,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
+00002E84  6000 00D6                        286    BRA FIN_ESCCAR
+00002E88                                   287  
+00002E88                                   288  RBB_MAYOR:
+00002E88  18C1                             289    MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+00002E8A  21CC 2364                        290    MOVE.L  A4,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
+00002E8E  6000 00CC                        291    BRA FIN_ESCCAR
+00002E92                                   292  
+00002E92                                   293  RBB_AUX:
+00002E92  B5CB                             294    CMP.L A3,A2  * E=P?
+00002E94  6700 00C0                        295    BEQ   LLENO
+00002E98  2878 2358                        296    MOVE.L  RBB_IN_PUNT,A4
+00002E9C  1881                             297    MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+00002E9E  21CC 2364                        298    MOVE.L  A4,RBB_INT_PUNT  *Se Inicializa I con el valor de Principio
+00002EA2  6000 00B8                        299    BRA FIN_ESCCAR
+00002EA6                                   300  
+00002EA6                                   301  EA_LINEA:
+00002EA6  B07C 0000                        302    CMP #$00000000,D0
+00002EAA  6700 0056                        303    BEQ EA_REC
+00002EAE                                   304  
+00002EAE                                   305  EA_TRANS:
+00002EAE  2878 2374                        306    MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
+00002EB2  2A78 236C                        307    MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002EB6  2678 2370                        308    MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
+00002EBA  2478 2368                        309    MOVE.L TBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+00002EBE  538B                             310    SUB.L #1,A3  *Se le resta 1 a E
+00002EC0  B9CB                             311    CMP.L A3,A4 * I=E-1?
+00002EC2  528B                             312    ADD.L #1,A3  *Se restablece el valor de E
+00002EC4  6700 0090                        313    BEQ LLENO
+00002EC8  528D                             314    ADD.L #1,A5   *Se le añade 1 al puntero de fin
+00002ECA  BBCC                             315    CMP.L A4,A5   *Se comparan los punteros I y F+1
+00002ECC  538D                             316    SUB.L #1,A5   *Se restablece el valor del puntero FIn
+00002ECE  6700 001E                        317    BEQ  TBA_AUX      *Está en la posicion auxiliar
+00002ED2                                   318  
+00002ED2                                   319  TBA_NO_AUX:
+00002ED2  B9CB                             320    CMP.L A3,A4  *Se comparan I y E
+00002ED4  6C00 000E                        321    BGE TBA_MAYOR
+00002ED8  528C                             322    ADD.L #1,A4
+00002EDA  1881                             323    MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+00002EDC  21CC 2374                        324    MOVE.L  A4,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
+00002EE0  6000 007A                        325    BRA FIN_ESCCAR
+00002EE4                                   326  
+00002EE4                                   327  TBA_MAYOR:
+00002EE4  18C1                             328    MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+00002EE6  21CC 2374                        329    MOVE.L  A4,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
+00002EEA  6000 0070                        330    BRA FIN_ESCCAR
+00002EEE                                   331  
+00002EEE                                   332  TBA_AUX:
+00002EEE  B5CB                             333    CMP.L A3,A2  * E=P?
+00002EF0  6700 0064                        334    BEQ   LLENO
+00002EF4  2878 2368                        335    MOVE.L  TBA_IN_PUNT,A4
+00002EF8  1881                             336    MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+00002EFA  21CC 2374                        337    MOVE.L  A4,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
+00002EFE  6000 005C                        338    BRA FIN_ESCCAR
+00002F02                                   339  
+00002F02                                   340  EA_REC:
+00002F02  2878 2354                        341    MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
+00002F06  2A78 234C                        342    MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002F0A  2678 2350                        343    MOVE.L RBA_EXT_PUNT,A3 *Se mete el puntero de E al A3
+00002F0E  2478 2348                        344    MOVE.L RBA_IN_PUNT,A2 *Se mete el puntero de Principio al A2
+00002F12  538B                             345    SUB.L #1,A3  *Se le resta 1 a E
+00002F14  B9CB                             346    CMP.L A3,A4 * I=E-1?
+00002F16  528B                             347    ADD.L #1,A3  *Se restablece el valor de E
+00002F18  6700 003C                        348    BEQ LLENO
+00002F1C  528D                             349    ADD.L #1,A5   *Se le añade 1 al puntero de fin
+00002F1E  BBCC                             350    CMP.L A4,A5   *Se comparan los punteros I y F+1
+00002F20  538D                             351    SUB.L #1,A5   *Se restablece el valor del puntero FIn
+00002F22  6700 001E                        352    BEQ  RBA_AUX      *Está en la posicion auxiliar
+00002F26                                   353  
+00002F26                                   354  RBA_NO_AUX:
+00002F26  B9CB                             355    CMP.L A3,A4  *Se comparan I y E
+00002F28  6C00 000E                        356    BGE RBA_MAYOR
+00002F2C  528C                             357    ADD.L #1,A4
+00002F2E  1881                             358    MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
+00002F30  21CC 2354                        359    MOVE.L  A4,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
+00002F34  6000 0026                        360    BRA FIN_ESCCAR
+00002F38                                   361  
+00002F38                                   362  RBA_MAYOR:
+00002F38  18C1                             363    MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
+00002F3A  21CC 2354                        364    MOVE.L  A4,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
+00002F3E  6000 001C                        365    BRA FIN_ESCCAR
+00002F42                                   366  
+00002F42                                   367  RBA_AUX:
+00002F42  B5CB                             368    CMP.L A3,A2  * E=P?
+00002F44  6700 0010                        369    BEQ   LLENO
+00002F48  2878 2348                        370    MOVE.L  RBA_IN_PUNT,A4
+00002F4C  1881                             371    MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
+00002F4E  21CC 2354                        372    MOVE.L  A4,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
+00002F52  6000 0008                        373    BRA FIN_ESCCAR
+00002F56                                   374  
+00002F56                                   375  LLENO:
+00002F56  70FF                             376      MOVE.L #$ffffffff,D0
+00002F58  6000 0002                        377      BRA FIN_ESCCAR
+00002F5C                                   378  FIN_ESCCAR:
+00002F5C  4E5E                             379    UNLK A6
+00002F5E  4E75                             380    RTS
+00002F60                                   381  
+00002F60                                   382  ********************LINEA********************
+00002F60                                   383  
+00002F60                                   384  LINEA:
+00002F60  4E56 0000                        385    LINK A6,#0
+00002F64  0800 0000                        386    BTST #0,D0
+00002F68  6700 0036                        387    BEQ LINEA_A
+00002F6C                                   388  
+00002F6C                                   389  LINEA_B:
+00002F6C  B07C 0001                        390    CMP #$00000001,D0
+00002F70  6700 0018                        391    BEQ LINEAB_REC
+00002F74                                   392  LINEAB_TRANS:
+00002F74  2478 2378                        393    MOVE.L TBB_IN_PUNT,A2
+00002F78  2678 2380                        394    MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
+00002F7C  2878 2384                        395    MOVE.L TBB_INT_PUNT,A4 *Se mete el puntero I en A4
+00002F80  2A78 237C                        396    MOVE.L TBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002F84  4280                             397    CLR.L D0 *Contador
+00002F86  6000 004C                        398    BRA L_BUCLE
+00002F8A                                   399  
+00002F8A                                   400  LINEAB_REC:
+00002F8A  2478 2358                        401    MOVE.L RBB_IN_PUNT,A2
+00002F8E  2678 2360                        402    MOVE.L RBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
+00002F92  2878 2364                        403    MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
+00002F96  2A78 235C                        404    MOVE.L RBB_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002F9A  4280                             405    CLR.L D0 *Contador
+00002F9C  6000 0036                        406    BRA L_BUCLE
+00002FA0                                   407  
+00002FA0                                   408  LINEA_A:
+00002FA0  B07C 0000                        409    CMP #$00000000,D0
+00002FA4  6700 0018                        410    BEQ LINEAA_REC
+00002FA8                                   411  
+00002FA8                                   412  LINEAA_TRANS:
+00002FA8  2478 2368                        413    MOVE.L TBA_IN_PUNT,A2
+00002FAC  2678 2370                        414    MOVE.L TBA_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
+00002FB0  2878 2374                        415    MOVE.L TBA_INT_PUNT,A4 *Se mete el puntero I en A4
+00002FB4  2A78 236C                        416    MOVE.L TBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002FB8  4280                             417    CLR.L D0 *Contador
+00002FBA  6000 0018                        418    BRA L_BUCLE
+00002FBE                                   419  
+00002FBE                                   420  LINEAA_REC:
+00002FBE  2478 2348                        421    MOVE.L RBA_IN_PUNT,A2
+00002FC2  2678 2350                        422    MOVE.L RBA_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
+00002FC6  2878 2354                        423    MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
+00002FCA  2A78 234C                        424    MOVE.L RBA_FIN_PUNT,A5 *Se mete el puntero FIn en A5
+00002FCE  4280                             425    CLR.L D0 *Contador
+00002FD0  6000 0002                        426    BRA L_BUCLE
+00002FD4                                   427  
+00002FD4                                   428  L_BUCLE:
+00002FD4  4281                             429     CLR.L D1
+00002FD6  5280                             430     ADD.L #1,D0 *Aumenta el contador
+00002FD8  1213                             431     MOVE.B (A3),D1 *POP de E
+00002FDA  B27C 000D                        432     CMP #13,D1 *D1=13?
+00002FDE  6700 0036                        433     BEQ F_LINEA  *Si D1=13, SE acaba la linea
+00002FE2  BACB                             434     CMP A3,A5 *E=F?
+00002FE4  6700 0012                        435     BEQ FIN_LINEA *Si E=F, esta al final de la linea
+00002FE8  B6CC                             436     CMP A4,A3 *I=E?
+00002FEA  6700 0006                        437     BEQ L_VACIO *Si I=E, vacio
+00002FEE  528B                             438     ADD.L #1,A3
+00002FF0  60E2                             439     BRA L_BUCLE
+00002FF2                                   440  L_VACIO:
+00002FF2  4280                             441    CLR.L D0 *Se pone el contador a 0
+00002FF4  6000 0020                        442    BRA F_LINEA
+00002FF8                                   443  FIN_LINEA:
+00002FF8  121B                             444    MOVE.B (A3)+,D1 *POP del buffer
+00002FFA  B27C 000D                        445    CMP #13,D1 *D1=13?
+00002FFE  6700 0016                        446    BEQ F_LINEA *Fin de la linea
+00003002  528D                             447    ADD.L #1,A5
+00003004  BACC                             448    CMP A4,A5
+00003006  538D                             449    SUB.L #1,A5
+00003008  6600 0008                        450    BNE L_RESET
+0000300C  4280                             451    CLR.L D0 *D1!=13, no es una linea, por tanto contador = 0
+0000300E  6000 0006                        452    BRA F_LINEA
+00003012                                   453  L_RESET:
+00003012  264A                             454    MOVE.L A2,A3
+00003014  60BE                             455    BRA L_BUCLE
+00003016                                   456  F_LINEA:
+00003016  4E5E                             457    UNLK A6
+00003018  4E75                             458    RTS
+0000301A                                   459  
+0000301A                                   460  
+0000301A                                   461  
+0000301A                                   462  ********************SCAN********************
+0000301A                                   463    **recepcion
+0000301A                                   464  SCAN:
+0000301A  4E56 0000                        465    LINK A6,#0  *Creación marco de pila
+0000301E  226E 0008                        466    MOVE.L   8(A6),A1 *DIR Buffer
+00003022  302E 000C                        467    MOVE.W   12(A6),D0 *Descriptor
+00003026  342E 000E                        468    MOVE.W   14(A6),D2 *Tamaño
+0000302A  3800                             469    MOVE.W   D0,D4 *Guardamos el Descriptor
+0000302C  B07C 0001                        470    CMP #$0001,D0
+00003030  6E00 002A                        471    BGT SCAN_ERROR
+00003034  B07C 0000                        472    CMP #0000,D0
+00003038  6D00 0022                        473    BLT SCAN_ERROR
+0000303C  6100 FF22                        474    BSR LINEA
+00003040  2600                             475    MOVE.L D0,D3 *Número de caracteres que hay en la línea
+00003042  B642                             476    CMP D2,D3 *Si el número de caracteres que hay en la línea es mayor que el tamaño tiene que devolver un error
+00003044  6E00 001C                        477    BGT SCAN_TAMANO
+00003048  4282                             478    CLR.L D2  *Se libera el 2 registro de Direccion
+0000304A                                   479  SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
+0000304A  B642                             480    CMP D2,D3
+0000304C  6700 001A                        481    BEQ SC_FIN
+00003050  5202                             482    ADD.B #1,D2
+00003052  3004                             483    MOVE.W D4,D0
+00003054  6100 FC8A                        484    BSR LEECAR
+00003058  12C0                             485    MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
+0000305A  60EE                             486    BRA SCAN_BUCLE
+0000305C                                   487  SCAN_ERROR:
+0000305C  70FF                             488    MOVE.L #$ffffffff,D0
+0000305E  6000 000A                        489    BRA SCAN_FIN
+00003062                                   490  SCAN_TAMANO:
+00003062  7000                             491    MOVE.L #0,D0
+00003064  6000 0004                        492    BRA SCAN_FIN
+00003068                                   493  SC_FIN:
+00003068  2003                             494    MOVE.L D3,D0 *Devolvemos el resultado en D0
+0000306A                                   495  SCAN_FIN:
+0000306A  4E5E                             496    UNLK A6
+0000306C  4E75                             497    RTS
+0000306E                                   498  
+0000306E                                   499  
+0000306E                                   500  ********************PRINT********************
+0000306E                                   501  
+0000306E                                   502  **transmision
+0000306E                                   503  PRINT:
+0000306E  4E56 0000                        504    LINK A6,#0  *Creación marco de pila
+00003072  226E 0008                        505    MOVE.L   8(A6),A1 *DIR Buffer
+00003076  302E 000C                        506    MOVE.W   12(A6),D0 *Descriptor
+0000307A  342E 000E                        507    MOVE.W   14(A6),D2 *Tamaño
+0000307E  4284                             508    CLR.L D4 *Contador
+00003080  B07C 0001                        509    CMP #$0001,D0
+00003084  6700 0018                        510    BEQ PRINT_B
+00003088  B07C 0000                        511    CMP #0000,D0
+0000308C  6700 0008                        512    BEQ PRINT_A
+00003090                                   513  PRINT_ERROR:
+00003090  70FF                             514    MOVE.L #$ffffffff,D0 *Se retorna -1 en el registro D0
+00003092  6000 006C                        515    BRA ERR_PRINT
+00003096                                   516  PRINT_A:
+00003096  303C 0010                        517    MOVE.W #$0010,D0
+0000309A  6000 0006                        518    BRA PRINT_BUCLE
+0000309E                                   519  PRINT_B:
+0000309E  303C 0011                        520    MOVE.W #$0011,D0
+000030A2                                   521  PRINT_BUCLE:
+000030A2  B444                             522    CMP D4,D2
+000030A4  6700 004E                        523    BEQ PR_FIN
+000030A8  5204                             524    ADD.B #1,D4 *Aumentamos Contador
+000030AA  1219                             525    MOVE.B (A1)+,D1
+000030AC  6100 FD3C                        526    BSR ESCCAR
+000030B0                                   527  
+000030B0  B27C 000D                        528    CMP #13,D1
+000030B4  6700 000C                        529    BEQ PRINT_FLAG
+000030B8  B07C FFFF                        530    CMP #$ffffffff,D0
+000030BC  6700 0036                        531    BEQ PR_FIN
+000030C0  60E0                             532    BRA PRINT_BUCLE
+000030C2                                   533  
+000030C2                                   534  PRINT_FLAG:
+000030C2  1C3C 0001                        535    MOVE.B #1,D6
+000030C6  60DA                             536    BRA PRINT_BUCLE
+000030C8                                   537  PRINT_FFLAG:
+000030C8  B07C 0010                        538    CMP #$0010,D0
+000030CC  6700 0014                        539    BEQ FLAGA
+000030D0  08F8 0004 2388                   540    BSET #4,IMR_COPIA * Pone el bit 4 de IMR a 1
+000030D6  13F8 2388 00EFFC0B               541    MOVE.B IMR_COPIA,IMR
+000030DE  6000 001C                        542    BRA PRINT_FIN
+000030E2                                   543  FLAGA:
+000030E2  08F8 0001 2388                   544    BSET #1,IMR_COPIA * Pone el bit 0 de IMR a 1
+000030E8  13F8 2388 00EFFC0B               545    MOVE.B IMR_COPIA,IMR
+000030F0  6000 000A                        546    BRA PRINT_FIN
+000030F4                                   547  
+000030F4                                   548  PR_FIN:
+000030F4  2004                             549    MOVE.L D4,D0 *Devolvemos el resultado en D0
+000030F6  BC7C 0001                        550    CMP #1,D6
+000030FA  67CC                             551    BEQ PRINT_FFLAG
+000030FC                                   552  PRINT_FIN:
+000030FC  4E5E                             553    UNLK A6 *Se elimina el marco de pila
+000030FE  4E75                             554    RTS
+00003100                                   555  ERR_PRINT:
+00003100  4E5E                             556    UNLK A6 *Se elimina el marco de pila
+00003102  4E75                             557    RTS
+00003104                                   558  *************** RTI ****************
+00003104                                   559  RTI:
+00003104  4E75                             560    RTS
+00003106                                   561  
+00003106                                   562  *************** Programa principal ****************
+00003106                                   563  
+00003106                                   564  INICIO: * Manejadores de excepciones
+00003106  21FC 000031B0 0008               565     MOVE.L #BUS_ERROR,8 * Bus error handler
+0000310E  21FC 000031B4 000C               566     MOVE.L #ADDRESS_ER,12 * Address error handler
+00003116  21FC 000031B8 0010               567     MOVE.L #ILLEGAL_IN,16 * Illegal instruction handler
+0000311E  21FC 000031BC 0020               568     MOVE.L #PRIV_VIOLT,32 * Privilege violation handler
+00003126                                   569  
+00003126  6100 FAA6                        570     BSR INIT
+0000312A  46FC 2000                        571     MOVE.W #$2000,SR * Permite interrupciones
+0000312E                                   572  
+0000312E                                   573  BUCPR:
+0000312E  31FC 0000 2BC2                   574     MOVE.W #0,CONTC * Inicializa contador de caracteres
+00003134  31FC 000A 2BC0                   575     MOVE.W #NLIN,CONTL * Inicializa contador de L´ıneas
+0000313A  21FC 0000238C 2BC4               576     MOVE.L #BUFFER,DIRLEC * Direcci´on de lectura = comienzo del buffer
+00003142                                   577  OTRAL:
+00003142                                   578  
+00003142  3F3C 001E                        579     MOVE.W #TAML,-(A7) * Tama~no m´aximo de la l´ınea
+00003146  3F3C 0000                        580     MOVE.W #DESA,-(A7) * Puerto A
+0000314A  2F38 2BC4                        581     MOVE.L DIRLEC,-(A7) * Direcci´on de lectura
+0000314E                                   582  
+0000314E                                   583  ESPL:
+0000314E  6100 FECA                        584     BSR SCAN
+00003152  B0BC 00000000                    585     CMP.L #0,D0
+00003158  67F4                             586     BEQ ESPL * Si no se ha le´ıdo una l´ınea se intenta de nuevo
+0000315A  508F                             587     ADD.L #8,A7 * Restablece la pila
+0000315C  D1B8 2BC4                        588     ADD.L D0,DIRLEC * Calcula la nueva direcci´on de lectura
+00003160  D178 2BC2                        589     ADD.W D0,CONTC * Actualiza el n´umero de caracteres le´ıdos
+00003164  5378 2BC0                        590     SUB.W #1,CONTL * Actualiza el n´umero de l´ıneas le´ıdas. Si no
+00003168  66D8                             591     BNE OTRAL * se han le´ıdo todas las l´ıneas se vuelve a leer
+0000316A  21FC 0000238C 2BC4               592     MOVE.L #BUFFER,DIRLEC * Direcci´on de lectura = comienzo del buffer
+00003172                                   593  
+00003172                                   594  OTRAE:
+00003172  31FC 0005 2BCC                   595     MOVE.W #TAMB,TAME * Tama~no de escritura = Tama~no de bloque
+00003178                                   596  ESPE:
+00003178  3F38 2BCC                        597     MOVE.W TAME,-(A7) * Tama~no de escritura
+0000317C  3F3C 0001                        598     MOVE.W #DESB,-(A7) * Puerto B
+00003180  2F38 2BC4                        599     MOVE.L DIRLEC,-(A7) * Direcci´on de lectura
+00003184  6100 FEE8                        600     BSR PRINT
+00003188  508F                             601     ADD.L #8,A7 * Restablece la pila
+0000318A  D1B8 2BC4                        602     ADD.L D0,DIRLEC * Calcula la nueva direcci´on del buffer
+0000318E  9178 2BC2                        603     SUB.W D0,CONTC * Actualiza el contador de caracteres
+00003192  6700 0018                        604     BEQ SALIR * Si no quedan caracteres se acaba
+00003196  9178 2BCC                        605     SUB.W D0,TAME * Actualiza el tama~no de escritura
+0000319A  66DC                             606     BNE ESPE * Si no se ha escrito todo el bloque se insiste
+0000319C  0C78 0005 2BC2                   607     CMP.W #TAMB,CONTC * Si el no de caracteres que quedan es menor que el
+000031A2                                   608      * tama~no establecido se transmite ese n´umero
+000031A2  62CE                             609     BHI OTRAE * Siguiente bloque
+000031A4  31F8 2BC2 2BCC                   610      MOVE.W CONTC,TAME
+000031AA  60CC                             611     BRA ESPE * Siguiente bloque
+000031AC                                   612  
+000031AC                                   613  SALIR:
+000031AC  6080                             614      BRA BUCPR
+000031AE                                   615  
+000031AE                                   616  FIN:
+000031AE  4848                             617     BREAK
+000031B0                                   618  BUS_ERROR:
+000031B0  4848                             619      BREAK * Bus error handler
+000031B2  4E71                             620      NOP
+000031B4                                   621  ADDRESS_ER:
+000031B4  4848                             622      BREAK * Address error handler
+000031B6  4E71                             623      NOP
+000031B8                                   624  ILLEGAL_IN:
+000031B8  4848                             625      BREAK * Illegal instruction handler
+000031BA  4E71                             626      NOP
+000031BC                                   627  PRIV_VIOLT:
+000031BC  4848                             628      BREAK * Privilege violation handler
+000031BE  4E71                             629      NOP
 
 No errors detected
 No warnings generated
