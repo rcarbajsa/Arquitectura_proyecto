@@ -4,15 +4,13 @@
         DC.L    INICIO          *PC
         ORG     $400
 
-*************** Buffers  ****************
-
+	*Buffers
 BUS_RBA:DS.B 2002
 BUS_RBB:DS.B 2002
 BUS_TBA:DS.B 2002
 BUS_TBB:DS.B 2002
 
-*************** Punteros ****************
-
+	*Punteros
 RBA_IN_PUNT: DC.L 0
 RBA_FIN_PUNT:DC.L 0
 RBA_EXT_PUNT:DC.L 0
@@ -44,26 +42,8 @@ NLIN: EQU 10 * N´umero de l´ıneas a leer
 TAML: EQU 30 * Tama~no de l´ınea para SCAN
 TAMB: EQU 5 * Tama~no de bloque para PRINT
 
-*************** Copia del IMR ****************
 
-IMR_COPIA:DC.L 0
-
-*************** Definicion de equivalencias para INICIO ****************
-
-BUFFER: DS.B 2100 * Buffer para lectura y escritura de caracteres
-CONTL: DC.W 0 * Contador de lineas
-CONTC: DC.W 0 * Contador de caracteres
-DIRLEC: DC.L 0 * Direccion de lectura para SCAN
-DIRESC: DC.L 0 * Direccion de escritura para PRINT
-TAME: DC.W 0 * Tamaño de escritura para print
-DESA: EQU 0 * Descriptor linea A
-DESB: EQU 1 * Descriptor linea B
-NLIN: EQU 10 * Numero de lineas a leer
-TAML: EQU 30 * Tamaño de linea para SCAN
-TAMB: EQU 5 * Tamaño de bloque para PRINT
-
-
-*************** Definicion de equivalencias ****************
+* Definicion de equivalencias
 
 MR1A    EQU     $effc01       * de modo A (escritura)
 MR2A    EQU     $effc01       * de modo A (2 escritura)
@@ -570,8 +550,7 @@ PRINT_FIN:
 ERR_PRINT:
   UNLK A6 *Se elimina el marco de pila
   RTS
-
-*************** RTI ****************
+*RTI
 RTI:
   *Salvaguardar los registros
   MOVE.L A1,-(A7)
@@ -590,7 +569,6 @@ RTI:
   AND.B ISR,D0
 
 
-<<<<<<< HEAD
 
 
   RTS
@@ -599,73 +577,3 @@ INICIO:
    BSR INIT
    BSR RTI
    BREAK
-=======
-*************** Programa principal ****************
-
-INICIO: * Manejadores de excepciones
-   MOVE.L #BUS_ERROR,8 * Bus error handler
-   MOVE.L #ADDRESS_ER,12 * Address error handler
-   MOVE.L #ILLEGAL_IN,16 * Illegal instruction handler
-   MOVE.L #PRIV_VIOLT,32 * Privilege violation handler
-
-   BSR INIT
-   MOVE.W #$2000,SR * Permite interrupciones
-
-BUCPR:
-   MOVE.W #0,CONTC * Inicializa contador de caracteres
-   MOVE.W #NLIN,CONTL * Inicializa contador de L´ıneas
-   MOVE.L #BUFFER,DIRLEC * Direcci´on de lectura = comienzo del buffer
-OTRAL:
-
-   MOVE.W #TAML,-(A7) * Tama~no m´aximo de la l´ınea
-   MOVE.W #DESA,-(A7) * Puerto A
-   MOVE.L DIRLEC,-(A7) * Direcci´on de lectura
-
-ESPL:
-   BSR SCAN
-   CMP.L #0,D0
-   BEQ ESPL * Si no se ha le´ıdo una l´ınea se intenta de nuevo
-   ADD.L #8,A7 * Restablece la pila
-   ADD.L D0,DIRLEC * Calcula la nueva direcci´on de lectura
-   ADD.W D0,CONTC * Actualiza el n´umero de caracteres le´ıdos
-   SUB.W #1,CONTL * Actualiza el n´umero de l´ıneas le´ıdas. Si no
-   BNE OTRAL * se han le´ıdo todas las l´ıneas se vuelve a leer
-   MOVE.L #BUFFER,DIRLEC * Direcci´on de lectura = comienzo del buffer
-
-OTRAE:
-   MOVE.W #TAMB,TAME * Tama~no de escritura = Tama~no de bloque
-ESPE:
-   MOVE.W TAME,-(A7) * Tama~no de escritura
-   MOVE.W #DESB,-(A7) * Puerto B
-   MOVE.L DIRLEC,-(A7) * Direcci´on de lectura
-   BSR PRINT
-   ADD.L #8,A7 * Restablece la pila
-   ADD.L D0,DIRLEC * Calcula la nueva direcci´on del buffer
-   SUB.W D0,CONTC * Actualiza el contador de caracteres
-   BEQ SALIR * Si no quedan caracteres se acaba
-   SUB.W D0,TAME * Actualiza el tama~no de escritura
-   BNE ESPE * Si no se ha escrito todo el bloque se insiste
-   CMP.W #TAMB,CONTC * Si el no de caracteres que quedan es menor que el
-    * tama~no establecido se transmite ese n´umero
-   BHI OTRAE * Siguiente bloque
-    MOVE.W CONTC,TAME
-   BRA ESPE * Siguiente bloque
-
-SALIR:
-    BRA BUCPR
-
-FIN:
-   BREAK
-BUS_ERROR:
-    BREAK * Bus error handler
-    NOP
-ADDRESS_ER:
-    BREAK * Address error handler
-    NOP
-ILLEGAL_IN:
-    BREAK * Illegal instruction handler
-    NOP
-PRIV_VIOLT:
-    BREAK * Privilege violation handler
-    NOP
->>>>>>> 2d1297b7c09314df81ead929f81a63435dc9c21c
