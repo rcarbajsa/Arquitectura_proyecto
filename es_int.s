@@ -28,7 +28,6 @@ TBB_FIN_PUNT:DC.L 0
 TBB_EXT_PUNT:DC.L 0
 TBB_INT_PUNT:DC.L 0
 
-
 * Definicion de equivalencias
 
 MR1A    EQU     $effc01       * de modo A (escritura)
@@ -36,16 +35,27 @@ MR2A    EQU     $effc01       * de modo A (2 escritura)
 SRA     EQU     $effc03       * de estado A (lectura)
 CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
 CRA     EQU     $effc05       * de control A (escritura)
-TBA     EQU     $effc07       * buffer transmision A (escritura)
 RBA     EQU     $effc07       * buffer recepcion A  (lectura)
-TBB     EQU     $effc17       * buffer trasmisión B
-RBB     EQU     $effc17       * buffer recepción B
+TBA     EQU     $effc07       * buffer transmision A (escritura)
 ACR     EQU     $effc09       * de control auxiliar
 IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
 ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
 
-*INIT
+MR1B    EQU     $effc11       * de modo B (escritura)
+MR2B    EQU     $effc11       * de modo B (2 escritura)
+SRB     EQU     $effc13       * de estado B (lectura)
+CSRB    EQU     $effc13       * de seleccion de reloj B (escritura)
+CRB     EQU     $effc15       * de control B (escritura)
+RBB     EQU     $effc17       * buffer recepcion B  (lectura)
+TBB     EQU     $effc17       * buffer transmision B (escritura)
+IVR     EQU     $effc09       * de vector de interrupcion
+
+*********************INIT**********************
+
 INIT:
+
+*********************BUFFERS**********************
+
 	MOVE.L #BUS_RBA,RBA_IN_PUNT
 	MOVE.L #BUS_RBA,RBA_EXT_PUNT
 	MOVE.L #BUS_RBA,RBA_INT_PUNT
@@ -66,18 +76,35 @@ INIT:
 	MOVE.L #BUS_TBB,TBB_INT_PUNT
 	MOVE.L #BUS_TBB,TBB_FIN_PUNT
 	ADD.L  #1999,TBB_FIN_PUNT
-	RTS
+
+  *********************DECLARACIONES INIT**********************
+
+  MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
+  MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
+  MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
+  MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
+  MOVE.B #%00000000,MR2A     * Eco desactivado de modo A.
+  MOVE.B #%00000000,MR2B     * Eco desactivado de modo B.
+  MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
+  MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
+  MOVE.B #%00000000,ACR
+  MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
+  MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
+  MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
+  MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
+  MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
+  RTS *Retorno
 
   *********************LEECAR**********************
 
   LEECAR:
+    LINK A6,#0 *Creación del marco de pila
     BTST    #0,D0
     BEQ LA_LINEA
 
 LB_LINEA:
      CMP #$00000001,D0
      BEQ LB_REC
-
 LB_TRANS:
      MOVE.L TBB_IN_PUNT,A2
      MOVE.L TBB_EXT_PUNT,A3
@@ -167,19 +194,19 @@ RBA_RESET:
 
   VACIO:
     MOVE.L #$ffffffff,D0
-  FIN_LEECAR:RTS
+  FIN_LEECAR:
+    UNLK A6 *Destrucción del marco de pila
+    RTS
 
 ********************ESCCAR********************
 ESCCAR:
-
+    LINK A6,#0 *Creación del marco de pila
     BTST #0,D0
     BEQ EA_LINEA
-
 EB_LINEA:
 
     CMP #$00000001,D0
     BEQ ESC_REC_B
-
 ESC_TRANS_B:
     MOVE.L TBB_IN_PUNT,A2 *Se mete el puntero de Principio al A2
     MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de E al A3
@@ -200,12 +227,12 @@ TBB_NO_AUX:
     ADD.L #1,A4
     MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT    *Guarda la nueva direcion del puntero
-    RTS
+    BRA FIN_ESCCAR
 
 TBB_MAYOR:
     MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT           *Guarda la nueva direcion del puntero
-    RTS
+    BRA FIN_ESCCAR
 
 TBB_AUX:
     CMP.L A3,A2  * E=P?
@@ -213,7 +240,7 @@ TBB_AUX:
     MOVE.L  TBB_IN_PUNT,A4
     MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
     MOVE.L  A4,TBB_INT_PUNT  *Se Inicializa I con el valor de Principio
-    RTS
+    BRA FIN_ESCCAR
 
 ESC_REC_B:
   MOVE.L RBB_INT_PUNT,A4 *Se mete el puntero I en A4
@@ -235,12 +262,12 @@ RBB_NO_AUX:
   ADD.L #1,A4
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT    *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBB_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBB_AUX:
   CMP.L A3,A2  * E=P?
@@ -248,7 +275,7 @@ RBB_AUX:
   MOVE.L  RBB_IN_PUNT,A4
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,RBB_INT_PUNT  *Se Inicializa I con el valor de Principio
-  RTS
+  BRA FIN_ESCCAR
 
 EA_LINEA:
   CMP #$00000000,D0
@@ -274,12 +301,12 @@ TBA_NO_AUX:
   ADD.L #1,A4
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT    *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 TBA_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 TBA_AUX:
   CMP.L A3,A2  * E=P?
@@ -287,7 +314,7 @@ TBA_AUX:
   MOVE.L  TBA_IN_PUNT,A4
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,TBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-  RTS
+  BRA FIN_ESCCAR
 
 EA_REC:
   MOVE.L RBA_INT_PUNT,A4 *Se mete el puntero I en A4
@@ -309,12 +336,12 @@ RBA_NO_AUX:
   ADD.L #1,A4
   MOVE.B  D1,(A4)            *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT    *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBA_MAYOR:
   MOVE.B  D1,(A4)+           *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT           *Guarda la nueva direcion del puntero
-  RTS
+  BRA FIN_ESCCAR
 
 RBA_AUX:
   CMP.L A3,A2  * E=P?
@@ -322,22 +349,25 @@ RBA_AUX:
   MOVE.L  RBA_IN_PUNT,A4
   MOVE.B  D1,(A4)   *Push del registro D1 en el buffer
   MOVE.L  A4,RBA_INT_PUNT  *Se Inicializa I con el valor de Principio
-  RTS
+  BRA FIN_ESCCAR
 
 LLENO:
     MOVE.L #$ffffffff,D0
-    RTS
+    BRA FIN_ESCCAR
+FIN_ESCCAR:
+  UNLK A6
+  RTS
 
 ********************LINEA********************
 
 LINEA:
+  LINK A6,#0
   BTST #0,D0
   BEQ LINEA_A
 
 LINEA_B:
   CMP #$00000001,D0
   BEQ LINEAB_REC
-
 LINEAB_TRANS:
   MOVE.L TBB_IN_PUNT,A2
   MOVE.L TBB_EXT_PUNT,A3 *Se mete el puntero de Principio al A2
@@ -388,7 +418,7 @@ L_BUCLE:
    BRA L_BUCLE
 L_VACIO:
   CLR.L D0 *Se pone el contador a 0
-  RTS
+  BRA F_LINEA
 FIN_LINEA:
   MOVE.B (A3)+,D1 *POP del buffer
   CMP #13,D1 *D1=13?
@@ -397,40 +427,121 @@ FIN_LINEA:
   CMP A4,A5
   SUB.L #1,A5
   BNE L_RESET
-  CLR.L D0 *D1!=13, no es una linea, por tanto contador=0
+  CLR.L D0 *D1!=13, no es una linea, por tanto contador = 0
   BRA F_LINEA
 L_RESET:
   MOVE.L A2,A3
   BRA L_BUCLE
-F_LINEA: RTS
+F_LINEA:
+  UNLK A6
+  RTS
 
-*PRINT
-PRINT:RTS
-*SCAN
-SCAN:RTS
 
+
+********************SCAN********************
+  **recepcion
+SCAN:
+  LINK A6,#0  *Creación marco de pila
+  MOVE.L   8(A6),A1 *DIR Buffer
+  MOVE.W   12(A6),D0 *Descriptor
+  MOVE.W   14(A6),D2 *Tamaño
+  MOVE.W   D0,D4 *Guardamos el Descriptor
+  CMP #$0001,D0
+  BGT SCAN_ERROR
+  CMP #0000,D0
+  BLT SCAN_ERROR
+  BSR LINEA
+  MOVE.L D0,D3 *Número de caracteres que hay en la línea
+  CMP D2,D3 *Si el número de caracteres que hay en la línea es mayor que el tamaño tiene que devolver un error
+  BGT SCAN_TAMANO
+  CLR.L D2  *Se libera el 2 registro de Direccion
+SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
+  CMP D2,D3
+  BEQ SC_FIN
+  ADD.B #1,D2
+  MOVE.W D4,D0
+  BSR LEECAR
+  MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
+  BRA SCAN_BUCLE
+SCAN_ERROR:
+  MOVE.L #$ffffffff,D0
+  BRA SCAN_FIN
+SCAN_TAMANO:
+  MOVE.L #0,D0
+  BRA SCAN_FIN
+SC_FIN:
+  MOVE.L D3,D0 *Devolvemos el resultado en D0
+SCAN_FIN:
+  UNLK A6
+  RTS
+
+
+********************PRINT********************
+
+**transmision
+PRINT:
+  LINK A6,#0  *Creación marco de pila
+  MOVE.L   8(A6),A1 *DIR Buffer
+  MOVE.W   12(A6),D0 *Descriptor
+  MOVE.W   14(A6),D2 *Tamaño
+  CLR.L D4 *Contador
+  CMP #$0001,D0
+  BEQ PRINT_B
+  CMP #0000,D0
+  BEQ PRINT_A
+PRINT_ERROR:
+  MOVE.L #$ffffffff,D0 *Se retorna -1 en el registro D0
+  BRA PRINT_FIN
+PRINT_A:
+  MOVE.W #$0010,D0
+  BRA PRINT_BUCLE
+PRINT_B:
+  MOVE.W #$0011,D0
+PRINT_BUCLE:
+  CMP D4,D2
+  BEQ PR_FIN
+  ADD.B #1,D4 *Aumentamos Contador
+  MOVE.B (A1)+,D1
+  BSR ESCCAR
+
+  CMP #13,D1
+  BEQ PRINT_FLAG
+  CMP #$ffffffff,D0
+  BEQ PR_FIN
+  BRA PRINT_BUCLE
+
+PRINT_FLAG:
+  CMP #$0010,D0
+  BEQ FLAGA
+  MOVE.B #%00110000,IMR * Pone el bit 4 de IMR a 1
+  BRA PRINT_BUCLE
+FLAGA:
+  MOVE.B #%00000011,IMR * Pone el bit 0 de IMR a 1
+  BRA PRINT_BUCLE
+
+PR_FIN:
+  MOVE.L D4,D0 *Devolvemos el resultado en D0
+PRINT_FIN:
+  UNLK A6 *Se elimina el marco de pila
+  RTS
 *RTI
-RTI:RTS
-
-*Pruebas
+RTI:
+  RTS
 
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.L #$00000000,D0
-   MOVE.L #1,D1
-   BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000001,D0
-   MOVE.L #13,D1
-   BSR ESCCAR
-   BSR LEECAR
+   MOVE.W #$0000,-(A7)
+   MOVE.W #$0000,-(A7)
+   MOVE.L #$00001388,-(A7)
+   MOVE.L #$00001388,A4
+   MOVE.B #$69,(A4)+
+   MOVE.B #$6e,(A4)+
    MOVE.L #$00000011,D0
-   MOVE.L #2,D1
+   MOVE.B #$70,D1
    BSR ESCCAR
-   BSR LEECAR
-   MOVE.L #$00000010,D0
-   MOVE.L #13,D1
+   MOVE.B #$65,D1
    BSR ESCCAR
-   BSR LEECAR
+   MOVE.B #13,(A4)+
+   BSR PRINT
    BREAK
