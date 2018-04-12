@@ -29,6 +29,20 @@ TBB_IN_PUNT: DC.L 0
 TBB_FIN_PUNT:DC.L 0
 TBB_EXT_PUNT:DC.L 0
 TBB_INT_PUNT:DC.L 0
+*Copia IMR
+IMR_COPIA:DC.L 0
+
+BUFFER: DS.B 2100 * Buffer para lectura y escritura de caracteres
+CONTL: DC.W 0 * Contador de l´ıneas
+CONTC: DC.W 0 * Contador de caracteres
+DIRLEC: DC.L 0 * Direcci´on de lectura para SCAN
+DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
+TAME: DC.W 0 * Tama~no de escritura para print
+DESA: EQU 0 * Descriptor l´ınea A
+DESB: EQU 1 * Descriptor l´ınea B
+NLIN: EQU 10 * N´umero de l´ıneas a leer
+TAML: EQU 30 * Tama~no de l´ınea para SCAN
+TAMB: EQU 5 * Tama~no de bloque para PRINT
 
 *************** Copia del IMR ****************
 
@@ -546,15 +560,16 @@ FLAGA:
   BRA PRINT_FIN
 
 PR_FIN:
-  MOVE.L D4,D0 *Devolvemos el resultado en D0
   CMP #1,D6
   BEQ PRINT_FFLAG
 PRINT_FIN:
+  MOVE.L D4,D0 *Devolvemos el resultado en D0
   UNLK A6 *Se elimina el marco de pila
   RTS
 ERR_PRINT:
   UNLK A6 *Se elimina el marco de pila
   RTS
+
 *************** RTI ****************
 RTI:
   RTS
