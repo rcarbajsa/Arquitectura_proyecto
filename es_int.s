@@ -27,6 +27,8 @@ TBB_IN_PUNT: DC.L 0
 TBB_FIN_PUNT:DC.L 0
 TBB_EXT_PUNT:DC.L 0
 TBB_INT_PUNT:DC.L 0
+*Copia IMR
+IMR_COPIA:DC.L 0
 
 * Definicion de equivalencias
 
@@ -511,16 +513,23 @@ PRINT_BUCLE:
   BRA PRINT_BUCLE
 
 PRINT_FLAG:
+  MOVE.B #1,D6
+  BRA PRINT_BUCLE
+PRINT_FFLAG:
   CMP #$0010,D0
   BEQ FLAGA
-  MOVE.B #%00110000,IMR * Pone el bit 4 de IMR a 1
-  BRA PRINT_BUCLE
+  BSET #4,IMR_COPIA * Pone el bit 4 de IMR a 1
+  MOVE.B IMR_COPIA,IMR
+  BRA PRINT_FIN
 FLAGA:
-  MOVE.B #%00000011,IMR * Pone el bit 0 de IMR a 1
-  BRA PRINT_BUCLE
+  BSET #1,IMR_COPIA * Pone el bit 0 de IMR a 1
+  MOVE.B IMR_COPIA,IMR
+  BRA PRINT_FIN
 
 PR_FIN:
   MOVE.L D4,D0 *Devolvemos el resultado en D0
+  CMP #1,D6
+  BEQ PRINT_FFLAG
 PRINT_FIN:
   UNLK A6 *Se elimina el marco de pila
   RTS
@@ -531,17 +540,13 @@ RTI:
 *Programa Principal
 INICIO:
    BSR INIT
-   MOVE.W #$0000,-(A7)
-   MOVE.W #$0000,-(A7)
-   MOVE.L #$00001388,-(A7)
-   MOVE.L #$00001388,A4
-   MOVE.B #$69,(A4)+
-   MOVE.B #$6e,(A4)+
-   MOVE.L #$00000011,D0
+   MOVE.W #$0022,-(A7)
+   MOVE.W #$0001,-(A7)
+   MOVE.L #$800,-(A7)
+   MOVE.L #$00000001,D0
    MOVE.B #$70,D1
    BSR ESCCAR
-   MOVE.B #$65,D1
+   MOVE.B #$0d,D1
    BSR ESCCAR
-   MOVE.B #13,(A4)+
-   BSR PRINT
+   BSR SCAN
    BREAK
