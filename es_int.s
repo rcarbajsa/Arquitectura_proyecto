@@ -108,7 +108,7 @@ INIT:
   MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
   MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
   MOVE.B #%00100010,IMR_COPIA
-  MOVE.L RTI,$100           * Inicio de RTI en tabla de interrupciones
+  MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
   RTS *Retorno
 
   *********************LEECAR**********************

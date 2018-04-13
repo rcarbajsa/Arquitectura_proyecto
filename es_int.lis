@@ -108,7 +108,7 @@
 00002CC6  13FC 0040 00EFFC09               108    MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
 00002CCE  13FC 0022 00EFFC0B               109    MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
 00002CD6  11FC 0022 2388                   110    MOVE.B #%00100010,IMR_COPIA
-00002CDC  21F9 0000310A 0100               111    MOVE.L RTI,$100           * Inicio de RTI en tabla de interrupciones
+00002CDC  21FC 0000310A 0100               111    MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
 00002CE4  4E75                             112    RTS *Retorno
 00002CE6                                   113  
 00002CE6                                   114    *********************LEECAR**********************
