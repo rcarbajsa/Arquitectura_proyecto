@@ -569,44 +569,50 @@ RTI:
   BTST #0,D5    *Comprueba que este habilitada TxRDYA
   BEQ TxRDYA
   BTST #1,D5    *Comprueba que este habilitada RxRDYA FFULLA
-  BEQ FFULLA
+  BEQ RxRDYA
   BTST #4,D5    *Comprueba que este habilitada TxRDYB
   BEQ TxRDYB
   BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
-  BEQ FFULLB
+  BEQ RxRDYB
 
 TxRDYA:
-  BCLR #0,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
+  MOVE.L #2,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
   BSR LINEA
   CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
-  BNE FIN_RTI   * Hay una linea dentro del buffer interno
-  MOVE.B TBA,D1 * Se mete el caracter del buffer de transmision en D1
-  CLR.L D0  * Se resetea el D0
-  MOVE.B #00000010,D0 * Se mete un 2 en D0(TBA)
-  BSR ESCCAR * Se llama a ESCCAR
+  BEQ FIN_RTI   * Hay una linea dentro del buffer interno
+  MOVE.L #2,D0
+  BSR LEECAR
+  MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
+  BRA FIN_RTI
 
 TxRDYB:
-  BSET #0,D0 *pone a 1 el bit 0 de D0, se llama aL buffer TBB
+  MOVE.L #3,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
+  BSR LINEA
   CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
-  BNE FIN_RTI   * Hay una linea dentro del buffer interno
-  MOVE.B TBB,D1 * Se mete el caracter del buffer de transmision en D1
-  CLR.L D0  * Se resetea el D0
-  MOVE.B #00000011,D0 * Se mete un 3 en D0(TBB)
-  BSR ESCCAR * Se llama a ESCCAR
+  BEQ FIN_RTI   * Hay una linea dentro del buffer interno
+  MOVE.L #3,D0
+  BSR LEECAR
+  CMP #13,D0
+  BNE TA_CONT
+  MOVE.L D0,TBB * Se mete el caracter del buffer de transmision en D1
+  BRA FIN_RTI
 
-FFULLA:
+RxRDYA:
+  CLR.L D1
+  MOVE.L RBA,D1
+  MOVE.L #2,D0
+  BSR ESCCAR
+  CMP.L #$ffffffff,D0
+  *BEQ RB_FIN *Falta poner la excepcion de lleno
+  BRA FIN_RTI
+
+RxRDYB:
   CLR.L D1
   MOVE.B RBA,D1
+  MOVE.L #3,D0
   BSR ESCCAR
   CMP.L #$ffffffff,D0
-  BEQ FIN_RTI
-
-FFULLB:
-  CLR.L D1
-  MOVE.B RBB,D1
-  BSR ESCCAR
-  CMP.L #$ffffffff,D0
-  BEQ FIN_RTI
+  BRA FIN_RTI*Falta poner la excepcion de lleno
 
 FIN_RTI:
   ** Recuperamos los registros **
