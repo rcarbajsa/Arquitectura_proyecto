@@ -491,7 +491,6 @@ SCAN_FIN:
   UNLK A6
   RTS
 
-
 ********************PRINT********************
 
 **transmision
@@ -567,10 +566,24 @@ RTI:
   MOVE.L D6,-(A7)
   MOVE.B IMR_COPIA,D0
   AND.B ISR,D0
-
-
-
-
+  BTST #0,D0    *Comprueba que este habilitada TxRDYA
+  BTST #1,D0    *Comprueba que este habilitada TxRDYA FFULLA
+  BTST #4,D0    *Comprueba que este habilitada TxRDYB
+  BTST #5,D0    *Comprueba que este habilitada TxRDYB FFULLB
+FIN:
+  ** Recuperamos los registros **
+  MOVE.L (A7)+,A1
+  MOVE.L (A7)+,A2
+  MOVE.L (A7)+,A3
+  MOVE.L (A7)+,A4
+  MOVE.L (A7)+,A5
+  MOVE.L (A7)+,A6
+  MOVE.L (A7)+,D0
+  MOVE.L (A7)+,D1
+  MOVE.L (A7)+,D2
+  MOVE.L (A7)+,D3
+  MOVE.L (A7)+,D4
+  MOVE.L (A7)+,D6 
   RTS
 *Programa Principal
 INICIO:
