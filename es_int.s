@@ -108,7 +108,7 @@ INIT:
   MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
   MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
   MOVE.B #%00100010,IMR_COPIA
-  MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
+  MOVE.L RTI,$100           * Inicio de RTI en tabla de interrupciones
   RTS *Retorno
 
   *********************LEECAR**********************
@@ -564,13 +564,51 @@ RTI:
   MOVE.L D3,-(A7)
   MOVE.L D4,-(A7)
   MOVE.L D6,-(A7)
-  MOVE.B IMR_COPIA,D0
-  AND.B ISR,D0
-  BTST #0,D0    *Comprueba que este habilitada TxRDYA
-  BTST #1,D0    *Comprueba que este habilitada TxRDYA FFULLA
-  BTST #4,D0    *Comprueba que este habilitada TxRDYB
-  BTST #5,D0    *Comprueba que este habilitada TxRDYB FFULLB
-FIN:
+  MOVE.B IMR_COPIA,D5
+  AND.B ISR,D5
+  BTST #0,D5    *Comprueba que este habilitada TxRDYA
+  BEQ TxRDYA
+  BTST #1,D5    *Comprueba que este habilitada RxRDYA FFULLA
+  BEQ FFULLA
+  BTST #4,D5    *Comprueba que este habilitada TxRDYB
+  BEQ TxRDYB
+  BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
+  BEQ FFULLB
+
+TxRDYA:
+  BCLR #0,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
+  BSR LINEA
+  CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
+  BNE FIN_RTI   * Hay una linea dentro del buffer interno
+  MOVE.B TBA,D1 * Se mete el caracter del buffer de transmision en D1
+  CLR.L D0  * Se resetea el D0
+  MOVE.B #00000010,D0 * Se mete un 2 en D0(TBA)
+  BSR ESCCAR * Se llama a ESCCAR
+
+TxRDYB:
+  BSET #0,D0 *pone a 1 el bit 0 de D0, se llama aL buffer TBB
+  CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
+  BNE FIN_RTI   * Hay una linea dentro del buffer interno
+  MOVE.B TBB,D1 * Se mete el caracter del buffer de transmision en D1
+  CLR.L D0  * Se resetea el D0
+  MOVE.B #00000011,D0 * Se mete un 3 en D0(TBB)
+  BSR ESCCAR * Se llama a ESCCAR
+
+FFULLA:
+  CLR.L D1
+  MOVE.B RBA,D1
+  BSR ESCCAR
+  CMP.L #$ffffffff,D0
+  BEQ FIN_RTI
+
+FFULLB:
+  CLR.L D1
+  MOVE.B RBB,D1
+  BSR ESCCAR
+  CMP.L #$ffffffff,D0
+  BEQ FIN_RTI
+
+FIN_RTI:
   ** Recuperamos los registros **
   MOVE.L (A7)+,A1
   MOVE.L (A7)+,A2
@@ -583,10 +621,67 @@ FIN:
   MOVE.L (A7)+,D2
   MOVE.L (A7)+,D3
   MOVE.L (A7)+,D4
-  MOVE.L (A7)+,D6 
-  RTS
+  MOVE.L (A7)+,D6
+  RTE
 *Programa Principal
-INICIO:
-   BSR INIT
-   BSR RTI
-   BREAK
+INICIO: * Manejadores de excepciones
+  MOVE.L  #BUS_ERROR,8  * Bus error handler
+  MOVE.L  #ADDRESS_ER,12 * Address error handler
+  MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
+  MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
+
+  BSR INIT
+  MOVE.W #$2000,SR
+
+BUCPR:
+  MOVE.W #0,CONTC
+  MOVE.W #NLIN,CONTL
+  MOVE.L #BUFFER,DIRLEC
+OTRAL:
+  MOVE.W #TAML,-(A7)
+  MOVE.W #DESA,-(A7)
+  MOVE.L DIRLEC,-(A7)
+ESPL:
+  BSR SCAN
+  CMP.L #0,D0
+  BEQ ESPL
+  ADD.L #8,A7
+  ADD.L D0,DIRLEC
+  ADD.W D0,CONTC
+  SUB.W #1,CONTL
+  BNE OTRAL
+
+  MOVE.L #BUFFER,DIRLEC
+OTRAE:
+  MOVE.W #TAMB,TAME
+ESPE:
+  MOVE.W TAME,-(A7)
+  MOVE.W #DESB,-(A7)
+  MOVE.L DIRLEC,-(A7)
+  BSR PRINT
+  ADD.L #8,A7
+  ADD.L D0,DIRLEC
+  SUB.W D0,CONTC
+  BEQ SALIR
+  SUB.W D0,TAME
+  BNE ESPE
+  CMP.W #TAMB,CONTC
+  BHI OTRAE
+  MOVE.W CONTC,TAME
+  BRA ESPE
+SALIR:
+  BRA BUCPR
+FIN:
+  BREAK
+BUS_ERROR:
+  BREAK
+  NOP
+ADDRESS_ER:
+  BREAK
+  NOP
+ILLEGAL_IN:
+  BREAK
+  NOP
+PRIV_VIOLT:
+  BREAK
+  NOP
