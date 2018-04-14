@@ -98,8 +98,8 @@ INIT:
   MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
   MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
   MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
-  MOVE.B #%00000000,MR2A     * Eco desactivado de modo A.
-  MOVE.B #%00000000,MR2B     * Eco desactivado de modo B.
+  MOVE.B #%00000000,MR1A     * Eco desactivado de modo A.
+  MOVE.B #%00000000,MR1B     * Eco desactivado de modo B.
   MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
   MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
   MOVE.B #%00000000,ACR
@@ -108,7 +108,9 @@ INIT:
   MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
   MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
   MOVE.B #%00100010,IMR_COPIA
-  MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
+  LEA      RTI,A1               * Dirección de la tabla de vectores
+  MOVE.L   #$100,A2             * $100 es la dirección siguiente al V.I.
+  MOVE.L   A1,(A2)              * Actualización de la dirección de la tabla de vectores
   RTS *Retorno
 
   *********************LEECAR**********************
@@ -586,6 +588,8 @@ TxRDYA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
+  MOVE.L #10,TBA
+ TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
@@ -605,7 +609,9 @@ TxRDYB:
   CMP.L #$FFFFFFFF,D0 * SI es -1, el buffer esta vacio
   BEQ F_TxRDYB  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
-  BNE TA_CONT
+  BNE TB_CONT
+  MOVE.L #10,TBB
+ TB_CONT:
   MOVE.L D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
@@ -655,7 +661,7 @@ INICIO: * Manejadores de excepciones
   MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
   MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
 
-BSR INIT
+  BSR INIT
   MOVE.W #$2000,SR
 
 BUCPR:
