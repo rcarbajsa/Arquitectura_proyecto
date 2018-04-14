@@ -586,6 +586,8 @@ TxRDYA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
+  MOVE.L #10,TBA
+ TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
@@ -605,7 +607,9 @@ TxRDYB:
   CMP.L #$FFFFFFFF,D0 * SI es -1, el buffer esta vacio
   BEQ F_TxRDYB  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
-  BNE TA_CONT
+  BNE TB_CONT
+  MOVE.L #10,TBB
+ TB_CONT:
   MOVE.L D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
