@@ -1,7 +1,7 @@
 00000000                                     1  * Inicializa el SP y el PC
 00000000                                     2          ORG     $0
 00000000  00008000                           3          DC.L    $8000           *Pila
-00000004  000031D2                           4          DC.L    INICIO          *PC
+00000004  000031DE                           4          DC.L    INICIO          *PC
 00000400                                     5          ORG     $400
 00000400                                     6  
 00000400                                     7  	*Buffers
@@ -569,122 +569,130 @@
 0000312C  0805 0000                        569    BTST #0,D5    *Comprueba que este habilitada TxRDYA
 00003130  6700 001A                        570    BEQ TxRDYA
 00003134  0805 0001                        571    BTST #1,D5    *Comprueba que este habilitada RxRDYA FFULLA
-00003138  6700 0052                        572    BEQ FFULLA
+00003138  6700 005A                        572    BEQ RxRDYA
 0000313C  0805 0004                        573    BTST #4,D5    *Comprueba que este habilitada TxRDYB
-00003140  6700 002C                        574    BEQ TxRDYB
+00003140  6700 002A                        574    BEQ TxRDYB
 00003144  0805 0005                        575    BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
-00003148  6700 0058                        576    BEQ FFULLB
+00003148  6700 0062                        576    BEQ RxRDYB
 0000314C                                   577  
 0000314C                                   578  TxRDYA:
-0000314C  0880 0000                        579    BCLR #0,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
-00003150  6100 FE14                        580    BSR LINEA
-00003154  B0BC 00000000                    581    CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
-0000315A  6600 005C                        582    BNE FIN_RTI   * Hay una linea dentro del buffer interno
-0000315E  1239 00EFFC07                    583    MOVE.B TBA,D1 * Se mete el caracter del buffer de transmision en D1
-00003164  4280                             584    CLR.L D0  * Se resetea el D0
-00003166  103C 000A                        585    MOVE.B #00000010,D0 * Se mete un 2 en D0(TBA)
-0000316A  6100 FC84                        586    BSR ESCCAR * Se llama a ESCCAR
-0000316E                                   587  
-0000316E                                   588  TxRDYB:
-0000316E  08C0 0000                        589    BSET #0,D0 *pone a 1 el bit 0 de D0, se llama aL buffer TBB
-00003172  B0BC 00000000                    590    CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
-00003178  6600 003E                        591    BNE FIN_RTI   * Hay una linea dentro del buffer interno
-0000317C  1239 00EFFC17                    592    MOVE.B TBB,D1 * Se mete el caracter del buffer de transmision en D1
-00003182  4280                             593    CLR.L D0  * Se resetea el D0
-00003184  103C 000B                        594    MOVE.B #00000011,D0 * Se mete un 3 en D0(TBB)
-00003188  6100 FC66                        595    BSR ESCCAR * Se llama a ESCCAR
-0000318C                                   596  
-0000318C                                   597  FFULLA:
-0000318C  4281                             598    CLR.L D1
-0000318E  1239 00EFFC07                    599    MOVE.B RBA,D1
-00003194  6100 FC5A                        600    BSR ESCCAR
-00003198  B0BC FFFFFFFF                    601    CMP.L #$ffffffff,D0
-0000319E  6700 0018                        602    BEQ FIN_RTI
-000031A2                                   603  
-000031A2                                   604  FFULLB:
-000031A2  4281                             605    CLR.L D1
-000031A4  1239 00EFFC17                    606    MOVE.B RBB,D1
-000031AA  6100 FC44                        607    BSR ESCCAR
-000031AE  B0BC FFFFFFFF                    608    CMP.L #$ffffffff,D0
-000031B4  6700 0002                        609    BEQ FIN_RTI
-000031B8                                   610  
-000031B8                                   611  FIN_RTI:
-000031B8                                   612    ** Recuperamos los registros **
-000031B8  225F                             613    MOVE.L (A7)+,A1
-000031BA  245F                             614    MOVE.L (A7)+,A2
-000031BC  265F                             615    MOVE.L (A7)+,A3
-000031BE  285F                             616    MOVE.L (A7)+,A4
-000031C0  2A5F                             617    MOVE.L (A7)+,A5
-000031C2  2C5F                             618    MOVE.L (A7)+,A6
-000031C4  201F                             619    MOVE.L (A7)+,D0
-000031C6  221F                             620    MOVE.L (A7)+,D1
-000031C8  241F                             621    MOVE.L (A7)+,D2
-000031CA  261F                             622    MOVE.L (A7)+,D3
-000031CC  281F                             623    MOVE.L (A7)+,D4
-000031CE  2C1F                             624    MOVE.L (A7)+,D6
-000031D0  4E73                             625    RTE
-000031D2                                   626  *Programa Principal
-000031D2                                   627  INICIO: * Manejadores de excepciones
-000031D2  21FC 0000327C 0008               628    MOVE.L  #BUS_ERROR,8  * Bus error handler
-000031DA  21FC 00003280 000C               629    MOVE.L  #ADDRESS_ER,12 * Address error handler
-000031E2  21FC 00003284 0010               630    MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
-000031EA  21FC 00003288 0020               631    MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
-000031F2                                   632  
-000031F2  6100 F9DA                        633    BSR INIT
-000031F6  46FC 2000                        634    MOVE.W #$2000,SR
-000031FA                                   635  
-000031FA                                   636  BUCPR:
-000031FA  31FC 0000 2BC2                   637    MOVE.W #0,CONTC
-00003200  31FC 000A 2BC0                   638    MOVE.W #NLIN,CONTL
-00003206  21FC 0000238C 2BC4               639    MOVE.L #BUFFER,DIRLEC
-0000320E                                   640  OTRAL:
-0000320E  3F3C 001E                        641    MOVE.W #TAML,-(A7)
-00003212  3F3C 0000                        642    MOVE.W #DESA,-(A7)
-00003216  2F38 2BC4                        643    MOVE.L DIRLEC,-(A7)
-0000321A                                   644  ESPL:
-0000321A  6100 FE04                        645    BSR SCAN
-0000321E  B0BC 00000000                    646    CMP.L #0,D0
-00003224  67F4                             647    BEQ ESPL
-00003226  508F                             648    ADD.L #8,A7
-00003228  D1B8 2BC4                        649    ADD.L D0,DIRLEC
-0000322C  D178 2BC2                        650    ADD.W D0,CONTC
-00003230  5378 2BC0                        651    SUB.W #1,CONTL
-00003234  66D8                             652    BNE OTRAL
-00003236                                   653  
-00003236  21FC 0000238C 2BC4               654    MOVE.L #BUFFER,DIRLEC
-0000323E                                   655  OTRAE:
-0000323E  31FC 0005 2BCC                   656    MOVE.W #TAMB,TAME
-00003244                                   657  ESPE:
-00003244  3F38 2BCC                        658    MOVE.W TAME,-(A7)
-00003248  3F3C 0001                        659    MOVE.W #DESB,-(A7)
-0000324C  2F38 2BC4                        660    MOVE.L DIRLEC,-(A7)
-00003250  6100 FE22                        661    BSR PRINT
-00003254  508F                             662    ADD.L #8,A7
-00003256  D1B8 2BC4                        663    ADD.L D0,DIRLEC
-0000325A  9178 2BC2                        664    SUB.W D0,CONTC
-0000325E  6700 0018                        665    BEQ SALIR
-00003262  9178 2BCC                        666    SUB.W D0,TAME
-00003266  66DC                             667    BNE ESPE
-00003268  0C78 0005 2BC2                   668    CMP.W #TAMB,CONTC
-0000326E  62CE                             669    BHI OTRAE
-00003270  31F8 2BC2 2BCC                   670    MOVE.W CONTC,TAME
-00003276  60CC                             671    BRA ESPE
-00003278                                   672  SALIR:
-00003278  6080                             673    BRA BUCPR
-0000327A                                   674  FIN:
-0000327A  4848                             675    BREAK
-0000327C                                   676  BUS_ERROR:
-0000327C  4848                             677    BREAK
-0000327E  4E71                             678    NOP
-00003280                                   679  ADDRESS_ER:
-00003280  4848                             680    BREAK
-00003282  4E71                             681    NOP
-00003284                                   682  ILLEGAL_IN:
-00003284  4848                             683    BREAK
-00003286  4E71                             684    NOP
-00003288                                   685  PRIV_VIOLT:
-00003288  4848                             686    BREAK
-0000328A  4E71                             687    NOP
+0000314C  7002                             579    MOVE.L #2,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
+0000314E  6100 FE16                        580    BSR LINEA
+00003152  B0BC 00000000                    581    CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
+00003158  6700 006A                        582    BEQ FIN_RTI   * Hay una linea dentro del buffer interno
+0000315C  7002                             583    MOVE.L #2,D0
+0000315E  6100 FB86                        584    BSR LEECAR
+00003162  13C0 00EFFC07                    585    MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
+00003168  6000 005A                        586    BRA FIN_RTI
+0000316C                                   587  
+0000316C                                   588  TxRDYB:
+0000316C  7003                             589    MOVE.L #3,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
+0000316E  6100 FDF6                        590    BSR LINEA
+00003172  B0BC 00000000                    591    CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
+00003178  6700 004A                        592    BEQ FIN_RTI   * Hay una linea dentro del buffer interno
+0000317C  7003                             593    MOVE.L #3,D0
+0000317E  6100 FB66                        594    BSR LEECAR
+00003182  B07C 000D                        595    CMP #13,D0
+00003186  6600 CE78                        596    BNE TA_CONT
+ERROR: Undefined symbol
+0000318A  23C0 00EFFC17                    597    MOVE.L D0,TBB * Se mete el caracter del buffer de transmision en D1
+00003190  6000 0032                        598    BRA FIN_RTI
+00003194                                   599  
+00003194                                   600  RxRDYA:
+00003194  4281                             601    CLR.L D1
+00003196  2239 00EFFC07                    602    MOVE.L RBA,D1
+0000319C  7002                             603    MOVE.L #2,D0
+0000319E  6100 FC50                        604    BSR ESCCAR
+000031A2  B0BC FFFFFFFF                    605    CMP.L #$ffffffff,D0
+000031A8                                   606    *BEQ RB_FIN *Falta poner la excepcion de lleno
+000031A8  6000 001A                        607    BRA FIN_RTI
+000031AC                                   608  
+000031AC                                   609  RxRDYB:
+000031AC  4281                             610    CLR.L D1
+000031AE  1239 00EFFC07                    611    MOVE.B RBA,D1
+000031B4  7003                             612    MOVE.L #3,D0
+000031B6  6100 FC38                        613    BSR ESCCAR
+000031BA  B0BC FFFFFFFF                    614    CMP.L #$ffffffff,D0
+000031C0  6000 CE3E                        615    BRA FIN_RTI*Falta poner la excepcion de lleno
+ERROR: Undefined symbol
+000031C4                                   616  
+000031C4                                   617  FIN_RTI:
+000031C4                                   618    ** Recuperamos los registros **
+000031C4  225F                             619    MOVE.L (A7)+,A1
+000031C6  245F                             620    MOVE.L (A7)+,A2
+000031C8  265F                             621    MOVE.L (A7)+,A3
+000031CA  285F                             622    MOVE.L (A7)+,A4
+000031CC  2A5F                             623    MOVE.L (A7)+,A5
+000031CE  2C5F                             624    MOVE.L (A7)+,A6
+000031D0  201F                             625    MOVE.L (A7)+,D0
+000031D2  221F                             626    MOVE.L (A7)+,D1
+000031D4  241F                             627    MOVE.L (A7)+,D2
+000031D6  261F                             628    MOVE.L (A7)+,D3
+000031D8  281F                             629    MOVE.L (A7)+,D4
+000031DA  2C1F                             630    MOVE.L (A7)+,D6
+000031DC  4E73                             631    RTE
+000031DE                                   632  *Programa Principal
+000031DE                                   633  INICIO: * Manejadores de excepciones
+000031DE  21FC 00003288 0008               634    MOVE.L  #BUS_ERROR,8  * Bus error handler
+000031E6  21FC 0000328C 000C               635    MOVE.L  #ADDRESS_ER,12 * Address error handler
+000031EE  21FC 00003290 0010               636    MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
+000031F6  21FC 00003294 0020               637    MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
+000031FE                                   638  
+000031FE  6100 F9CE                        639    BSR INIT
+00003202  46FC 2000                        640    MOVE.W #$2000,SR
+00003206                                   641  
+00003206                                   642  BUCPR:
+00003206  31FC 0000 2BC2                   643    MOVE.W #0,CONTC
+0000320C  31FC 000A 2BC0                   644    MOVE.W #NLIN,CONTL
+00003212  21FC 0000238C 2BC4               645    MOVE.L #BUFFER,DIRLEC
+0000321A                                   646  OTRAL:
+0000321A  3F3C 001E                        647    MOVE.W #TAML,-(A7)
+0000321E  3F3C 0000                        648    MOVE.W #DESA,-(A7)
+00003222  2F38 2BC4                        649    MOVE.L DIRLEC,-(A7)
+00003226                                   650  ESPL:
+00003226  6100 FDF8                        651    BSR SCAN
+0000322A  B0BC 00000000                    652    CMP.L #0,D0
+00003230  67F4                             653    BEQ ESPL
+00003232  508F                             654    ADD.L #8,A7
+00003234  D1B8 2BC4                        655    ADD.L D0,DIRLEC
+00003238  D178 2BC2                        656    ADD.W D0,CONTC
+0000323C  5378 2BC0                        657    SUB.W #1,CONTL
+00003240  66D8                             658    BNE OTRAL
+00003242                                   659  
+00003242  21FC 0000238C 2BC4               660    MOVE.L #BUFFER,DIRLEC
+0000324A                                   661  OTRAE:
+0000324A  31FC 0005 2BCC                   662    MOVE.W #TAMB,TAME
+00003250                                   663  ESPE:
+00003250  3F38 2BCC                        664    MOVE.W TAME,-(A7)
+00003254  3F3C 0001                        665    MOVE.W #DESB,-(A7)
+00003258  2F38 2BC4                        666    MOVE.L DIRLEC,-(A7)
+0000325C  6100 FE16                        667    BSR PRINT
+00003260  508F                             668    ADD.L #8,A7
+00003262  D1B8 2BC4                        669    ADD.L D0,DIRLEC
+00003266  9178 2BC2                        670    SUB.W D0,CONTC
+0000326A  6700 0018                        671    BEQ SALIR
+0000326E  9178 2BCC                        672    SUB.W D0,TAME
+00003272  66DC                             673    BNE ESPE
+00003274  0C78 0005 2BC2                   674    CMP.W #TAMB,CONTC
+0000327A  62CE                             675    BHI OTRAE
+0000327C  31F8 2BC2 2BCC                   676    MOVE.W CONTC,TAME
+00003282  60CC                             677    BRA ESPE
+00003284                                   678  SALIR:
+00003284  6080                             679    BRA BUCPR
+00003286                                   680  FIN:
+00003286  4848                             681    BREAK
+00003288                                   682  BUS_ERROR:
+00003288  4848                             683    BREAK
+0000328A  4E71                             684    NOP
+0000328C                                   685  ADDRESS_ER:
+0000328C  4848                             686    BREAK
+0000328E  4E71                             687    NOP
+00003290                                   688  ILLEGAL_IN:
+00003290  4848                             689    BREAK
+00003292  4E71                             690    NOP
+00003294                                   691  PRIV_VIOLT:
+00003294  4848                             692    BREAK
+00003296  4E71                             693    NOP
 
-No errors detected
+2 errors detected
 No warnings generated

@@ -576,26 +576,44 @@ RTI:
   BEQ RxRDYB
 
 TxRDYA:
-  MOVE.L #2,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
+  MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LINEA
-  CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
+  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
   BEQ FIN_RTI   * Hay una linea dentro del buffer interno
-  MOVE.L #2,D0
+  MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LEECAR
+  CMP.L #$FFFFFFFF,D0 * Si es -1, el buffer esta vacio
+  BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
+  CMP #13,D0    * Se comprueba si habia un 13
+  BNE TA_CONT
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
+F_TxRDYA:
+  BCLR #0,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYA
+  MOVE.B IMR_COPIA,IMR
+  CLR.L D0
+  BRA RTI
+
 TxRDYB:
-  MOVE.L #3,D0 *pone a 0 el bit 0 de D0, se llama aL buffer TBA
+  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LINEA
-  CMP.L #0,D0 * Se comprueba si hay una linea dentro del buffer
+  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
   BEQ FIN_RTI   * Hay una linea dentro del buffer interno
-  MOVE.L #3,D0
+  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LEECAR
-  CMP #13,D0
+  CMP.L #$FFFFFFFF,D0 * SI es -1, el buffer esta vacio
+  BEQ F_TxRDYB  * Si es -1, se deshabilitan las interrupciones
+  CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
   MOVE.L D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
+
+F_TxRDYB:
+  BCLR #4,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYB
+  MOVE.B IMR_COPIA,IMR
+  CLR.L D0
+  BRA RTI
 
 RxRDYA:
   CLR.L D1
@@ -612,7 +630,7 @@ RxRDYB:
   MOVE.L #3,D0
   BSR ESCCAR
   CMP.L #$ffffffff,D0
-  BRA FIN_RTI*Falta poner la excepcion de lleno
+  BRA FIN_RTI   *Falta poner la excepcion de lleno
 
 FIN_RTI:
   ** Recuperamos los registros **
@@ -629,6 +647,7 @@ FIN_RTI:
   MOVE.L (A7)+,D4
   MOVE.L (A7)+,D6
   RTE
+
 *Programa Principal
 INICIO: * Manejadores de excepciones
   MOVE.L  #BUS_ERROR,8  * Bus error handler
@@ -636,7 +655,7 @@ INICIO: * Manejadores de excepciones
   MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
   MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
 
-  BSR INIT
+BSR INIT
   MOVE.W #$2000,SR
 
 BUCPR:
