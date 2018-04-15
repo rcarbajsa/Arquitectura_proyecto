@@ -35,7 +35,7 @@ CONTL: DC.W 0 * Contador de l´ıneas
 CONTC: DC.W 0 * Contador de caracteres
 DIRLEC: DC.L 0 * Direcci´on de lectura para SCAN
 DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
-TAME: DC.W 0 * Tama~no de escritura para print
+TAME: DC.W 0 * Tamano de escritura para print
 DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
 NLIN: EQU 10 * N´umero de l´ıneas a leer
@@ -77,8 +77,8 @@ INIT:
   MOVE.B   #%00000101,CRA       * Transmision y recepcion activados en A.
   MOVE.B   #%00000101,CRB       * Transmision y recepcion activados en B.
   MOVE.B   #$40,IVR             * Vector de interrupción 40.
-  MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
-  MOVE.B #%00100010,IMR_COPIA
+  MOVE.B   #%00100010,IMR      * Habilita las interrupciones de A y B
+  MOVE.B   #%00100010,IMR_COPIA
   LEA      RTI,A1               * Dirección de la tabla de vectores
   MOVE.L   #$100,A2             * $100 es la dirección siguiente al V.I.
   MOVE.L   A1,(A2)              * Actualización de la dirección de la tabla de vectores
@@ -219,7 +219,6 @@ ESCCAR:
     BTST #0,D0
     BEQ EA_LINEA
 EB_LINEA:
-
     CMP #$00000001,D0
     BEQ ESC_REC_B
 ESC_TRANS_B:
@@ -620,20 +619,17 @@ F_TxRDYB:
 
 RxRDYA:
   CLR.L D1
-  MOVE.L RBA,D1
-  MOVE.L #2,D0
+  MOVE.B RBA,D1
+  MOVE.L #0,D0
   BSR ESCCAR
-  CMP.L #$ffffffff,D0
-  *BEQ RB_FIN *Falta poner la excepcion de lleno
   BRA FIN_RTI
 
 RxRDYB:
   CLR.L D1
-  MOVE.B RBA,D1
-  MOVE.L #3,D0
+  MOVE.B RBB,D1
+  MOVE.L #1,D0
   BSR ESCCAR
-  CMP.L #$ffffffff,D0
-  BRA FIN_RTI   *Falta poner la excepcion de lleno
+  BRA FIN_RTI
 
 FIN_RTI:
   ** Recuperamos los registros **
