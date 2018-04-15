@@ -5,30 +5,30 @@
         ORG     $400
 
 	*Buffers
-BUS_RBA:DS.B 2002
-BUS_RBB:DS.B 2002
-BUS_TBA:DS.B 2002
-BUS_TBB:DS.B 2002
+BUS_RBA:DS.B 2001
+BUS_RBB:DS.B 2001
+BUS_TBA:DS.B 2001
+BUS_TBB:DS.B 2001
 
 	*Punteros
-RBA_IN_PUNT: DC.L 0
-RBA_FIN_PUNT:DC.L 0
-RBA_EXT_PUNT:DC.L 0
-RBA_INT_PUNT:DC.L 0
-RBB_IN_PUNT: DC.L 0
-RBB_FIN_PUNT:DC.L 0
-RBB_EXT_PUNT:DC.L 0
-RBB_INT_PUNT:DC.L 0
-TBA_IN_PUNT: DC.L 0
-TBA_FIN_PUNT:DC.L 0
-TBA_EXT_PUNT:DC.L 0
-TBA_INT_PUNT:DC.L 0
-TBB_IN_PUNT: DC.L 0
-TBB_FIN_PUNT:DC.L 0
-TBB_EXT_PUNT:DC.L 0
-TBB_INT_PUNT:DC.L 0
+RBA_IN_PUNT: DS.B 4
+RBA_FIN_PUNT:DS.B 4
+RBA_EXT_PUNT:DS.B 4
+RBA_INT_PUNT:DS.B 4
+RBB_IN_PUNT: DS.B 4
+RBB_FIN_PUNT:DS.B 4
+RBB_EXT_PUNT:DS.B 4
+RBB_INT_PUNT:DS.B 4
+TBA_IN_PUNT: DS.B 4
+TBA_FIN_PUNT:DS.B 4
+TBA_EXT_PUNT:DS.B 4
+TBA_INT_PUNT:DS.B 4
+TBB_IN_PUNT: DS.B 4
+TBB_FIN_PUNT:DS.B 4
+TBB_EXT_PUNT:DS.B 4
+TBB_INT_PUNT:DS.B 4
 *Copia IMR
-IMR_COPIA:DC.L 0
+IMR_COPIA:DS.B 2
 
 BUFFER: DS.B 2100 * Buffer para lectura y escritura de caracteres
 CONTL: DC.W 0 * Contador de l´ıneas
@@ -45,74 +45,71 @@ TAMB: EQU 5 * Tama~no de bloque para PRINT
 
 * Definicion de equivalencias
 
-MR1A    EQU     $effc01       * de modo A (escritura)
-MR2A    EQU     $effc01       * de modo A (2 escritura)
-SRA     EQU     $effc03       * de estado A (lectura)
-CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
-CRA     EQU     $effc05       * de control A (escritura)
-RBA     EQU     $effc07       * buffer recepcion A  (lectura)
-TBA     EQU     $effc07       * buffer transmision A (escritura)
-ACR     EQU     $effc09       * de control auxiliar
-IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
-ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
-
-MR1B    EQU     $effc11       * de modo B (escritura)
-MR2B    EQU     $effc11       * de modo B (2 escritura)
-SRB     EQU     $effc13       * de estado B (lectura)
-CSRB    EQU     $effc13       * de seleccion de reloj B (escritura)
-CRB     EQU     $effc15       * de control B (escritura)
-RBB     EQU     $effc17       * buffer recepcion B  (lectura)
-TBB     EQU     $effc17       * buffer transmision B (escritura)
-IVR     EQU     $effc09       * de vector de interrupcion
+MR1A  EQU  $effc01  * de modo A (escritura)
+SRA   EQU  $effc03  * de estado A (lectura)
+CRA   EQU  $effc05  * de control A (escritura)
+TBA   EQU  $effc07  * buffer transmision A (escritura)
+RBA   EQU  $effc07  * buffer recepcion A  (lectura)
+ACR   EQU  $effc09  * de control auxiliar
+IMR   EQU  $effc0B  * de mascara de interrupcion A (escritura)
+MR1B  EQU  $effc11  * de modo B (escritura)
+SRB   EQU  $effc13  * de estado B (lectura)
+CRB   EQU  $effc15  * de control B (escritura)
+TBB   EQU  $effc17  * buffer transmision B (escritura)
+RBB   EQU  $effc17  * buffer recepcion B (lectura)
+IVR   EQU  $effc19  * del vector de interrupci�n
 
 *********************INIT**********************
 
 INIT:
 
-*********************BUFFERS**********************
 
-	MOVE.L #BUS_RBA,RBA_IN_PUNT
-	MOVE.L #BUS_RBA,RBA_EXT_PUNT
-	MOVE.L #BUS_RBA,RBA_INT_PUNT
-	MOVE.L #BUS_RBA,RBA_FIN_PUNT
-	ADD.L  #1999,RBA_FIN_PUNT
-	MOVE.L #BUS_RBB,RBB_IN_PUNT
-	MOVE.L #BUS_RBB,RBB_EXT_PUNT
-	MOVE.L #BUS_RBB,RBB_INT_PUNT
-	MOVE.L #BUS_RBB,RBB_FIN_PUNT
-	ADD.L  #1999,RBB_FIN_PUNT
-	MOVE.L #BUS_TBA,TBA_IN_PUNT
-	MOVE.L #BUS_TBA,TBA_EXT_PUNT
-	MOVE.L #BUS_TBA,TBA_INT_PUNT
-	MOVE.L #BUS_TBA,TBA_FIN_PUNT
-	ADD.L  #1999,TBA_FIN_PUNT
-	MOVE.L #BUS_TBB,TBB_IN_PUNT
-	MOVE.L #BUS_TBB,TBB_EXT_PUNT
-	MOVE.L #BUS_TBB,TBB_INT_PUNT
-	MOVE.L #BUS_TBB,TBB_FIN_PUNT
-	ADD.L  #1999,TBB_FIN_PUNT
 
   *********************DECLARACIONES INIT**********************
 
-  MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
-  MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
-  MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
-  MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
-  MOVE.B #%00000000,MR1A     * Eco desactivado de modo A.
-  MOVE.B #%00000000,MR1B     * Eco desactivado de modo B.
-  MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
-  MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
-  MOVE.B #%00000000,ACR
-  MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
-  MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
-  MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
+  MOVE.B   #%00000011,MR1A      * 8 bits por carac. en A y solicita una int. por carac.
+  MOVE.B   #%00000000,MR1A      * Eco desactivado en A
+  MOVE.B   #%00000011,MR1B      * 8 bits por caract. en B y solicita una int. por carac.
+  MOVE.B   #%00000000,MR1B      * Eco desactivado en B
+  MOVE.B   #%11001100,SRA       * Velocidad = 38400 bps.
+  MOVE.B   #%11001100,SRB       * Velocidad = 38400 bps.
+  MOVE.B   #%00000000,ACR       * Selección del primer conjunto de velocidades.
+  MOVE.B   #%00000101,CRA       * Transmision y recepcion activados en A.
+  MOVE.B   #%00000101,CRB       * Transmision y recepcion activados en B.
+  MOVE.B   #$40,IVR             * Vector de interrupción 40.
   MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
   MOVE.B #%00100010,IMR_COPIA
   LEA      RTI,A1               * Dirección de la tabla de vectores
   MOVE.L   #$100,A2             * $100 es la dirección siguiente al V.I.
   MOVE.L   A1,(A2)              * Actualización de la dirección de la tabla de vectores
-  RTS *Retorno
 
+  *********************BUFFERS**********************
+  LEA    BUS_RBA,A1
+  MOVE.L A1,RBA_IN_PUNT
+	MOVE.L A1,RBA_EXT_PUNT
+	MOVE.L A1,RBA_INT_PUNT
+	MOVE.L A1,RBA_FIN_PUNT
+	ADD.L  #1999,RBA_FIN_PUNT
+  LEA    BUS_RBB,A1
+	MOVE.L A1,RBB_IN_PUNT
+	MOVE.L A1,RBB_EXT_PUNT
+	MOVE.L A1,RBB_INT_PUNT
+	MOVE.L A1,RBB_FIN_PUNT
+	ADD.L  #1999,RBB_FIN_PUNT
+  LEA    BUS_TBA,A1
+	MOVE.L A1,TBA_IN_PUNT
+	MOVE.L A1,TBA_EXT_PUNT
+	MOVE.L A1,TBA_INT_PUNT
+	MOVE.L A1,TBA_FIN_PUNT
+	ADD.L  #1999,TBA_FIN_PUNT
+  LEA    BUS_TBB,A1
+	MOVE.L A1,TBB_IN_PUNT
+	MOVE.L A1,TBB_EXT_PUNT
+	MOVE.L A1,TBB_INT_PUNT
+	MOVE.L A1,TBB_FIN_PUNT
+	ADD.L  #1999,TBB_FIN_PUNT
+
+  RTS *Retorno
   *********************LEECAR**********************
 
   LEECAR:
@@ -567,7 +564,7 @@ RTI:
   MOVE.L D4,-(A7)
   MOVE.L D6,-(A7)
   MOVE.B IMR_COPIA,D5
-  AND.B ISR,D5
+  AND.B IMR,D5
   BTST #0,D5    *Comprueba que este habilitada TxRDYA
   BEQ TxRDYA
   BTST #1,D5    *Comprueba que este habilitada RxRDYA FFULLA
