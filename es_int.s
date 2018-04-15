@@ -566,13 +566,13 @@ RTI:
   MOVE.B IMR_COPIA,D5
   AND.B IMR,D5
   BTST #0,D5    *Comprueba que este habilitada TxRDYA
-  BEQ TxRDYA
+  BNE TxRDYA
   BTST #1,D5    *Comprueba que este habilitada RxRDYA FFULLA
-  BEQ RxRDYA
+  BNE RxRDYA
   BTST #4,D5    *Comprueba que este habilitada TxRDYB
-  BEQ TxRDYB
+  BNE TxRDYB
   BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
-  BEQ RxRDYB
+  BNE RxRDYB
 
 TxRDYA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
