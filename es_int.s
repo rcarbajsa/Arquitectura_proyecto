@@ -5,10 +5,10 @@
         ORG     $400
 
 	*Buffers
-BUS_RBA:DS.B 2001
-BUS_RBB:DS.B 2001
-BUS_TBA:DS.B 2001
-BUS_TBB:DS.B 2001
+BUS_RBA:DS.B 2002
+BUS_RBB:DS.B 2002
+BUS_TBA:DS.B 2002
+BUS_TBB:DS.B 2002
 
 	*Punteros
 RBA_IN_PUNT: DS.B 4
@@ -589,8 +589,7 @@ TxRDYA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
-  MOVE.L #10,TBA
-
+  MOVE.B #10,TBA
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -612,9 +611,9 @@ TxRDYB:
   BEQ F_TxRDYB  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
-  MOVE.L #10,TBB
+  MOVE.B #10,TBB
  TB_CONT:
-  MOVE.L D0,TBB * Se mete el caracter del buffer de transmision en D1
+  MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
 F_TxRDYB:
