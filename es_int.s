@@ -38,7 +38,7 @@ DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
 TAME: DC.W 0 * Tamano de escritura para print
 DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
-NLIN: EQU 10 * N´umero de l´ıneas a leer
+NLIN: EQU 1 * N´umero de l´ıneas a leer
 TAML: EQU 30 * Tama~no de l´ınea para SCAN
 TAMB: EQU 5 * Tama~no de bloque para PRINT
 
@@ -498,40 +498,42 @@ PRINT:
   MOVE.W   12(A6),D0 *Descriptor
   MOVE.W   14(A6),D2 *Tamaño
   CLR.L D4 *Contador
-  CMP #$0001,D0
+  CMP #$0001,D0  * Salto a la linea B
   BEQ PRINT_B
-  CMP #0000,D0
+  CMP #0000,D0 * Salto a la linea A
   BEQ PRINT_A
 PRINT_ERROR:
-  MOVE.L #$ffffffff,D0 *Se retorna -1 en el registro D0
+  MOVE.L #$ffffffff,D0 * Se retorna -1 en el registro D0
   BRA ERR_PRINT
 PRINT_A:
-  MOVE.W #$0010,D0
+  MOVE.W #$0010,D0  * Condicion de salto para el flag_a
   BRA PRINT_BUCLE
+
 PRINT_B:
-  MOVE.W #$0011,D0
+  MOVE.W #$0011,D0 * Condicion de salto para el flag_b
 PRINT_BUCLE:
-  CMP D4,D2
+  CMP D4,D2 * Se comprueba que no hemos llegado al final del buffer
   BEQ PR_FIN
   ADD.B #1,D4 *Aumentamos Contador
-  MOVE.B (A1)+,D1
-  BSR ESCCAR
-
-  CMP #13,D1
+  MOVE.B (A1)+,D1 *Se saca el elemento del buffer y se lleva D1
+  BSR ESCCAR * Escribe el caracter en el buffer
+  CMP #13,D1 * Se comprueba que no haya un retorno de carro en D1
   BEQ PRINT_FLAG
-  CMP #$ffffffff,D0
+  CMP #$ffffffff,D0 * Si el buffer esta lleno acaba print
   BEQ PR_FIN
   BRA PRINT_BUCLE
 
 PRINT_FLAG:
-  MOVE.B #1,D6
+  MOVE.B #1,D6 * Habilitamos el flag
   BRA PRINT_BUCLE
+
 PRINT_FFLAG:
   CMP #$0010,D0
   BEQ FLAGA
   BSET #4,IMR_COPIA * Pone el bit 4 de IMR a 1
   MOVE.B IMR_COPIA,IMR
   BRA PRINT_FIN
+
 FLAGA:
   BSET #1,IMR_COPIA * Pone el bit 0 de IMR a 1
   MOVE.B IMR_COPIA,IMR
@@ -540,14 +542,17 @@ FLAGA:
 PR_FIN:
   CMP #1,D6
   BEQ PRINT_FFLAG
+
 PRINT_FIN:
   MOVE.L D4,D0 *Devolvemos el resultado en D0
   UNLK A6 *Se elimina el marco de pila
   RTS
+
 ERR_PRINT:
   UNLK A6 *Se elimina el marco de pila
   RTS
-*RTI
+
+********************RTI********************
 RTI:
   *Salvaguardar los registros
   MOVE.L A1,-(A7)
@@ -585,12 +590,13 @@ TxRDYA:
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
   MOVE.L #10,TBA
+
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
 F_TxRDYA:
-  BCLR #0,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYA
+  BCLR.B #0,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYA
   MOVE.B IMR_COPIA,IMR
   CLR.L D0
   BRA RTI
@@ -612,7 +618,7 @@ TxRDYB:
   BRA FIN_RTI
 
 F_TxRDYB:
-  BCLR #4,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYB
+  BCLR.B #4,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYB
   MOVE.B IMR_COPIA,IMR
   CLR.L D0
   BRA RTI
