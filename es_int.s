@@ -5,10 +5,10 @@
         ORG     $400
 
 	*Buffers
-BUS_RBA:DS.B 2001
-BUS_RBB:DS.B 2001
-BUS_TBA:DS.B 2001
-BUS_TBB:DS.B 2001
+BUS_RBA:DS.B 2002
+BUS_RBB:DS.B 2002
+BUS_TBA:DS.B 2002
+BUS_TBB:DS.B 2002
 
 	*Punteros
 RBA_IN_PUNT: DS.B 4
@@ -38,7 +38,7 @@ DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
 TAME: DC.W 0 * Tamano de escritura para print
 DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
-NLIN: EQU 10 * N´umero de l´ıneas a leer
+NLIN: EQU 1 * N´umero de l´ıneas a leer
 TAML: EQU 30 * Tama~no de l´ınea para SCAN
 TAMB: EQU 5 * Tama~no de bloque para PRINT
 
@@ -524,6 +524,7 @@ PRINT_BUCLE:
   BRA PRINT_BUCLE
 
 PRINT_FLAG:
+  CLR.L D6
   MOVE.B #1,D6
   BRA PRINT_BUCLE
 PRINT_FFLAG:
@@ -584,7 +585,7 @@ TxRDYA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
-  MOVE.L #10,TBA
+  MOVE.B #10,TBA
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -606,9 +607,9 @@ TxRDYB:
   BEQ F_TxRDYB  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
-  MOVE.L #10,TBB
+  MOVE.B #10,TBB
  TB_CONT:
-  MOVE.L D0,TBB * Se mete el caracter del buffer de transmision en D1
+  MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
 
 F_TxRDYB:
