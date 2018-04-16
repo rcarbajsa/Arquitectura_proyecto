@@ -562,8 +562,8 @@ RTI:
   MOVE.L A5,-(A7)
   MOVE.L A6,-(A7)
   MOVE.L D0,-(A7)
-  MOVE.L D2,-(A7)
   MOVE.L D1,-(A7)
+  MOVE.L D2,-(A7)
   MOVE.L D3,-(A7)
   MOVE.L D4,-(A7)
   MOVE.L D6,-(A7)
@@ -638,18 +638,18 @@ RxRDYB:
 
 FIN_RTI:
   ** Recuperamos los registros **
-  MOVE.L (A7)+,A1
-  MOVE.L (A7)+,A2
-  MOVE.L (A7)+,A3
-  MOVE.L (A7)+,A4
-  MOVE.L (A7)+,A5
-  MOVE.L (A7)+,A6
-  MOVE.L (A7)+,D0
-  MOVE.L (A7)+,D1
-  MOVE.L (A7)+,D2
-  MOVE.L (A7)+,D3
-  MOVE.L (A7)+,D4
   MOVE.L (A7)+,D6
+  MOVE.L (A7)+,D4
+  MOVE.L (A7)+,D3
+  MOVE.L (A7)+,D2
+  MOVE.L (A7)+,D1
+  MOVE.L (A7)+,D0
+  MOVE.L (A7)+,A6
+  MOVE.L (A7)+,A5
+  MOVE.L (A7)+,A4
+  MOVE.L (A7)+,A3
+  MOVE.L (A7)+,A2
+  MOVE.L (A7)+,A1
   RTE
 
 *Programa Principal
