@@ -29,6 +29,9 @@ TBB_EXT_PUNT:DS.B 4
 TBB_INT_PUNT:DS.B 4
 *Copia IMR
 IMR_COPIA:DS.B 2
+*Flags de transmisión
+FLAG_A:DS.B 1
+FLAG_B:DS.B 1
 
 BUFFER: DS.B 2100 * Buffer para lectura y escritura de caracteres
 CONTL: DC.W 0 * Contador de l´ıneas
@@ -38,9 +41,9 @@ DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
 TAME: DC.W 0 * Tamano de escritura para print
 DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
-NLIN: EQU 3 * N´umero de l´ıneas a leer
+NLIN: EQU 4 * N´umero de l´ıneas a leer
 TAML: EQU 30 * Tama~no de l´ınea para SCAN
-TAMB: EQU 5 * Tama~no de bloque para PRINT
+TAMB: EQU 21 * Tama~no de bloque para PRINT
 
 
 * Definicion de equivalencias
@@ -79,6 +82,8 @@ INIT:
   MOVE.B   #$40,IVR             * Vector de interrupción 40.
   MOVE.B   #%00100010,IMR      * Habilita las interrupciones de A y B
   MOVE.B   #%00100010,IMR_COPIA
+  MOVE.B #0,FLAG_A             *Iniciamos los flags a 0
+  MOVE.B #0,FLAG_B
   LEA      RTI,A1               * Dirección de la tabla de vectores
   MOVE.L   #$100,A2             * $100 es la dirección siguiente al V.I.
   MOVE.L   A1,(A2)              * Actualización de la dirección de la tabla de vectores
@@ -555,19 +560,19 @@ ERR_PRINT:
 ********************RTI********************
 RTI:
   *Salvaguardar los registros
-  MOVE.W A1,-(A7)
-  MOVE.W A2,-(A7)
-  MOVE.W A3,-(A7)
-  MOVE.W A4,-(A7)
-  MOVE.W A5,-(A7)
-  MOVE.W A6,-(A7)
-  MOVE.L D0,-(A7)
-  MOVE.L D1,-(A7)
-  MOVE.L D2,-(A7)
-  MOVE.L D3,-(A7)
-  MOVE.L D4,-(A7)
+  MOVE.L A1,-(A7)
+  MOVE.L A2,-(A7)
+  MOVE.L A3,-(A7)
+  MOVE.L A4,-(A7)
+  MOVE.L A5,-(A7)
+  MOVE.L A6,-(A7)
+  MOVE.W D0,-(A7)
+  MOVE.W D1,-(A7)
+  MOVE.W D2,-(A7)
+  MOVE.W D3,-(A7)
+  MOVE.W D4,-(A7)
   *MOVE.L D5,-(A7)
-  MOVE.L D6,-(A7)
+  MOVE.W D6,-(A7)
   MOVE.B IMR_COPIA,D5
   AND.B IMR,D5
   BTST #0,D5    *Comprueba que este habilitada TxRDYA
@@ -580,6 +585,17 @@ RTI:
   BNE RxRDYB
 
 TxRDYA:
+  MOVE.B FLAG_A,D3
+  CMP #1,D3
+  BNE SIGA
+  MOVE.B #0,FLAG_A
+  MOVE.B #10,TBA
+  MOVE.L #2,D0
+  BSR LINEA
+  CMP #0,D0
+  BEQ F_TxRDYA
+  BRA FIN_RTI
+SIGA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
@@ -590,7 +606,9 @@ TxRDYA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
-  MOVE.B #10,TBA
+  MOVE.B D0,TBA
+  MOVE.B #1,FLAG_A
+  BRA FIN_RTI
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -602,17 +620,28 @@ F_TxRDYA:
   BRA FIN_RTI
 
 TxRDYB:
+  MOVE.B FLAG_B,D3
+  CMP #1,D3
+  BNE SIGB
+  MOVE.B #0,FLAG_B
+  MOVE.B #10,TBB
+  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
+  BSR LINEA
+  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
+  BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
+  BRA FIN_RTI
+SIGB:
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
   BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LEECAR
-  CMP.L #$FFFFFFFF,D0 * SI es -1, el buffer esta vacio
-  BEQ F_TxRDYB  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
-  MOVE.B #10,TBB
+  MOVE.B D0,TBB
+  MOVE.B #1,FLAG_B
+  BRA FIN_RTI
  TB_CONT:
   MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -639,19 +668,19 @@ RxRDYB:
 
 FIN_RTI:
   ** Recuperamos los registros **
-  MOVE.L (A7)+,D6
+  MOVE.W (A7)+,D6
   *MOVE.L (A7)+,D5
-  MOVE.L (A7)+,D4
-  MOVE.L (A7)+,D3
-  MOVE.L (A7)+,D2
-  MOVE.L (A7)+,D1
-  MOVE.L (A7)+,D0
-  MOVE.W (A7)+,A6
-  MOVE.W (A7)+,A5
-  MOVE.W (A7)+,A4
-  MOVE.W (A7)+,A3
-  MOVE.W (A7)+,A2
-  MOVE.W (A7)+,A1
+  MOVE.W (A7)+,D4
+  MOVE.W (A7)+,D3
+  MOVE.W (A7)+,D2
+  MOVE.W (A7)+,D1
+  MOVE.W (A7)+,D0
+  MOVE.L (A7)+,A6
+  MOVE.L (A7)+,A5
+  MOVE.L (A7)+,A4
+  MOVE.L (A7)+,A3
+  MOVE.L (A7)+,A2
+  MOVE.L (A7)+,A1
   RTE
 
 *Programa Principal
