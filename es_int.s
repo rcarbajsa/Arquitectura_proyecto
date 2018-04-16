@@ -38,7 +38,7 @@ DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
 TAME: DC.W 0 * Tamano de escritura para print
 DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
-NLIN: EQU 1 * N´umero de l´ıneas a leer
+NLIN: EQU 3 * N´umero de l´ıneas a leer
 TAML: EQU 30 * Tama~no de l´ınea para SCAN
 TAMB: EQU 5 * Tama~no de bloque para PRINT
 
@@ -555,17 +555,18 @@ ERR_PRINT:
 ********************RTI********************
 RTI:
   *Salvaguardar los registros
-  MOVE.L A1,-(A7)
-  MOVE.L A2,-(A7)
-  MOVE.L A3,-(A7)
-  MOVE.L A4,-(A7)
-  MOVE.L A5,-(A7)
-  MOVE.L A6,-(A7)
+  MOVE.W A1,-(A7)
+  MOVE.W A2,-(A7)
+  MOVE.W A3,-(A7)
+  MOVE.W A4,-(A7)
+  MOVE.W A5,-(A7)
+  MOVE.W A6,-(A7)
   MOVE.L D0,-(A7)
   MOVE.L D1,-(A7)
   MOVE.L D2,-(A7)
   MOVE.L D3,-(A7)
   MOVE.L D4,-(A7)
+  *MOVE.L D5,-(A7)
   MOVE.L D6,-(A7)
   MOVE.B IMR_COPIA,D5
   AND.B IMR,D5
@@ -582,7 +583,7 @@ TxRDYA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
-  BEQ FIN_RTI   * Hay una linea dentro del buffer interno
+  BEQ F_TxRDYA   * Hay una linea dentro del buffer interno
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LEECAR
   CMP.L #$FFFFFFFF,D0 * Si es -1, el buffer esta vacio
@@ -598,13 +599,13 @@ F_TxRDYA:
   BCLR.B #0,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYA
   MOVE.B IMR_COPIA,IMR
   CLR.L D0
-  BRA RTI
+  BRA FIN_RTI
 
 TxRDYB:
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
-  BEQ FIN_RTI   * Hay una linea dentro del buffer interno
+  BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LEECAR
   CMP.L #$FFFFFFFF,D0 * SI es -1, el buffer esta vacio
@@ -620,7 +621,7 @@ F_TxRDYB:
   BCLR.B #4,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYB
   MOVE.B IMR_COPIA,IMR
   CLR.L D0
-  BRA RTI
+  BRA FIN_RTI
 
 RxRDYA:
   CLR.L D1
@@ -639,17 +640,18 @@ RxRDYB:
 FIN_RTI:
   ** Recuperamos los registros **
   MOVE.L (A7)+,D6
+  *MOVE.L (A7)+,D5
   MOVE.L (A7)+,D4
   MOVE.L (A7)+,D3
   MOVE.L (A7)+,D2
   MOVE.L (A7)+,D1
   MOVE.L (A7)+,D0
-  MOVE.L (A7)+,A6
-  MOVE.L (A7)+,A5
-  MOVE.L (A7)+,A4
-  MOVE.L (A7)+,A3
-  MOVE.L (A7)+,A2
-  MOVE.L (A7)+,A1
+  MOVE.W (A7)+,A6
+  MOVE.W (A7)+,A5
+  MOVE.W (A7)+,A4
+  MOVE.W (A7)+,A3
+  MOVE.W (A7)+,A2
+  MOVE.W (A7)+,A1
   RTE
 
 *Programa Principal
