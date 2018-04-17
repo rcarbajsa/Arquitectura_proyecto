@@ -41,9 +41,9 @@ DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
 TAME: DC.W 0 * Tamano de escritura para print
 DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
-NLIN: EQU 4 * N´umero de l´ıneas a leer
-TAML: EQU 30 * Tama~no de l´ınea para SCAN
-TAMB: EQU 21 * Tama~no de bloque para PRINT
+NLIN: EQU 1 * N´umero de l´ıneas a leer
+TAML: EQU 100 * Tama~no de l´ınea para SCAN
+TAMB: EQU 3 * Tama~no de bloque para PRINT
 
 
 * Definicion de equivalencias
@@ -729,10 +729,8 @@ ESPE:
   BHI OTRAE
   MOVE.W CONTC,TAME
   BRA ESPE
-SALIR:
-  BRA BUCPR
-FIN:
-  BREAK
+SALIR:BRA BUCPR
+FIN:  BREAK
 BUS_ERROR:
   BREAK
   NOP
