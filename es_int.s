@@ -43,7 +43,7 @@ DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
 NLIN: EQU 1 * N´umero de l´ıneas a leer
 TAML: EQU 100 * Tama~no de l´ınea para SCAN
-TAMB: EQU 3 * Tama~no de bloque para PRINT
+TAMB: EQU 1 * Tama~no de bloque para PRINT
 
 
 * Definicion de equivalencias
@@ -71,9 +71,9 @@ INIT:
   *********************DECLARACIONES INIT**********************
 
   MOVE.B   #%00000011,MR1A      * 8 bits por carac. en A y solicita una int. por carac.
-  MOVE.B   #%00000000,MR1A      * Eco desactivado en A
   MOVE.B   #%00000011,MR1B      * 8 bits por caract. en B y solicita una int. por carac.
-  MOVE.B   #%00000000,MR1B      * Eco desactivado en B
+  MOVE.B   #%00000000,MR1A      *Eco desactivado
+  MOVE.B   #%00000000,MR1B
   MOVE.B   #%11001100,SRA       * Velocidad = 38400 bps.
   MOVE.B   #%11001100,SRB       * Velocidad = 38400 bps.
   MOVE.B   #%00000000,ACR       * Selección del primer conjunto de velocidades.
@@ -89,31 +89,26 @@ INIT:
   MOVE.L   A1,(A2)              * Actualización de la dirección de la tabla de vectores
 
   *********************BUFFERS**********************
-  LEA    BUS_RBA,A1
-  MOVE.L A1,RBA_IN_PUNT
-	MOVE.L A1,RBA_EXT_PUNT
-	MOVE.L A1,RBA_INT_PUNT
-	MOVE.L A1,RBA_FIN_PUNT
+  MOVE.L #BUS_RBA,RBA_IN_PUNT
+	MOVE.L #BUS_RBA,RBA_EXT_PUNT
+	MOVE.L #BUS_RBA,RBA_INT_PUNT
+	MOVE.L #BUS_RBA,RBA_FIN_PUNT
 	ADD.L  #1999,RBA_FIN_PUNT
-  LEA    BUS_RBB,A1
-	MOVE.L A1,RBB_IN_PUNT
-	MOVE.L A1,RBB_EXT_PUNT
-	MOVE.L A1,RBB_INT_PUNT
-	MOVE.L A1,RBB_FIN_PUNT
+	MOVE.L #BUS_RBB,RBB_IN_PUNT
+	MOVE.L #BUS_RBB,RBB_EXT_PUNT
+	MOVE.L #BUS_RBB,RBB_INT_PUNT
+	MOVE.L #BUS_RBB,RBB_FIN_PUNT
 	ADD.L  #1999,RBB_FIN_PUNT
-  LEA    BUS_TBA,A1
-	MOVE.L A1,TBA_IN_PUNT
-	MOVE.L A1,TBA_EXT_PUNT
-	MOVE.L A1,TBA_INT_PUNT
-	MOVE.L A1,TBA_FIN_PUNT
+	MOVE.L #BUS_TBA,TBA_IN_PUNT
+	MOVE.L #BUS_TBA,TBA_EXT_PUNT
+	MOVE.L #BUS_TBA,TBA_INT_PUNT
+	MOVE.L #BUS_TBA,TBA_FIN_PUNT
 	ADD.L  #1999,TBA_FIN_PUNT
-  LEA    BUS_TBB,A1
-	MOVE.L A1,TBB_IN_PUNT
-	MOVE.L A1,TBB_EXT_PUNT
-	MOVE.L A1,TBB_INT_PUNT
-	MOVE.L A1,TBB_FIN_PUNT
+	MOVE.L #BUS_TBB,TBB_IN_PUNT
+	MOVE.L #BUS_TBB,TBB_EXT_PUNT
+	MOVE.L #BUS_TBB,TBB_INT_PUNT
+	MOVE.L #BUS_TBB,TBB_FIN_PUNT
 	ADD.L  #1999,TBB_FIN_PUNT
-
   RTS *Retorno
   *********************LEECAR**********************
 
@@ -540,7 +535,7 @@ PRINT_FFLAG:
   BRA PRINT_FIN
 
 FLAGA:
-  BSET #1,IMR_COPIA * Pone el bit 0 de IMR a 1
+  BSET #0,IMR_COPIA * Pone el bit 0 de IMR a 1
   MOVE.B IMR_COPIA,IMR
   BRA PRINT_FIN
 
@@ -586,15 +581,16 @@ RTI:
 
 TxRDYA:
   MOVE.B FLAG_A,D3
-  CMP #1,D3
+  CMP #1,D3     * Se compara que el flag de D3 sea 1
   BNE SIGA
-  MOVE.B #0,FLAG_A
-  MOVE.B #10,TBA
-  MOVE.L #2,D0
+  MOVE.B #0,FLAG_A * Si es 1 se pone a 0
+  MOVE.B #10,TBA * Se introduce un salto de linea en TBA
+  MOVE.L #2,D0  * Se llama a TBA en LINEA
   BSR LINEA
-  CMP #0,D0
+  CMP #0,D0 * Si LINEA esta vacio o no tiene 13 fin
   BEQ F_TxRDYA
   BRA FIN_RTI
+
 SIGA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LINEA
@@ -606,9 +602,10 @@ SIGA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
-  MOVE.B D0,TBA
-  MOVE.B #1,FLAG_A
+  MOVE.B D0,TBA * SE introduce el contenido de D0 en el buffer
+  MOVE.B #1,FLAG_A * El flag de A se pone a 1
   BRA FIN_RTI
+
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -621,10 +618,10 @@ F_TxRDYA:
 
 TxRDYB:
   MOVE.B FLAG_B,D3
-  CMP #1,D3
+  CMP #1,D3 * Se comprueba si el flag de B esta a 0
   BNE SIGB
-  MOVE.B #0,FLAG_B
-  MOVE.B #10,TBB
+  MOVE.B #0,FLAG_B * Se pone el flag de B a 0
+  MOVE.B #10,TBB * Se introduce un salto de linea en TBB
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
@@ -639,9 +636,10 @@ SIGB:
   BSR LEECAR
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
-  MOVE.B D0,TBB
-  MOVE.B #1,FLAG_B
+  MOVE.B D0,TBB * Se introduce el resultado de D0 en TBB
+  MOVE.B #1,FLAG_B * Se pone el flag de B a 1
   BRA FIN_RTI
+
  TB_CONT:
   MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -683,7 +681,8 @@ FIN_RTI:
   MOVE.L (A7)+,A1
   RTE
 
-*Programa Principal
+********************PPAL********************
+
 INICIO: * Manejadores de excepciones
   MOVE.L  #BUS_ERROR,8  * Bus error handler
   MOVE.L  #ADDRESS_ER,12 * Address error handler
@@ -699,7 +698,7 @@ BUCPR:
   MOVE.L #BUFFER,DIRLEC
 OTRAL:
   MOVE.W #TAML,-(A7)
-  MOVE.W #DESA,-(A7)
+  MOVE.W #DESB,-(A7)
   MOVE.L DIRLEC,-(A7)
 ESPL:
   BSR SCAN
@@ -716,7 +715,7 @@ OTRAE:
   MOVE.W #TAMB,TAME
 ESPE:
   MOVE.W TAME,-(A7)
-  MOVE.W #DESB,-(A7)
+  MOVE.W #DESA,-(A7)
   MOVE.L DIRLEC,-(A7)
   BSR PRINT
   ADD.L #8,A7
