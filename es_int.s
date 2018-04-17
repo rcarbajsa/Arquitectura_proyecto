@@ -586,15 +586,16 @@ RTI:
 
 TxRDYA:
   MOVE.B FLAG_A,D3
-  CMP #1,D3
+  CMP #1,D3     * Se compara que el flag de D3 sea 1
   BNE SIGA
-  MOVE.B #0,FLAG_A
-  MOVE.B #10,TBA
-  MOVE.L #2,D0
+  MOVE.B #0,FLAG_A * Si es 1 se pone a 0
+  MOVE.B #10,TBA * Se introduce un salto de linea en TBA
+  MOVE.L #2,D0  * Se llama a TBA en LINEA
   BSR LINEA
-  CMP #0,D0
+  CMP #0,D0 * Si LINEA esta vacio o no tiene 13 fin
   BEQ F_TxRDYA
   BRA FIN_RTI
+
 SIGA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LINEA
@@ -606,9 +607,10 @@ SIGA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
-  MOVE.B D0,TBA
-  MOVE.B #1,FLAG_A
+  MOVE.B D0,TBA * SE introduce el contenido de D0 en el buffer
+  MOVE.B #1,FLAG_A * El flag de A se pone a 1
   BRA FIN_RTI
+
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -621,10 +623,10 @@ F_TxRDYA:
 
 TxRDYB:
   MOVE.B FLAG_B,D3
-  CMP #1,D3
+  CMP #1,D3 * Se comprueba si el flag de B esta a 0
   BNE SIGB
-  MOVE.B #0,FLAG_B
-  MOVE.B #10,TBB
+  MOVE.B #0,FLAG_B * Se pone el flag de B a 0
+  MOVE.B #10,TBB * Se introduce un salto de linea en TBB
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
@@ -639,9 +641,10 @@ SIGB:
   BSR LEECAR
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
-  MOVE.B D0,TBB
-  MOVE.B #1,FLAG_B
+  MOVE.B D0,TBB * Se introduce el resultado de D0 en TBB
+  MOVE.B #1,FLAG_B * Se pone el flag de B a 1
   BRA FIN_RTI
+
  TB_CONT:
   MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -683,7 +686,8 @@ FIN_RTI:
   MOVE.L (A7)+,A1
   RTE
 
-*Programa Principal
+********************PPAL********************
+
 INICIO: * Manejadores de excepciones
   MOVE.L  #BUS_ERROR,8  * Bus error handler
   MOVE.L  #ADDRESS_ER,12 * Address error handler
