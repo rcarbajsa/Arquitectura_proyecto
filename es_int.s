@@ -42,8 +42,8 @@ TAME: DC.W 0 * Tamano de escritura para print
 DESA: EQU 0 * Descriptor l´ınea A
 DESB: EQU 1 * Descriptor l´ınea B
 NLIN: EQU 1 * N´umero de l´ıneas a leer
-TAML: EQU 100 * Tama~no de l´ınea para SCAN
-TAMB: EQU 3 * Tama~no de bloque para PRINT
+TAML: EQU 2000 * Tama~no de l´ınea para SCAN
+TAMB: EQU 1 * Tama~no de bloque para PRINT
 
 
 * Definicion de equivalencias
@@ -477,7 +477,7 @@ SCAN:
 SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
   CMP D2,D3
   BEQ SC_FIN
-  ADD.B #1,D2
+  ADD.L #1,D2
   MOVE.W D4,D0
   BSR LEECAR
   MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
@@ -503,9 +503,9 @@ PRINT:
   MOVE.W   12(A6),D0 *Descriptor
   MOVE.W   14(A6),D2 *Tamaño
   CLR.L D4 *Contador
-  CMP #$0001,D0  * Salto a la linea B
+  CMP.L #$0001,D0  * Salto a la linea B
   BEQ PRINT_B
-  CMP #0000,D0 * Salto a la linea A
+  CMP.L #0000,D0 * Salto a la linea A
   BEQ PRINT_A
 PRINT_ERROR:
   MOVE.L #$ffffffff,D0 * Se retorna -1 en el registro D0
@@ -517,14 +517,14 @@ PRINT_A:
 PRINT_B:
   MOVE.W #$0011,D0 * Condicion de salto para el flag_b
 PRINT_BUCLE:
-  CMP D4,D2 * Se comprueba que no hemos llegado al final del buffer
+  CMP.L D4,D2 * Se comprueba que no hemos llegado al final del buffer
   BEQ PR_FIN
-  ADD.B #1,D4 *Aumentamos Contador
+  ADD.L #1,D4 *Aumentamos Contador
   MOVE.B (A1)+,D1 *Se saca el elemento del buffer y se lleva D1
   BSR ESCCAR * Escribe el caracter en el buffer
-  CMP #13,D1 * Se comprueba que no haya un retorno de carro en D1
+  CMP.L #13,D1 * Se comprueba que no haya un retorno de carro en D1
   BEQ PRINT_FLAG
-  CMP #$ffffffff,D0 * Si el buffer esta lleno acaba print
+  CMP.L #$ffffffff,D0 * Si el buffer esta lleno acaba print
   BEQ PR_FIN
   BRA PRINT_BUCLE
 
@@ -533,19 +533,19 @@ PRINT_FLAG:
   BRA PRINT_BUCLE
 
 PRINT_FFLAG:
-  CMP #$0010,D0
+  CMP.W #$0010,D0
   BEQ FLAGA
   BSET #4,IMR_COPIA * Pone el bit 4 de IMR a 1
   MOVE.B IMR_COPIA,IMR
   BRA PRINT_FIN
 
 FLAGA:
-  BSET #1,IMR_COPIA * Pone el bit 0 de IMR a 1
+  BSET #0,IMR_COPIA * Pone el bit 0 de IMR a 1
   MOVE.B IMR_COPIA,IMR
   BRA PRINT_FIN
 
 PR_FIN:
-  CMP #1,D6
+  CMP.L #1,D6
   BEQ PRINT_FFLAG
 
 PRINT_FIN:
@@ -566,13 +566,12 @@ RTI:
   MOVE.L A4,-(A7)
   MOVE.L A5,-(A7)
   MOVE.L A6,-(A7)
-  MOVE.W D0,-(A7)
-  MOVE.W D1,-(A7)
-  MOVE.W D2,-(A7)
-  MOVE.W D3,-(A7)
-  MOVE.W D4,-(A7)
-  *MOVE.L D5,-(A7)
-  MOVE.W D6,-(A7)
+  MOVE.L D0,-(A7)
+  MOVE.L D1,-(A7)
+  MOVE.L D2,-(A7)
+  MOVE.L D3,-(A7)
+  MOVE.L D4,-(A7)
+  MOVE.L D6,-(A7)
   MOVE.B IMR_COPIA,D5
   AND.B IMR,D5
   BTST #0,D5    *Comprueba que este habilitada TxRDYA
@@ -586,16 +585,15 @@ RTI:
 
 TxRDYA:
   MOVE.B FLAG_A,D3
-  CMP #1,D3     * Se compara que el flag de D3 sea 1
+  CMP #1,D3
   BNE SIGA
-  MOVE.B #0,FLAG_A * Si es 1 se pone a 0
-  MOVE.B #10,TBA * Se introduce un salto de linea en TBA
-  MOVE.L #2,D0  * Se llama a TBA en LINEA
+  MOVE.B #0,FLAG_A
+  MOVE.B #10,TBA
+  MOVE.L #2,D0
   BSR LINEA
-  CMP #0,D0 * Si LINEA esta vacio o no tiene 13 fin
+  CMP #0,D0
   BEQ F_TxRDYA
   BRA FIN_RTI
-
 SIGA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LINEA
@@ -607,10 +605,9 @@ SIGA:
   BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
-  MOVE.B D0,TBA * SE introduce el contenido de D0 en el buffer
-  MOVE.B #1,FLAG_A * El flag de A se pone a 1
+  MOVE.B D0,TBA
+  MOVE.B #1,FLAG_A
   BRA FIN_RTI
-
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -623,13 +620,13 @@ F_TxRDYA:
 
 TxRDYB:
   MOVE.B FLAG_B,D3
-  CMP #1,D3 * Se comprueba si el flag de B esta a 0
+  CMP.B #1,D3
   BNE SIGB
-  MOVE.B #0,FLAG_B * Se pone el flag de B a 0
-  MOVE.B #10,TBB * Se introduce un salto de linea en TBB
+  MOVE.B #0,FLAG_B
+  MOVE.B #10,TBB
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LINEA
-  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
+  CMP.B #0,D0   * Se comprueba si hay una linea dentro del buffer
   BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
   BRA FIN_RTI
 SIGB:
@@ -639,12 +636,11 @@ SIGB:
   BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LEECAR
-  CMP #13,D0    * Se comprueba si habia un 13
+  CMP.B #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
-  MOVE.B D0,TBB * Se introduce el resultado de D0 en TBB
-  MOVE.B #1,FLAG_B * Se pone el flag de B a 1
+  MOVE.B D0,TBB
+  MOVE.B #1,FLAG_B
   BRA FIN_RTI
-
  TB_CONT:
   MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -671,13 +667,12 @@ RxRDYB:
 
 FIN_RTI:
   ** Recuperamos los registros **
-  MOVE.W (A7)+,D6
-  *MOVE.L (A7)+,D5
-  MOVE.W (A7)+,D4
-  MOVE.W (A7)+,D3
-  MOVE.W (A7)+,D2
-  MOVE.W (A7)+,D1
-  MOVE.W (A7)+,D0
+  MOVE.L (A7)+,D6
+  MOVE.L (A7)+,D4
+  MOVE.L (A7)+,D3
+  MOVE.L (A7)+,D2
+  MOVE.L (A7)+,D1
+  MOVE.L (A7)+,D0
   MOVE.L (A7)+,A6
   MOVE.L (A7)+,A5
   MOVE.L (A7)+,A4
@@ -686,7 +681,92 @@ FIN_RTI:
   MOVE.L (A7)+,A1
   RTE
 
-********************PPAL********************
+*Programa Principal
+******************** PRUEBAS ********************
+
+****Se cosidera que todos los buffers estan vacios antes de llamar a las pruebas
+*Llena el buffer
+pr1:
+ BPR1:
+  CMP.L #2000,D4
+  BEQ FIN_pr1
+  ADD #1,D4
+  MOVE.L #1,D1
+  BSR ESCCAR
+  BRA pr1
+FIN_pr1:
+  CLR.L D4
+  CLR.L D1
+  CLR.L D0
+  RTS
+
+  *Llena el buffer e intenta introducir otro caracter, en D0 = 0xFFFFFFF
+pr2:
+  BSR pr2
+  ADD #1,D4
+  BSR ESCCAR
+  RTS
+
+  * Lee todos los carcteres de un buffer lleno
+pr3:
+  BSR pr1
+ BPR3:
+  CMP.L #2000,D4
+  BEQ FIN_pr3
+  BSR LEECAR
+  BRA BPR3
+ FIN_pr3:
+  CLR.L D0
+  CLR.L D4
+  RTS
+
+  * Lee un caracter de un buffer vacio
+pr4:
+ BSR LEECAR
+ RTS
+
+ * Escribe 2000 caracteres, lee 1500 y escribe 500
+
+ pr5:
+  BSR pr1
+  CLR.L D4
+ BPR5:
+  ADD.B #1,D4
+  CMP.L #1500,D4
+  BEQ BPR5_2
+  BSR LEECAR
+  BRA BPR5
+BPR5_2:
+    ADD.B #1,D3
+    CMP.L #500,D3
+    BEQ FIN_pr5
+    MOVE.L #1,D1
+    BSR ESCCAR
+    BRA BPR5_2
+FIN_pr5:
+    CLR.L D1
+    CLR.L D0
+    CLR.L D4
+    CLR.L D3
+    RTS
+* Introduce 500 (abcdefghijklmnopqrst 25 veces) caracteres en la Linea A,
+*  (50 bytes por segundo) Se deben leer 1f5 caracteres
+
+pr29:
+  CLR.L D0
+  CLR.L D4
+Bpr29:
+  CMP.L #500,D4
+  BEQ FIN_pr29
+  ADD.L #1,D4
+  MOVE.B #$61,D0
+  MOVE.B D0,RBA
+  CLR.L D0
+  BSR Bpr29
+FIN_pr29:
+  MOVE.B #$d,D0
+  MOVE.B D0,RBA
+  RTS
 
 INICIO: * Manejadores de excepciones
   MOVE.L  #BUS_ERROR,8  * Bus error handler
@@ -698,6 +778,7 @@ INICIO: * Manejadores de excepciones
   MOVE.W #$2000,SR
 
 BUCPR:
+*  BSR pr29
   MOVE.W #0,CONTC
   MOVE.W #NLIN,CONTL
   MOVE.L #BUFFER,DIRLEC
@@ -720,7 +801,7 @@ OTRAE:
   MOVE.W #TAMB,TAME
 ESPE:
   MOVE.W TAME,-(A7)
-  MOVE.W #DESB,-(A7)
+  MOVE.W #DESA,-(A7)
   MOVE.L DIRLEC,-(A7)
   BSR PRINT
   ADD.L #8,A7
