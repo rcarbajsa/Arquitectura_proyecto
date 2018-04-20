@@ -11,90 +11,110 @@ BUS_TBA:DS.B 2002
 BUS_TBB:DS.B 2002
 
 	*Punteros
-RBA_IN_PUNT: DC.L 0
-RBA_FIN_PUNT:DC.L 0
-RBA_EXT_PUNT:DC.L 0
-RBA_INT_PUNT:DC.L 0
-RBB_IN_PUNT: DC.L 0
-RBB_FIN_PUNT:DC.L 0
-RBB_EXT_PUNT:DC.L 0
-RBB_INT_PUNT:DC.L 0
-TBA_IN_PUNT: DC.L 0
-TBA_FIN_PUNT:DC.L 0
-TBA_EXT_PUNT:DC.L 0
-TBA_INT_PUNT:DC.L 0
-TBB_IN_PUNT: DC.L 0
-TBB_FIN_PUNT:DC.L 0
-TBB_EXT_PUNT:DC.L 0
-TBB_INT_PUNT:DC.L 0
+RBA_IN_PUNT: DS.B 4
+RBA_FIN_PUNT:DS.B 4
+RBA_EXT_PUNT:DS.B 4
+RBA_INT_PUNT:DS.B 4
+RBB_IN_PUNT: DS.B 4
+RBB_FIN_PUNT:DS.B 4
+RBB_EXT_PUNT:DS.B 4
+RBB_INT_PUNT:DS.B 4
+TBA_IN_PUNT: DS.B 4
+TBA_FIN_PUNT:DS.B 4
+TBA_EXT_PUNT:DS.B 4
+TBA_INT_PUNT:DS.B 4
+TBB_IN_PUNT: DS.B 4
+TBB_FIN_PUNT:DS.B 4
+TBB_EXT_PUNT:DS.B 4
+TBB_INT_PUNT:DS.B 4
+*Copia IMR
+IMR_COPIA:DS.B 2
+*Flags de transmisión
+FLAG_A:DS.B 1
+FLAG_B:DS.B 1
+
+BUFFER: DS.B 2100 * Buffer para lectura y escritura de caracteres
+CONTL: DC.W 0 * Contador de l´ıneas
+CONTC: DC.W 0 * Contador de caracteres
+DIRLEC: DC.L 0 * Direcci´on de lectura para SCAN
+DIRESC: DC.L 0 * Direcci´on de escritura para PRINT
+TAME: DC.W 0 * Tamano de escritura para print
+DESA: EQU 0 * Descriptor l´ınea A
+DESB: EQU 1 * Descriptor l´ınea B
+NLIN: EQU 1 * N´umero de l´ıneas a leer
+TAML: EQU 2000 * Tama~no de l´ınea para SCAN
+TAMB: EQU 1 * Tama~no de bloque para PRINT
+
 
 * Definicion de equivalencias
 
-MR1A    EQU     $effc01       * de modo A (escritura)
-MR2A    EQU     $effc01       * de modo A (2 escritura)
-SRA     EQU     $effc03       * de estado A (lectura)
-CSRA    EQU     $effc03       * de seleccion de reloj A (escritura)
-CRA     EQU     $effc05       * de control A (escritura)
-RBA     EQU     $effc07       * buffer recepcion A  (lectura)
-TBA     EQU     $effc07       * buffer transmision A (escritura)
-ACR     EQU     $effc09       * de control auxiliar
-IMR     EQU     $effc0B       * de mascara de interrupcion A (escritura)
-ISR     EQU     $effc0B       * de estado de interrupcion A (lectura)
-
-MR1B    EQU     $effc11       * de modo B (escritura)
-MR2B    EQU     $effc11       * de modo B (2 escritura)
-SRB     EQU     $effc13       * de estado B (lectura)
-CSRB    EQU     $effc13       * de seleccion de reloj B (escritura)
-CRB     EQU     $effc15       * de control B (escritura)
-RBB     EQU     $effc17       * buffer recepcion B  (lectura)
-TBB     EQU     $effc17       * buffer transmision B (escritura)
-IVR     EQU     $effc09       * de vector de interrupcion
+MR1A  EQU  $effc01  * de modo A (escritura)
+SRA   EQU  $effc03  * de estado A (lectura)
+CRA   EQU  $effc05  * de control A (escritura)
+TBA   EQU  $effc07  * buffer transmision A (escritura)
+RBA   EQU  $effc07  * buffer recepcion A  (lectura)
+ACR   EQU  $effc09  * de control auxiliar
+IMR   EQU  $effc0B  * de mascara de interrupcion A (escritura)
+MR1B  EQU  $effc11  * de modo B (escritura)
+SRB   EQU  $effc13  * de estado B (lectura)
+CRB   EQU  $effc15  * de control B (escritura)
+TBB   EQU  $effc17  * buffer transmision B (escritura)
+RBB   EQU  $effc17  * buffer recepcion B (lectura)
+IVR   EQU  $effc19  * del vector de interrupci�n
 
 *********************INIT**********************
 
 INIT:
 
-*********************BUFFERS**********************
 
-	MOVE.L #BUS_RBA,RBA_IN_PUNT
-	MOVE.L #BUS_RBA,RBA_EXT_PUNT
-	MOVE.L #BUS_RBA,RBA_INT_PUNT
-	MOVE.L #BUS_RBA,RBA_FIN_PUNT
-	ADD.L  #1999,RBA_FIN_PUNT
-	MOVE.L #BUS_RBB,RBB_IN_PUNT
-	MOVE.L #BUS_RBB,RBB_EXT_PUNT
-	MOVE.L #BUS_RBB,RBB_INT_PUNT
-	MOVE.L #BUS_RBB,RBB_FIN_PUNT
-	ADD.L  #1999,RBB_FIN_PUNT
-	MOVE.L #BUS_TBA,TBA_IN_PUNT
-	MOVE.L #BUS_TBA,TBA_EXT_PUNT
-	MOVE.L #BUS_TBA,TBA_INT_PUNT
-	MOVE.L #BUS_TBA,TBA_FIN_PUNT
-	ADD.L  #1999,TBA_FIN_PUNT
-	MOVE.L #BUS_TBB,TBB_IN_PUNT
-	MOVE.L #BUS_TBB,TBB_EXT_PUNT
-	MOVE.L #BUS_TBB,TBB_INT_PUNT
-	MOVE.L #BUS_TBB,TBB_FIN_PUNT
-	ADD.L  #1999,TBB_FIN_PUNT
 
   *********************DECLARACIONES INIT**********************
 
-  MOVE.B #%00010000,CRA      * Reinicia el puntero MR1A
-  MOVE.B #%00010000,CRB      * Reinicia el puntero MR1B
-  MOVE.B #%00000011,MR1B     * 8 bits por caracter de modo B.
-  MOVE.B #%00000011,MR1A     * 8 bits por caracter de modo A.
-  MOVE.B #%00000000,MR2A     * Eco desactivado de modo A.
-  MOVE.B #%00000000,MR2B     * Eco desactivado de modo B.
-  MOVE.B #%11001100,CSRA     * Velocidad = 38400 bps.
-  MOVE.B #%11001100,CSRB     * Velocidad = 38400 bps
-  MOVE.B #%00000000,ACR
-  MOVE.B #%00000101,CRA      * Transmision y recepcion activados A.
-  MOVE.B #%00000101,CRB      * Transmision y recepcion activados B.
-  MOVE.B #$040,IVR           * Vector de Interrrupcion nº 40
-  MOVE.B #%00100010,IMR      * Habilita las interrupciones de A y B
-  MOVE.L #RTI,$100           * Inicio de RTI en tabla de interrupciones
-  RTS *Retorno
+  MOVE.B   #%00000011,MR1A      * 8 bits por carac. en A y solicita una int. por carac.
+  MOVE.B   #%00000000,MR1A      * Eco desactivado en A
+  MOVE.B   #%00000011,MR1B      * 8 bits por caract. en B y solicita una int. por carac.
+  MOVE.B   #%00000000,MR1B      * Eco desactivado en B
+  MOVE.B   #%11001100,SRA       * Velocidad = 38400 bps.
+  MOVE.B   #%11001100,SRB       * Velocidad = 38400 bps.
+  MOVE.B   #%00000000,ACR       * Selección del primer conjunto de velocidades.
+  MOVE.B   #%00000101,CRA       * Transmision y recepcion activados en A.
+  MOVE.B   #%00000101,CRB       * Transmision y recepcion activados en B.
+  MOVE.B   #$40,IVR             * Vector de interrupción 40.
+  MOVE.B   #%00100010,IMR      * Habilita las interrupciones de A y B
+  MOVE.B   #%00100010,IMR_COPIA
+  MOVE.B #0,FLAG_A             *Iniciamos los flags a 0
+  MOVE.B #0,FLAG_B
+  LEA      RTI,A1               * Dirección de la tabla de vectores
+  MOVE.L   #$100,A2             * $100 es la dirección siguiente al V.I.
+  MOVE.L   A1,(A2)              * Actualización de la dirección de la tabla de vectores
 
+  *********************BUFFERS**********************
+  LEA    BUS_RBA,A1
+  MOVE.L A1,RBA_IN_PUNT
+	MOVE.L A1,RBA_EXT_PUNT
+	MOVE.L A1,RBA_INT_PUNT
+	MOVE.L A1,RBA_FIN_PUNT
+	ADD.L  #1999,RBA_FIN_PUNT
+  LEA    BUS_RBB,A1
+	MOVE.L A1,RBB_IN_PUNT
+	MOVE.L A1,RBB_EXT_PUNT
+	MOVE.L A1,RBB_INT_PUNT
+	MOVE.L A1,RBB_FIN_PUNT
+	ADD.L  #1999,RBB_FIN_PUNT
+  LEA    BUS_TBA,A1
+	MOVE.L A1,TBA_IN_PUNT
+	MOVE.L A1,TBA_EXT_PUNT
+	MOVE.L A1,TBA_INT_PUNT
+	MOVE.L A1,TBA_FIN_PUNT
+	ADD.L  #1999,TBA_FIN_PUNT
+  LEA    BUS_TBB,A1
+	MOVE.L A1,TBB_IN_PUNT
+	MOVE.L A1,TBB_EXT_PUNT
+	MOVE.L A1,TBB_INT_PUNT
+	MOVE.L A1,TBB_FIN_PUNT
+	ADD.L  #1999,TBB_FIN_PUNT
+
+  RTS *Retorno
   *********************LEECAR**********************
 
   LEECAR:
@@ -204,7 +224,6 @@ ESCCAR:
     BTST #0,D0
     BEQ EA_LINEA
 EB_LINEA:
-
     CMP #$00000001,D0
     BEQ ESC_REC_B
 ESC_TRANS_B:
@@ -458,7 +477,7 @@ SCAN:
 SCAN_BUCLE: *Leemos los N caracteres de la linea y los almacenamos en el buffer
   CMP D2,D3
   BEQ SC_FIN
-  ADD.B #1,D2
+  ADD.L #1,D2
   MOVE.W D4,D0
   BSR LEECAR
   MOVE.B D0,(A1)+ *Metemos el caracter en el buffer
@@ -475,7 +494,6 @@ SCAN_FIN:
   UNLK A6
   RTS
 
-
 ********************PRINT********************
 
 **transmision
@@ -485,63 +503,328 @@ PRINT:
   MOVE.W   12(A6),D0 *Descriptor
   MOVE.W   14(A6),D2 *Tamaño
   CLR.L D4 *Contador
-  CMP #$0001,D0
+  CMP.L #$0001,D0  * Salto a la linea B
   BEQ PRINT_B
-  CMP #0000,D0
+  CMP.L #0000,D0 * Salto a la linea A
   BEQ PRINT_A
 PRINT_ERROR:
-  MOVE.L #$ffffffff,D0 *Se retorna -1 en el registro D0
-  BRA PRINT_FIN
+  MOVE.L #$ffffffff,D0 * Se retorna -1 en el registro D0
+  BRA ERR_PRINT
 PRINT_A:
-  MOVE.W #$0010,D0
+  MOVE.W #$0010,D0  * Condicion de salto para el flag_a
   BRA PRINT_BUCLE
-PRINT_B:
-  MOVE.W #$0011,D0
-PRINT_BUCLE:
-  CMP D4,D2
-  BEQ PR_FIN
-  ADD.B #1,D4 *Aumentamos Contador
-  MOVE.B (A1)+,D1
-  BSR ESCCAR
 
-  CMP #13,D1
+PRINT_B:
+  MOVE.W #$0011,D0 * Condicion de salto para el flag_b
+PRINT_BUCLE:
+  CMP.L D4,D2 * Se comprueba que no hemos llegado al final del buffer
+  BEQ PR_FIN
+  ADD.L #1,D4 *Aumentamos Contador
+  MOVE.B (A1)+,D1 *Se saca el elemento del buffer y se lleva D1
+  BSR ESCCAR * Escribe el caracter en el buffer
+  CMP.L #13,D1 * Se comprueba que no haya un retorno de carro en D1
   BEQ PRINT_FLAG
-  CMP #$ffffffff,D0
+  CMP.L #$ffffffff,D0 * Si el buffer esta lleno acaba print
   BEQ PR_FIN
   BRA PRINT_BUCLE
 
 PRINT_FLAG:
-  CMP #$0010,D0
+  MOVE.B #1,D6 * Habilitamos el flag
+  BRA PRINT_BUCLE
+
+PRINT_FFLAG:
+  CMP.W #$0010,D0
   BEQ FLAGA
-  MOVE.B #%00110000,IMR * Pone el bit 4 de IMR a 1
-  BRA PRINT_BUCLE
+  BSET #4,IMR_COPIA * Pone el bit 4 de IMR a 1
+  MOVE.B IMR_COPIA,IMR
+  BRA PRINT_FIN
+
 FLAGA:
-  MOVE.B #%00000011,IMR * Pone el bit 0 de IMR a 1
-  BRA PRINT_BUCLE
+  BSET #0,IMR_COPIA * Pone el bit 0 de IMR a 1
+  MOVE.B IMR_COPIA,IMR
+  BRA PRINT_FIN
 
 PR_FIN:
-  MOVE.L D4,D0 *Devolvemos el resultado en D0
+  CMP.L #1,D6
+  BEQ PRINT_FFLAG
+
 PRINT_FIN:
+  MOVE.L D4,D0 *Devolvemos el resultado en D0
   UNLK A6 *Se elimina el marco de pila
   RTS
-*RTI
-RTI:
+
+ERR_PRINT:
+  UNLK A6 *Se elimina el marco de pila
   RTS
 
+********************RTI********************
+RTI:
+  *Salvaguardar los registros
+  MOVE.L A1,-(A7)
+  MOVE.L A2,-(A7)
+  MOVE.L A3,-(A7)
+  MOVE.L A4,-(A7)
+  MOVE.L A5,-(A7)
+  MOVE.L A6,-(A7)
+  MOVE.L D0,-(A7)
+  MOVE.L D1,-(A7)
+  MOVE.L D2,-(A7)
+  MOVE.L D3,-(A7)
+  MOVE.L D4,-(A7)
+  MOVE.L D6,-(A7)
+  MOVE.B IMR_COPIA,D5
+  AND.B IMR,D5
+  BTST #0,D5    *Comprueba que este habilitada TxRDYA
+  BNE TxRDYA
+  BTST #1,D5    *Comprueba que este habilitada RxRDYA FFULLA
+  BNE RxRDYA
+  BTST #4,D5    *Comprueba que este habilitada TxRDYB
+  BNE TxRDYB
+  BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
+  BNE RxRDYB
+
+TxRDYA:
+  MOVE.B FLAG_A,D3
+  CMP #1,D3
+  BNE SIGA
+  MOVE.B #0,FLAG_A
+  MOVE.B #10,TBA
+  MOVE.L #2,D0
+  BSR LINEA
+  CMP #0,D0
+  BEQ F_TxRDYA
+  BRA FIN_RTI
+SIGA:
+  MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
+  BSR LINEA
+  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
+  BEQ F_TxRDYA   * Hay una linea dentro del buffer interno
+  MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
+  BSR LEECAR
+  CMP.L #$FFFFFFFF,D0 * Si es -1, el buffer esta vacio
+  BEQ F_TxRDYA  * Si es -1, se deshabilitan las interrupciones
+  CMP #13,D0    * Se comprueba si habia un 13
+  BNE TA_CONT
+  MOVE.B D0,TBA
+  MOVE.B #1,FLAG_A
+  BRA FIN_RTI
+ TA_CONT:
+  MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
+  BRA FIN_RTI
+
+F_TxRDYA:
+  BCLR.B #0,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYA
+  MOVE.B IMR_COPIA,IMR
+  CLR.L D0
+  BRA FIN_RTI
+
+TxRDYB:
+  MOVE.B FLAG_B,D3
+  CMP.B #1,D3
+  BNE SIGB
+  MOVE.B #0,FLAG_B
+  MOVE.B #10,TBB
+  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
+  BSR LINEA
+  CMP.B #0,D0   * Se comprueba si hay una linea dentro del buffer
+  BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
+  BRA FIN_RTI
+SIGB:
+  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
+  BSR LINEA
+  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
+  BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
+  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
+  BSR LEECAR
+  CMP.B #13,D0    * Se comprueba si habia un 13
+  BNE TB_CONT
+  MOVE.B D0,TBB
+  MOVE.B #1,FLAG_B
+  BRA FIN_RTI
+ TB_CONT:
+  MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
+  BRA FIN_RTI
+
+F_TxRDYB:
+  BCLR.B #4,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYB
+  MOVE.B IMR_COPIA,IMR
+  CLR.L D0
+  BRA FIN_RTI
+
+RxRDYA:
+  CLR.L D1
+  MOVE.B RBA,D1
+  MOVE.L #0,D0
+  BSR ESCCAR
+  BRA FIN_RTI
+
+RxRDYB:
+  CLR.L D1
+  MOVE.B RBB,D1
+  MOVE.L #1,D0
+  BSR ESCCAR
+  BRA FIN_RTI
+
+FIN_RTI:
+  ** Recuperamos los registros **
+  MOVE.L (A7)+,D6
+  MOVE.L (A7)+,D4
+  MOVE.L (A7)+,D3
+  MOVE.L (A7)+,D2
+  MOVE.L (A7)+,D1
+  MOVE.L (A7)+,D0
+  MOVE.L (A7)+,A6
+  MOVE.L (A7)+,A5
+  MOVE.L (A7)+,A4
+  MOVE.L (A7)+,A3
+  MOVE.L (A7)+,A2
+  MOVE.L (A7)+,A1
+  RTE
+
 *Programa Principal
-INICIO:
-   BSR INIT
-   MOVE.W #$0000,-(A7)
-   MOVE.W #$0000,-(A7)
-   MOVE.L #$00001388,-(A7)
-   MOVE.L #$00001388,A4
-   MOVE.B #$69,(A4)+
-   MOVE.B #$6e,(A4)+
-   MOVE.L #$00000011,D0
-   MOVE.B #$70,D1
-   BSR ESCCAR
-   MOVE.B #$65,D1
-   BSR ESCCAR
-   MOVE.B #13,(A4)+
-   BSR PRINT
-   BREAK
+******************** PRUEBAS ********************
+
+****Se cosidera que todos los buffers estan vacios antes de llamar a las pruebas
+*Llena el buffer
+pr1:
+ BPR1:
+  CMP.L #2000,D4
+  BEQ FIN_pr1
+  ADD #1,D4
+  MOVE.L #1,D1
+  BSR ESCCAR
+  BRA pr1
+FIN_pr1:
+  CLR.L D4
+  CLR.L D1
+  CLR.L D0
+  RTS
+
+  *Llena el buffer e intenta introducir otro caracter, en D0 = 0xFFFFFFF
+pr2:
+  BSR pr2
+  ADD #1,D4
+  BSR ESCCAR
+  RTS
+
+  * Lee todos los carcteres de un buffer lleno
+pr3:
+  BSR pr1
+ BPR3:
+  CMP.L #2000,D4
+  BEQ FIN_pr3
+  BSR LEECAR
+  BRA BPR3
+ FIN_pr3:
+  CLR.L D0
+  CLR.L D4
+  RTS
+
+  * Lee un caracter de un buffer vacio
+pr4:
+ BSR LEECAR
+ RTS
+
+ * Escribe 2000 caracteres, lee 1500 y escribe 500
+
+ pr5:
+  BSR pr1
+  CLR.L D4
+ BPR5:
+  ADD.B #1,D4
+  CMP.L #1500,D4
+  BEQ BPR5_2
+  BSR LEECAR
+  BRA BPR5
+BPR5_2:
+    ADD.B #1,D3
+    CMP.L #500,D3
+    BEQ FIN_pr5
+    MOVE.L #1,D1
+    BSR ESCCAR
+    BRA BPR5_2
+FIN_pr5:
+    CLR.L D1
+    CLR.L D0
+    CLR.L D4
+    CLR.L D3
+    RTS
+* Introduce 500 (abcdefghijklmnopqrst 25 veces) caracteres en la Linea A,
+*  (50 bytes por segundo) Se deben leer 1f5 caracteres
+
+pr29:
+  CLR.L D0
+  CLR.L D4
+Bpr29:
+  CMP.L #500,D4
+  BEQ FIN_pr29
+  ADD.L #1,D4
+  MOVE.B #$61,D0
+  MOVE.B D0,RBA
+  CLR.L D0
+  BSR Bpr29
+FIN_pr29:
+  MOVE.B #$d,D0
+  MOVE.B D0,RBA
+  RTS
+
+INICIO: * Manejadores de excepciones
+  MOVE.L  #BUS_ERROR,8  * Bus error handler
+  MOVE.L  #ADDRESS_ER,12 * Address error handler
+  MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
+  MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
+
+  BSR INIT
+  MOVE.W #$2000,SR
+
+BUCPR:
+*  BSR pr29
+  MOVE.W #0,CONTC
+  MOVE.W #NLIN,CONTL
+  MOVE.L #BUFFER,DIRLEC
+OTRAL:
+  MOVE.W #TAML,-(A7)
+  MOVE.W #DESA,-(A7)
+  MOVE.L DIRLEC,-(A7)
+ESPL:
+  BSR SCAN
+  CMP.L #0,D0
+  BEQ ESPL
+  ADD.L #8,A7
+  ADD.L D0,DIRLEC
+  ADD.W D0,CONTC
+  SUB.W #1,CONTL
+  BNE OTRAL
+
+  MOVE.L #BUFFER,DIRLEC
+OTRAE:
+  MOVE.W #TAMB,TAME
+ESPE:
+  MOVE.W TAME,-(A7)
+  MOVE.W #DESA,-(A7)
+  MOVE.L DIRLEC,-(A7)
+  BSR PRINT
+  ADD.L #8,A7
+  ADD.L D0,DIRLEC
+  SUB.W D0,CONTC
+  BEQ SALIR
+  SUB.W D0,TAME
+  BNE ESPE
+  CMP.W #TAMB,CONTC
+  BHI OTRAE
+  MOVE.W CONTC,TAME
+  BRA ESPE
+SALIR:BRA BUCPR
+FIN:  BREAK
+BUS_ERROR:
+  BREAK
+  NOP
+ADDRESS_ER:
+  BREAK
+  NOP
+ILLEGAL_IN:
+  BREAK
+  NOP
+PRIV_VIOLT:
+  BREAK
+  NOP
