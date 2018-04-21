@@ -533,13 +533,17 @@ PRINT_FLAG:
 PRINT_FFLAG:
   CMP.W #$0010,D0
   BEQ FLAGA
+  MOVE.W #$2700,SR   * Se inhabilitan las interrupciones
   BSET #4,IMR_COPIA * Pone el bit 4 de IMR a 1
   MOVE.B IMR_COPIA,IMR
+  MOVE.W #$2000,SR * Se habilitan las interrupciones
   BRA PRINT_FIN
 
 FLAGA:
+  MOVE.W #$2700,SR   * Se inhabilitan las interrupciones
   BSET #0,IMR_COPIA * Pone el bit 0 de IMR a 1
   MOVE.B IMR_COPIA,IMR
+  MOVE.W #$2000,SR   * Se habilitan las interrupciones
   BRA PRINT_FIN
 
 PR_FIN:
@@ -697,6 +701,7 @@ OTRAL:
   MOVE.W #DESB,-(A7)
   MOVE.L DIRLEC,-(A7)
 ESPL:
+  ADD.L #1,A7
   BSR SCAN
   CMP.L #0,D0
   BEQ ESPL
