@@ -574,6 +574,8 @@ RTI:
   MOVE.L D3,-(A7)
   MOVE.L D4,-(A7)
   MOVE.L D6,-(A7)
+
+PRINC_RTI:
   MOVE.B IMR_COPIA,D5
 PRINC_RTI:
   AND.B IMR,D5
@@ -586,6 +588,10 @@ PRINC_RTI:
   BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
   BNE RxRDYB
   BRA FIN_RTI
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5f9713cb451ac1f25603143f9a7ddfeb65436d1a
 TxRDYA:
   MOVE.B FLAG_A,D3
   CMP #1,D3
@@ -597,14 +603,26 @@ TxRDYA:
   CMP #0,D0
   BEQ F_TxRDYA
   BRA FIN_RTI
+
 SIGA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
+<<<<<<< HEAD
+=======
+  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
+  BEQ F_TxRDYA   * Hay una linea dentro del buffer interno
+  MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
+>>>>>>> 5f9713cb451ac1f25603143f9a7ddfeb65436d1a
   BSR LEECAR
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
   MOVE.B D0,TBA
   MOVE.B #1,FLAG_A
+<<<<<<< HEAD
   BRA PRINC_RTI
+=======
+  BRA FIN_RTI
+
+>>>>>>> 5f9713cb451ac1f25603143f9a7ddfeb65436d1a
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA PRINC_RTI
@@ -628,6 +646,12 @@ TxRDYB:
   BRA FIN_RTI
 SIGB:
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
+<<<<<<< HEAD
+=======
+  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
+  BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
+  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
+>>>>>>> 5f9713cb451ac1f25603143f9a7ddfeb65436d1a
   BSR LEECAR
   CMP.B #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
@@ -674,6 +698,7 @@ FIN_RTI:
   MOVE.L (A7)+,A1
   RTE
 
+<<<<<<< HEAD
 **Programa Principal
 ******* PRUEBAS *******
       INICIO: * Manejadores de excepciones
@@ -738,3 +763,66 @@ FIN_RTI:
       PRIV_VIOLT:
         BREAK
         NOP
+=======
+*Programa Principal
+******************** PRUEBAS ********************
+
+INICIO: * Manejadores de excepciones
+  MOVE.L  #BUS_ERROR,8  * Bus error handler
+  MOVE.L  #ADDRESS_ER,12 * Address error handler
+  MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
+  MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
+
+  BSR INIT
+  MOVE.W #$2000,SR
+BUCPR:
+  MOVE.W #0,CONTC
+  MOVE.W #NLIN,CONTL
+  MOVE.L #BUFFER,DIRLEC
+OTRAL:
+  MOVE.W #TAML,-(A7)
+  MOVE.W #DESB,-(A7)
+  MOVE.L DIRLEC,-(A7)
+ESPL:
+  BSR SCAN
+  CMP.L #0,D0
+  BEQ ESPL
+  ADD.L #8,A7
+  ADD.L D0,DIRLEC
+  ADD.W D0,CONTC
+  SUB.W #1,CONTL
+  BNE OTRAL
+  MOVE.L #BUFFER,DIRLEC
+
+OTRAE:
+  MOVE.W #TAMB,TAME
+ESPE:
+  MOVE.W TAME,-(A7)
+  MOVE.W #DESB,-(A7)
+  MOVE.L DIRLEC,-(A7)
+  BSR PRINT
+  ADD.L #8,A7
+  ADD.L D0,DIRLEC
+  SUB.W D0,CONTC
+  BEQ SALIR
+  SUB.W D0,TAME
+  BNE ESPE
+  CMP.W #TAMB,CONTC
+  BHI OTRAE
+  MOVE.W CONTC,TAME
+  BRA ESPE
+SALIR:BRA BUCPR
+FIN:  BREAK
+BUS_ERROR:
+  BREAK
+  NOP
+ADDRESS_ER:
+  BREAK
+  NOP
+ILLEGAL_IN:
+  BREAK
+  NOP
+PRIV_VIOLT:
+  BREAK
+  NOP
+>>>>>>> 5f9713cb451ac1f25603143f9a7ddfeb65436d1a
