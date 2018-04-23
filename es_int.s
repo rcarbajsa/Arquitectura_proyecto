@@ -575,6 +575,7 @@ RTI:
   MOVE.L D4,-(A7)
   MOVE.L D6,-(A7)
   MOVE.B IMR_COPIA,D5
+PRINC_RTI:
   AND.B IMR,D5
   BTST #0,D5    *Comprueba que este habilitada TxRDYA
   BNE TxRDYA
@@ -584,7 +585,7 @@ RTI:
   BNE TxRDYB
   BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
   BNE RxRDYB
-
+  BRA FIN_RTI
 TxRDYA:
   MOVE.B FLAG_A,D3
   CMP #1,D3
@@ -598,19 +599,15 @@ TxRDYA:
   BRA FIN_RTI
 SIGA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
-  BSR LINEA
-  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
-  BEQ F_TxRDYA   * Hay una linea dentro del buffer interno
-  MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
   BSR LEECAR
   CMP #13,D0    * Se comprueba si habia un 13
   BNE TA_CONT
   MOVE.B D0,TBA
   MOVE.B #1,FLAG_A
-  BRA FIN_RTI
+  BRA PRINC_RTI
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
-  BRA FIN_RTI
+  BRA PRINC_RTI
 
 F_TxRDYA:
   BCLR.B #0,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYA
@@ -631,19 +628,15 @@ TxRDYB:
   BRA FIN_RTI
 SIGB:
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
-  BSR LINEA
-  CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
-  BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
-  MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
   BSR LEECAR
   CMP.B #13,D0    * Se comprueba si habia un 13
   BNE TB_CONT
   MOVE.B D0,TBB
   MOVE.B #1,FLAG_B
-  BRA FIN_RTI
+  BRA PRINC_RTI
  TB_CONT:
   MOVE.B D0,TBB * Se mete el caracter del buffer de transmision en D1
-  BRA FIN_RTI
+  BRA PRINC_RTI
 
 F_TxRDYB:
   BCLR.B #4,IMR_COPIA * Se deshabilitan las interrupciones en TxRDYB
@@ -656,14 +649,14 @@ RxRDYA:
   MOVE.B RBA,D1
   MOVE.L #0,D0
   BSR ESCCAR
-  BRA FIN_RTI
+  BRA PRINC_RTI
 
 RxRDYB:
   CLR.L D1
   MOVE.B RBB,D1
   MOVE.L #1,D0
   BSR ESCCAR
-  BRA FIN_RTI
+  BRA PRINC_RTI
 
 FIN_RTI:
   ** Recuperamos los registros **
@@ -681,64 +674,67 @@ FIN_RTI:
   MOVE.L (A7)+,A1
   RTE
 
-*Programa Principal
-******************** PRUEBAS ********************
-INICIO: * Manejadores de excepciones
-  MOVE.L  #BUS_ERROR,8  * Bus error handler
-  MOVE.L  #ADDRESS_ER,12 * Address error handler
-  MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
-  MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
+**Programa Principal
+******* PRUEBAS *******
+      INICIO: * Manejadores de excepciones
+        MOVE.L  #BUS_ERROR,8  * Bus error handler
+        MOVE.L  #ADDRESS_ER,12 * Address error handler
+        MOVE.L  #ILLEGAL_IN,16 * Illegal instruction handler
+        MOVE.L  #PRIV_VIOLT,32 * Privilege violation handler
 
-  BSR INIT
-  MOVE.W #$2000,SR
-
-BUCPR:
-  MOVE.W #0,CONTC
-  MOVE.W #NLIN,CONTL
-  MOVE.L #BUFFER,DIRLEC
-OTRAL:
-  MOVE.W #TAML,-(A7)
-  MOVE.W #DESB,-(A7)
-  MOVE.L DIRLEC,-(A7)
-ESPL:
-  BSR SCAN
-  CMP.L #0,D0
-  BEQ ESPL
-  ADD.L #8,A7
-  ADD.L D0,DIRLEC
-  ADD.W D0,CONTC
-  SUB.W #1,CONTL
-  BNE OTRAL
-
-  MOVE.L #BUFFER,DIRLEC
-OTRAE:
-  MOVE.W #TAMB,TAME
-ESPE:
-  MOVE.W TAME,-(A7)
-  MOVE.W #DESB,-(A7)
-  MOVE.L DIRLEC,-(A7)
-  BSR PRINT
-  ADD.L #8,A7
-  ADD.L D0,DIRLEC
-  SUB.W D0,CONTC
-  BEQ SALIR
-  SUB.W D0,TAME
-  BNE ESPE
-  CMP.W #TAMB,CONTC
-  BHI OTRAE
-  MOVE.W CONTC,TAME
-  BRA ESPE
-SALIR:BRA BUCPR
-FIN:  BREAK
-BUS_ERROR:
-  BREAK
-  NOP
-ADDRESS_ER:
-  BREAK
-  NOP
-ILLEGAL_IN:
-  BREAK
-  NOP
-PRIV_VIOLT:
-  BREAK
-  NOP
+        BSR INIT
+        MOVE.W #$2000,SR
+        MOVE.L #BUFFER,A5
+      x:CLR.L D5
+        CLR.L D6
+      a:
+          CMP #190,D5
+          BEQ b
+          ADD.L #1,D5
+          CLR.L D6
+          MOVE.L #$31,D1
+      c:
+          CMP #10,D6
+          BEQ a
+          MOVE.B D1,(A5)
+          ADD.L #1,A5
+          ADD.L #1,D1
+          ADD.L #1,D6
+          BRA c
+  b:    MOVE.B #13,(A5)
+        ADD.L #1,A5
+        ADD.L #1,D3
+        CMP #3,D3
+        *BNE x
+        MOVE.L #BUFFER,DIRLEC
+      OTRAE:
+        MOVE.W #TAMB,TAME
+      ESPE:
+        MOVE.W TAME,-(A7)
+        MOVE.W #DESA,-(A7)
+        MOVE.L DIRLEC,-(A7)
+        BSR PRINT
+        ADD.L #8,A7
+        ADD.L D0,DIRLEC
+        SUB.W D0,CONTC
+        BEQ SALIR
+        SUB.W D0,TAME
+        BNE ESPE
+        CMP.W #TAMB,CONTC
+        BHI OTRAE
+        MOVE.W CONTC,TAME
+        BRA ESPE
+      SALIR:BREAK
+      FIN:  BREAK
+      BUS_ERROR:
+        BREAK
+        NOP
+      ADDRESS_ER:
+        BREAK
+        NOP
+      ILLEGAL_IN:
+        BREAK
+        NOP
+      PRIV_VIOLT:
+        BREAK
+        NOP
