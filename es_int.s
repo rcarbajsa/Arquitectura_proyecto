@@ -574,6 +574,8 @@ RTI:
   MOVE.L D3,-(A7)
   MOVE.L D4,-(A7)
   MOVE.L D6,-(A7)
+
+PRINC_RTI:
   MOVE.B IMR_COPIA,D5
   AND.B IMR,D5
   BTST #0,D5    *Comprueba que este habilitada TxRDYA
@@ -584,6 +586,7 @@ RTI:
   BNE TxRDYB
   BTST #5,D5    *Comprueba que este habilitada RxRDYB FFULLB
   BNE RxRDYB
+  BRA FIN_RTI
 
 TxRDYA:
   MOVE.B FLAG_A,D3
@@ -596,9 +599,9 @@ TxRDYA:
   CMP #0,D0
   BEQ F_TxRDYA
   BRA FIN_RTI
+
 SIGA:
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
-  BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
   BEQ F_TxRDYA   * Hay una linea dentro del buffer interno
   MOVE.L #2,D0  * Se mete un 2 en D0,para llamar al buffer TBA
@@ -608,6 +611,7 @@ SIGA:
   MOVE.B D0,TBA
   MOVE.B #1,FLAG_A
   BRA FIN_RTI
+
  TA_CONT:
   MOVE.B D0,TBA * Se mete el caracter del buffer de transmision en D1
   BRA FIN_RTI
@@ -631,7 +635,6 @@ TxRDYB:
   BRA FIN_RTI
 SIGB:
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
-  BSR LINEA
   CMP.L #0,D0   * Se comprueba si hay una linea dentro del buffer
   BEQ F_TxRDYB   * Hay una linea dentro del buffer interno
   MOVE.L #3,D0  *Se mete un 3 en D0, para llamar al buffer TBB
@@ -683,6 +686,7 @@ FIN_RTI:
 
 *Programa Principal
 ******************** PRUEBAS ********************
+
 INICIO: * Manejadores de excepciones
   MOVE.L  #BUS_ERROR,8  * Bus error handler
   MOVE.L  #ADDRESS_ER,12 * Address error handler
@@ -691,7 +695,6 @@ INICIO: * Manejadores de excepciones
 
   BSR INIT
   MOVE.W #$2000,SR
-
 BUCPR:
   MOVE.W #0,CONTC
   MOVE.W #NLIN,CONTL
@@ -709,8 +712,8 @@ ESPL:
   ADD.W D0,CONTC
   SUB.W #1,CONTL
   BNE OTRAL
-
   MOVE.L #BUFFER,DIRLEC
+
 OTRAE:
   MOVE.W #TAMB,TAME
 ESPE:
